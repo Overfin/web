@@ -100,6 +100,10 @@ const fr: Record<keyof typeof en, string> = {
   'item.seasonEpisode': 'Saison {season}, épisode {episode}',
   'item.seasonEpisodeShort': 'S{season}É{episode}',
 
+  'title.notHere': 'Pas encore ici',
+  'title.watched': 'Vu',
+  'title.partly': '{have} épisodes sur {aired}',
+  'title.specials': 'Épisodes spéciaux',
   'person.inLibrary': 'Dans la bibliothèque',
   'person.nothing': 'Rien ici.',
 

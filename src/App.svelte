@@ -12,14 +12,13 @@
   import Account from './pages/Account.svelte';
   import Discover from './pages/Discover.svelte';
   import Home from './pages/Home.svelte';
-  import Item from './pages/Item.svelte';
   import Library from './pages/Library.svelte';
   import Manage from './pages/Manage.svelte';
   import Person from './pages/Person.svelte';
   import Player from './pages/Player.svelte';
   import Profiles from './pages/Profiles.svelte';
   import Setup from './pages/Setup.svelte';
-  import Title from './pages/Title.svelte';
+  import TitlePage from './pages/TitlePage.svelte';
 
   type Phase =
     | { kind: 'loading' }
@@ -89,12 +88,10 @@
         <Home />
       {:else if route.parts[0] === 'library' && route.parts[1]}
         <Library id={route.parts[1]} params={route.params} />
-      {:else if route.parts[0] === 'item' && route.parts[1]}
-        <Item id={route.parts[1]} />
       {:else if route.parts[0] === 'discover'}
         <Discover />
-      {:else if route.parts[0] === 'title' && route.parts[1] && route.parts[2]}
-        <Title kind={route.parts[1]} tmdbId={route.parts[2]} />
+      {:else if route.parts[0] === 'title' && route.parts[1]}
+        <TitlePage id={route.parts[1]} params={route.params} />
       {:else if route.parts[0] === 'person' && route.parts[1]}
         <Person id={route.parts[1]} />
       {:else if route.parts[0] === 'play' && route.parts[1]}

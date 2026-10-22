@@ -4,7 +4,7 @@
      shows the same page. -->
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { Genre, ItemPage, ItemQuery, ItemSummary } from '../lib/sdk/overfin.js';
+  import type { Genre, ItemQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
@@ -51,13 +51,13 @@
     go(`/library/${id}${q ? '?' + q : ''}`);
   }
 
-  let items = $state<ItemSummary[]>([]);
+  let items = $state<TitleSummary[]>([]);
   let total = $state<number>();
   let finished = $state(false);
   let error = $state<unknown>();
   let sentinel = $state<HTMLElement>();
   let loading = false;
-  let pages: AsyncGenerator<ItemPage> | undefined;
+  let pages: AsyncGenerator<TitlePage> | undefined;
 
   function query(): ItemQuery {
     return {

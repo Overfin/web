@@ -18,9 +18,16 @@
   let intro = $state<Segment | null>(null);
   let notice = $state<{ text: string; takenOver: boolean } | null>(null);
 
-  const title = $derived(playback
-    ? playback.item.name + (playback.method !== 'direct' ? ` · ${t(`player.method.${playback.method}` as Key)}` : '')
-    : '');
+  // What plays, as titles are shown everywhere: an episode with its series.
+  const title = $derived.by(() => {
+    if (!playback) return '';
+    const it = playback.title;
+    let name = it?.name ?? playback.item.name;
+    if (it?.kind === 'episode' && it.series) {
+      name = `${it.series.name} · ${t('item.seasonEpisodeShort', { season: it.seasonNumber ?? '?', episode: it.episodeNumber ?? '?' })} · ${name}`;
+    }
+    return name + (playback.method !== 'direct' ? ` · ${t(`player.method.${playback.method}` as Key)}` : '');
+  });
 
   onMount(async () => {
     if (!video) return;

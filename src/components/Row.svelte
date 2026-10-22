@@ -1,12 +1,12 @@
 <!-- A titled row of titles, shown only when there's something in it. With
      remove, titles can be taken out (those removable says, or all). -->
 <script lang="ts">
-  import type { ItemSummary } from '../lib/sdk/overfin.js';
+  import type { TitleSummary } from '../lib/sdk/overfin.js';
   import Card from './Card.svelte';
 
   let { title, items, wide = false, remove, removable }: {
-    title: string; items: ItemSummary[]; wide?: boolean; remove?: (item: ItemSummary) => void;
-    removable?: (item: ItemSummary) => boolean;
+    title: string; items: TitleSummary[]; wide?: boolean; remove?: (item: TitleSummary) => void;
+    removable?: (item: TitleSummary) => boolean;
   } = $props();
 </script>
 

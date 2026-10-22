@@ -1,25 +1,34 @@
-<!-- One title in a row or grid: its poster (or a still, wide), its name,
-     and how far the profile got. -->
+<!-- One title in a row or grid, in a library or not: its poster (or a still,
+     wide), its name, how far the profile got. Hovered or focused, a title
+     that can play shows a play button in its corner; the rest of the card
+     opens the title's page. -->
 <script lang="ts">
-  import type { ItemSummary } from '../lib/sdk/overfin.js';
+  import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
+  import { play } from '../lib/play';
 
-  let { item, wide = false, remove }: { item: ItemSummary; wide?: boolean; remove?: () => void } = $props();
+  let { item, wide = false, flags = true, remove }: {
+    item: TitleSummary; wide?: boolean; flags?: boolean; remove?: () => void;
+  } = $props();
 
   const image = $derived(wide ? (item.images?.thumb ?? item.images?.backdrops?.[0] ?? item.images?.primary) : item.images?.primary);
-  const progress = $derived(item.userState?.positionMs && item.durationMs
-    ? Math.min(100, (100 * item.userState.positionMs) / item.durationMs) : 0);
+  const position = $derived(item.userState?.positionMs ?? 0);
+  const progress = $derived(position && item.durationMs ? Math.min(100, (100 * position) / item.durationMs) : 0);
   const sub = $derived.by(() => {
-    const e = item.episode;
-    if (!e) return item.year ?? '';
-    return `${e.seriesName ?? ''} · ${t('item.seasonEpisodeShort', { season: e.seasonNumber ?? '?', episode: e.number ?? '?' })}`;
+    if (item.kind === 'episode' && item.series) {
+      return `${item.series.name} · ${t('item.seasonEpisodeShort', { season: item.seasonNumber ?? '?', episode: item.episodeNumber ?? '?' })}`;
+    }
+    if (item.kind === 'season' && item.series) return item.series.name;
+    return item.year ?? '';
   });
+  const flag = $derived(!flags ? '' : item.availability === 'missing' ? t('title.notHere')
+    : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 </script>
 
-<div class="cardbox">
-  <a class="card" class:wide href="/item/{item.id}">
+<div class="cardbox" class:wide>
+  <a class="card" class:wide href="/title/{item.id}">
     <div class="poster" class:wide>
       {#if image}
         <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" use:loaded />
@@ -29,10 +38,18 @@
       {#if progress}
         <div class="progress" style:width="{progress}%"></div>
       {/if}
+      {#if flag}<span class="flag">{flag}</span>{/if}
+      {#if item.userState?.played}<span class="seen" aria-label={t('title.watched')}>✓</span>{/if}
     </div>
     <div class="title">{item.name}</div>
     <div class="sub">{sub}</div>
   </a>
+  {#if item.playable}
+    <button class="act" type="button" aria-label={t('item.play') + ' : ' + item.name}
+      onclick={() => play(item.id, position)}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+    </button>
+  {/if}
   {#if remove}
     <button class="remove" type="button" title={t('home.removeFromContinue')} aria-label={t('home.removeFromContinue')}
       onclick={remove}>✕</button>

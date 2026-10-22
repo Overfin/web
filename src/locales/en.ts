@@ -99,6 +99,10 @@ export default {
   'item.seasonEpisode': 'Season {season}, episode {episode}',
   'item.seasonEpisodeShort': 'S{season}E{episode}',
 
+  'title.notHere': 'Not here yet',
+  'title.watched': 'Watched',
+  'title.partly': '{have} of {aired} episodes',
+  'title.specials': 'Specials',
   'person.inLibrary': 'In the library',
   'person.nothing': 'Nothing here.',
 

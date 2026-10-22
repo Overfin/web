@@ -5,7 +5,7 @@
      the system asks for less motion. Arrows, dots, swipes and the arrow
      keys move it too. -->
 <script lang="ts">
-  import type { Item, ItemSummary } from '../lib/sdk/overfin.js';
+  import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
@@ -13,12 +13,12 @@
   import { play } from '../lib/play';
   import { session } from '../lib/session.svelte';
 
-  let { fallback }: { fallback: ItemSummary[] } = $props();
+  let { fallback }: { fallback: TitleSummary[] } = $props();
 
   const count = 8;
   const every = 8000;
 
-  let slides = $state<Item[]>([]);
+  let slides = $state<Title[]>([]);
   let index = $state(0);
   // Slides shown so far, and the next one: only their backdrops load.
   let seen = $state(new Set([0, 1]));
@@ -36,7 +36,7 @@
       const mixed: string[] = [];
       for (let i = 0; i < count; i++) {
         for (const title of [films[i], series[i]]) {
-          if (title?.libraryItem) mixed.push(title.libraryItem.id);
+          if (title && title.availability !== 'missing') mixed.push(title.id);
         }
       }
       if (mixed.length) return mixed.slice(0, count);
@@ -48,8 +48,8 @@
     ids().then(async (chosen) => {
       // Each title's page, for its overview and genres; those that fail
       // are left out.
-      const items = await Promise.all(chosen.map((id) => overfin.item(id).catch(() => null)));
-      slides = items.filter((it): it is Item => !!it?.images?.backdrops?.[0]);
+      const items = await Promise.all(chosen.map((id) => overfin.title(id).catch(() => null)));
+      slides = items.filter((it): it is Title => !!it?.images?.backdrops?.[0]);
     });
   });
 
@@ -106,19 +106,18 @@
           {/if}
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
-            {#if item.officialRating}<span>{item.officialRating}</span>{/if}
             {#if item.durationMs && item.kind === 'movie'}<span>{duration(item.durationMs)}</span>{/if}
             {#if item.genres?.length}<span>{item.genres.slice(0, 3).join(', ')}</span>{/if}
           </div>
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
           <div class="actions">
-            {#if item.kind === 'movie'}
+            {#if item.playable}
               <button class="primary" onclick={() => play(item.id, position)}>
                 {position ? t('home.resume') : t('item.play')}
               </button>
-              <a class="button" href="/item/{item.id}">{t('home.moreInfo')}</a>
+              <a class="button" href="/title/{item.id}">{t('home.moreInfo')}</a>
             {:else}
-              <a class="button primary" href="/item/{item.id}">{t('home.seeSeries')}</a>
+              <a class="button primary" href="/title/{item.id}">{t('home.seeSeries')}</a>
             {/if}
           </div>
         </div>

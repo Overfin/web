@@ -12,7 +12,7 @@
   async function load() {
     const [person, work] = await Promise.all([
       overfin.person(id),
-      overfin.items({ person: id, kind: ['movie', 'series'], sort: 'premiereDate', order: 'desc', limit: 100 }),
+      overfin.titles({ person: id, kind: ['movie', 'series'], sort: 'premiereDate', order: 'desc', limit: 100 }),
     ]);
     return { person, work: work.items };
   }
