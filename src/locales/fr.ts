@@ -234,7 +234,7 @@ const fr: Record<keyof typeof en, string> = {
   'error.request-refused': 'Cette demande a été refusée.',
   'error.not-pending': 'Cette demande ne peut plus être annulée.',
   'person.inLibrary': 'Dans la bibliothèque',
-  'person.elsewhere': 'Ailleurs',
+  'person.elsewhere': 'Non disponibles',
   'person.nothing': 'Rien ici.',
   'person.born': 'Né(e) le {date}',
   'person.died': 'Mort(e) le {date}',

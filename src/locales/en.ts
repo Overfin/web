@@ -233,7 +233,7 @@ export default {
   'error.request-refused': 'This request was refused.',
   'error.not-pending': 'This request can no longer be cancelled.',
   'person.inLibrary': 'In the library',
-  'person.elsewhere': 'Elsewhere',
+  'person.elsewhere': 'Unavailable',
   'person.nothing': 'Nothing here.',
   'person.born': 'Born {date}',
   'person.died': 'Died {date}',
