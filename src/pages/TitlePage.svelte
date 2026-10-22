@@ -60,6 +60,9 @@
   // Requests: the one made or cancelled here replaces what was loaded; a
   // season's or an episode's reloads the season's episodes.
   let mainRequest = $state<TitleSummary['request'] | null | undefined>(undefined);
+  // The cast: the first dozen in a row, everyone on demand.
+  const castShown = 12;
+  let wholeCast = $state(false);
   let seasonReload = $state(0);
   const askable = (x: TitleSummary) => session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
   async function requestMain(x: Title) {
@@ -126,6 +129,7 @@
         <div class="meta">
           {#if title.airDate}<span>{new Date(title.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
           {:else if title.year}<span>{title.year}</span>{/if}
+          {#if title.certification}<span class="certification">{title.certification}</span>{/if}
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
           {#if title.genres?.length}<span>{title.genres.join(', ')}</span>{/if}
           {#if availabilityText(title)}<span class="availability">{availabilityText(title)}</span>{/if}
@@ -235,9 +239,17 @@
   {/key}
 
   {#if title.cast?.length}
-    <h2>{t('item.cast')}</h2>
-    <div class="row">
-      {#each title.cast as c, i (i)}
+    {@const cast = wholeCast ? title.cast : title.cast.slice(0, castShown)}
+    <div class="section-head">
+      <h2>{t('item.cast')}</h2>
+      {#if title.cast.length > castShown}
+        <button class="link" type="button" aria-expanded={wholeCast} onclick={() => (wholeCast = !wholeCast)}>
+          {wholeCast ? t('item.castLess') : t('item.castAll', { count: title.cast.length })}
+        </button>
+      {/if}
+    </div>
+    <div class={wholeCast ? 'grid' : 'row'}>
+      {#each cast as c, i (i)}
         <div class="card">
           <div class="poster">
             {#if c.image}

@@ -95,6 +95,8 @@ const fr: Record<keyof typeof en, string> = {
   'item.seasons': 'Saisons',
   'item.episodes': 'Épisodes',
   'item.cast': 'Distribution',
+  'item.castAll': 'Voir toute la distribution ({count})',
+  'item.castLess': 'Afficher moins',
   'item.directedBy': 'Réalisé par',
   'item.writtenBy': 'Écrit par',
   'item.seasonEpisode': 'Saison {season}, épisode {episode}',

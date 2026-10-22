@@ -359,3 +359,7 @@ ol.episodes .number { color: var(--muted); font-weight: 400; }
 .chip.status.approved, .chip.status.processing { color: var(--accent); border-color: rgba(106, 168, 255, .4); }
 .chip.status.available, .chip.status.partiallyAvailable { color: #6ad38e; border-color: rgba(106, 211, 142, .4); }
 .chip.status.declined, .chip.status.failed { color: var(--danger); border-color: rgba(255, 107, 107, .4); }
+/* A certification, as a small framed label. */
+.meta .certification { border: 1px solid rgba(255, 255, 255, .45); border-radius: 3px; padding: 0 .35em; font-size: .85em; line-height: 1.5; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 2rem 0 .7rem; }
+.section-head h2 { margin: 0; }

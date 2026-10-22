@@ -94,6 +94,8 @@ export default {
   'item.seasons': 'Seasons',
   'item.episodes': 'Episodes',
   'item.cast': 'Cast',
+  'item.castAll': 'See the whole cast ({count})',
+  'item.castLess': 'Show less',
   'item.directedBy': 'Directed by',
   'item.writtenBy': 'Written by',
   'item.seasonEpisode': 'Season {season}, episode {episode}',

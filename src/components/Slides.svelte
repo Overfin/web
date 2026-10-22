@@ -106,6 +106,7 @@
           {/if}
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
+            {#if item.certification}<span class="certification">{item.certification}</span>{/if}
             {#if item.durationMs && item.kind === 'movie'}<span>{duration(item.durationMs)}</span>{/if}
             {#if item.genres?.length}<span>{item.genres.slice(0, 3).join(', ')}</span>{/if}
           </div>
