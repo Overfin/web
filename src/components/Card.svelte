@@ -1,6 +1,7 @@
 <!-- One title in a row or grid, in a library or not: its poster (or a still,
      wide), its name, how far the profile got. Hovered or focused, a title
-     that can play shows a play button in its corner, and one no library has
+     that can play (a series a library has too) shows a play button in its
+     corner, and one no library has
      a request button (when the server takes requests); the rest of the card
      opens the title's page. A requested title says where its request is. -->
 <script lang="ts">
@@ -26,10 +27,21 @@
     if (item.kind === 'season' && item.series) return item.series.name;
     return [item.year, note].filter(Boolean).join(' · ');
   });
+  // A series a library has plays too: the episode the server picks (in
+  // progress, the next one, or the first).
+  const series = $derived(item.kind === 'series' && item.availability !== 'missing');
+  async function start() {
+    if (!series) {
+      play(item.id, position);
+      return;
+    }
+    const up = await overfin.upNext(item.id).catch(() => null);
+    if (up) play(up.title.id, up.positionMs);
+  }
   // The request covering it: as loaded, then as made here.
   let asked = $state<TitleSummary['request'] | null>(null);
   const request = $derived(asked ?? item.request);
-  const askable = $derived(session.requests && !item.playable && item.availability !== 'available' && !request
+  const askable = $derived(session.requests && !item.playable && !series && item.availability !== 'available' && !request
     && item.kind !== 'other');
   async function requestIt() {
     asked = await ask(item.id);
@@ -56,9 +68,9 @@
     <div class="title">{item.name}</div>
     <div class="sub">{sub}</div>
   </a>
-  {#if item.playable}
+  {#if item.playable || series}
     <button class="act" type="button" aria-label={t('item.play') + ' : ' + item.name}
-      onclick={() => play(item.id, position)}>
+      onclick={start}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
     </button>
   {/if}

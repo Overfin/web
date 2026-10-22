@@ -168,6 +168,18 @@
               <button class="primary" onclick={() => requestMain(title)}>{askLabel(title)}</button>
             {/if}
           {/if}
+          {#if title.kind === 'series' && title.availability !== 'missing'}
+            <!-- The episode playing the series plays: the one in progress,
+                 the next one, or the first. -->
+            {#await overfin.upNext(title.id) then up}
+              {@const ep = t('item.seasonEpisodeShort', { season: up.title.seasonNumber ?? '?', episode: up.title.episodeNumber ?? '?' })}
+              <button class="primary" onclick={() => play(up.title.id, up.positionMs)}>
+                {up.positionMs ? t('item.resumeEpisode', { episode: ep, time: clock(up.positionMs) }) : t('item.playEpisode', { episode: ep })}
+              </button>
+            {:catch}
+              <!-- No episode to play: nothing offered. -->
+            {/await}
+          {/if}
           {#if title.playable}
             {#if position}
               <button class="primary" onclick={() => play(title.id, position)}>{t('item.resumeFrom', { time: clock(position) })}</button>

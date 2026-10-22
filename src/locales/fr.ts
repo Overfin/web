@@ -90,6 +90,8 @@ const fr: Record<keyof typeof en, string> = {
   'item.favoriteAdd': 'Ajouter aux favoris',
   'item.favoriteOn': 'Dans vos favoris',
   'item.resumeFrom': 'Reprendre à {time}',
+  'item.playEpisode': 'Lire {episode}',
+  'item.resumeEpisode': 'Reprendre {episode} à {time}',
   'item.fromStart': 'Depuis le début',
   'item.watchlistOn': '✓ Dans ma liste',
   'item.watchlistAdd': '+ Ma liste',

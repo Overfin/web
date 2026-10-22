@@ -55,10 +55,9 @@
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
-  <!-- Started titles and next episodes together; only started ones can be
-       taken out. -->
-  <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget}
-    removable={(i) => !!i.userState?.positionMs} />
+  <!-- Started titles and next episodes together; any can be taken out
+       (a series' until it's watched again). -->
+  <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
   <Row title={t('home.watchlist')} items={home.watchlist} />
   {#if session.discovery}
     <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" availability="library" flags={false}

@@ -89,6 +89,8 @@ export default {
   'item.favoriteAdd': 'Add to favorites',
   'item.favoriteOn': 'In your favorites',
   'item.resumeFrom': 'Resume from {time}',
+  'item.playEpisode': 'Play {episode}',
+  'item.resumeEpisode': 'Resume {episode} at {time}',
   'item.fromStart': 'From the start',
   'item.watchlistOn': '✓ On my watchlist',
   'item.watchlistAdd': '+ Watchlist',
