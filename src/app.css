@@ -107,7 +107,7 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
 .poster.wide { aspect-ratio: 16 / 9; }
 .row .card.wide { width: calc(var(--card) * 1.6); }
 .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.poster .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: .5rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.poster .fallback { position: absolute; inset: 0; background: var(--panel); display: grid; place-items: center; padding: .5rem; text-align: center; color: var(--muted); font-size: .85rem; }
 .progress { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--accent); }
 .card .title { margin-top: .4rem; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .sub { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -188,3 +188,65 @@ footer.tmdb img { height: 10px; width: auto; flex: none; }
 .cardbox .remove { position: absolute; top: .3rem; right: .3rem; min-height: 0; padding: .1em .45em; font-size: .8rem; background: rgba(11, 16, 32, .8); border: none; opacity: 0; }
 .cardbox:hover .remove, .cardbox .remove:focus-visible { opacity: 1; }
 @media (hover: none) { .cardbox .remove { opacity: 1; } }
+
+/* Loading: frames shimmer until their image is there, then it fades in. */
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.poster, .skeleton .line {
+  background: linear-gradient(100deg, var(--panel) 30%, #232631 50%, var(--panel) 70%) var(--panel);
+  background-size: 200% 100%; animation: shimmer 1.6s linear infinite;
+}
+.poster.ready { animation: none; background: var(--panel); }
+.poster img, .hero img.backdrop { opacity: 0; transition: opacity .35s; }
+.poster img.loaded, .hero img.backdrop.loaded { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .poster, .skeleton .line { animation: none; }
+  .poster img, .hero img.backdrop { transition: none; }
+}
+.skeleton .line { height: .9rem; width: 40%; border-radius: 4px; margin: .6rem 0; }
+.skeleton .line.wide { height: 2rem; width: 60%; }
+.skeleton .line.short { width: 25%; }
+.skeleton .line.heading { height: 1.2rem; width: 12rem; margin: 2rem 0 .8rem; }
+.skeleton .hero .lines { flex: 1; min-width: 12rem; }
+.skeleton .hero.art::before { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.toolbar .count { margin-left: auto; }
+@media (max-width: 600px) {
+  .toolbar select { flex: 1 1 calc(50% - .8rem); min-width: 0; }
+  .toolbar .count { margin-left: 0; }
+}
+
+/* Settings pages: panels with a head, labeled sections, lists. */
+h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 .5rem; }
+.panel-head { display: flex; align-items: center; gap: .9rem; margin-bottom: 1rem; }
+.panel-head h2 { margin: 0; }
+.panel-head .avatar.small { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .3rem; }
+.chip { display: inline-block; font-size: .75rem; padding: .1em .6em; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); }
+.field { padding: 1rem 0; border-top: 1px solid var(--border); }
+.field .toolbar { margin-bottom: .6rem; }
+.field .toolbar:last-child { margin-bottom: 0; }
+.inline { display: flex; gap: .6rem; flex-wrap: wrap; }
+.inline input { flex: 1 1 12rem; min-width: 0; max-width: 20rem; }
+.panel-foot { padding-top: 1rem; border-top: 1px solid var(--border); }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-top: 1px solid var(--border); }
+.list li:first-child { border-top: none; padding-top: 0; }
+.list .chip { margin-left: .4rem; }
+.small { font-size: .85rem; }
+.panel.setting { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.panel.setting h2 { margin: 0 0 .25rem; font-size: 1.05rem; }
+.panel.setting p { margin: 0; }
+.panel.setting button { flex: none; }
+.panel.danger-zone { border-color: rgba(255, 107, 107, .35); }
+@media (max-width: 600px) {
+  .panel.setting { flex-direction: column; align-items: stretch; gap: .9rem; }
+}
+
+/* The first visit. */
+.setup { max-width: 28rem; }
+.setup .panel { text-align: left; padding: 1.5rem; }
+.setup h2 { margin: 0 0 .5rem; }
+button.block { width: 100%; }
+form.stack label { display: grid; gap: .3rem; }
+.divider { display: flex; align-items: center; gap: .8rem; color: var(--muted); margin: 1.2rem 0; font-size: .85rem; }
+.divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }

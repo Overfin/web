@@ -8,6 +8,7 @@
   import Dialog from './components/Dialog.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
+  import Skeleton from './components/Skeleton.svelte';
   import Account from './pages/Account.svelte';
   import Discover from './pages/Discover.svelte';
   import Home from './pages/Home.svelte';
@@ -63,7 +64,7 @@
 </script>
 
 {#if phase.kind === 'loading'}
-  <main><p class="muted">{t('app.loading')}</p></main>
+  <main><Skeleton /></main>
 {:else if phase.kind === 'setup'}
   <main><Setup claim={phase.claim} done={start} /></main>
 {:else if phase.kind === 'blocked'}

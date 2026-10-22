@@ -35,20 +35,22 @@
   }
 </script>
 
-<div class="center">
+<div class="center setup">
   <h1>{t('setup.welcome')}</h1>
   <div class="panel">
     <p>{t('setup.fresh')}</p>
-    <button class="primary" onclick={create}>{t('setup.create')}</button>
+    <button class="primary block" onclick={create}>{t('setup.create')}</button>
   </div>
   {#if claim}
+    <div class="divider"><span>{t('setup.or')}</span></div>
     <div class="panel">
+      <h2>{t('setup.bringTitle')}</h2>
       <p>{t('setup.bringIntro')}</p>
       {#if claim === 'move'}<p class="muted">{t('setup.moveNote')}</p>{/if}
       <form class="stack" onsubmit={bring}>
         <label>{t('setup.username')} <input bind:value={username} name="username" autocomplete="username" required /></label>
         <label>{t('setup.password')} <input bind:value={password} name="password" type="password" autocomplete="current-password" required /></label>
-        <button type="submit">{t('setup.bring')}</button>
+        <button class="block" type="submit">{t('setup.bring')}</button>
       </form>
     </div>
   {/if}

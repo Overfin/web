@@ -43,23 +43,30 @@
   }
 </script>
 
-<div class="center">
+<div class="center wide">
   <h1>{t('account.title')}</h1>
   {#if profile?.kind !== 'kids'}
-    <div class="panel">
-      <p>{profile?.owner ? t('account.dataOwner') : t('account.dataProfile')}</p>
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.dataTitle')}</h2>
+        <p class="muted">{profile?.owner ? t('account.dataOwner') : t('account.dataProfile')}</p>
+      </div>
       <button onclick={download}>{t('account.download')}</button>
     </div>
-  {/if}
-  {#if profile?.kind !== 'kids'}
-    <div class="panel">
-      <p>{t('account.historyText')}</p>
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.historyTitle')}</h2>
+        <p class="muted">{t('account.historyText')}</p>
+      </div>
       <button onclick={clearHistory}>{t('account.clearHistory')}</button>
     </div>
   {/if}
   {#if profile?.owner}
-    <div class="panel">
-      <p>{t('account.deleteText')}</p>
+    <div class="panel setting danger-zone">
+      <div>
+        <h2>{t('account.deleteTitle')}</h2>
+        <p class="muted">{t('account.deleteText')}</p>
+      </div>
       <button class="danger" onclick={remove}>{t('account.delete')}</button>
     </div>
   {/if}

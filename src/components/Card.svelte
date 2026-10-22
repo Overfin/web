@@ -3,6 +3,7 @@
 <script lang="ts">
   import type { ItemSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
+  import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
 
   let { item, wide = false, remove }: { item: ItemSummary; wide?: boolean; remove?: () => void } = $props();
@@ -21,7 +22,7 @@
   <a class="card" class:wide href="/item/{item.id}">
     <div class="poster" class:wide>
       {#if image}
-        <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" />
+        <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" use:loaded />
       {:else}
         <div class="fallback">{item.name}</div>
       {/if}

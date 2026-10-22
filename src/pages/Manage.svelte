@@ -12,6 +12,7 @@
   import AccessPicker from '../components/AccessPicker.svelte';
   import CeilingPicker from '../components/CeilingPicker.svelte';
   import PageError from '../components/PageError.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
 
   const me = $derived(session.me?.activeProfile);
   const pinPattern = '[0-9]{4,8}';
@@ -62,30 +63,42 @@
   <div class="center wide">
     <h1>{me.owner ? t('manage.titleOwner') : t('manage.titleSelf')}</h1>
     {#await data}
-      <p class="muted">{t('app.loading')}</p>
+      <Skeleton kind="list" />
     {:then { profiles, ratings, sessions, tags }}
       {#each profiles as p (p.id)}
         {@const f = forms[p.id]}
         <div class="panel">
-          <h2>
-            {p.name}{#if p.owner}&nbsp;({t('manage.owner')}){/if}
-            {#if p.kind === 'kids'}
-              · {p.ceilingsNeeded ? t('manage.kidsNoLimits') : t('manage.kidsLimits', { movie: p.movieCeiling ?? '', series: p.seriesCeiling ?? '' })}
-            {/if}
-          </h2>
+          <div class="panel-head">
+            <span class="avatar small" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
+            <div>
+              <h2>{p.name}</h2>
+              <div class="chips">
+                {#if p.owner}<span class="chip">{t('manage.owner')}</span>{/if}
+                {#if p.kind === 'kids'}
+                  <span class="chip">{p.ceilingsNeeded ? t('manage.kidsNoLimits') : t('manage.kidsLimits', { movie: p.movieCeiling ?? '', series: p.seriesCeiling ?? '' })}</span>
+                {/if}
+                {#if p.hasPin}<span class="chip">{t('manage.pin')}</span>{/if}
+              </div>
+            </div>
+          </div>
           {#if p.ceilingsNeeded && me.owner}<p class="error">{t('manage.limitsMissing')}</p>{/if}
 
           {#if me.owner}
-            <div class="toolbar">
-              <input bind:value={f.name} maxlength="32" aria-label={t('manage.name')} />
-              <button onclick={() => act(p, () => overfin.updateProfile(p.id, { name: f.name }))}>{t('manage.rename')}</button>
-            </div>
+            <section class="field">
+              <h3>{t('manage.name')}</h3>
+              <div class="inline">
+                <input bind:value={f.name} maxlength="32" aria-label={t('manage.name')} />
+                <button onclick={() => act(p, () => overfin.updateProfile(p.id, { name: f.name }))}>{t('manage.rename')}</button>
+              </div>
+            </section>
           {/if}
 
           <!-- Limits: kids or standard, the ceilings for films and series, the
                libraries and the hidden tags. Changing them needs the owner's
                PIN, if the owner has one. -->
           {#if me.owner && !p.owner}
+            <section class="field">
+            <h3>{t('manage.limits')}</h3>
             <div class="toolbar">
               <label><input type="checkbox" bind:checked={f.kids} /> {t('manage.kidsProfile')}</label>
               {#if f.kids}<CeilingPicker {ratings} bind:movie={f.movie} bind:series={f.series} />{/if}
@@ -104,12 +117,15 @@
                 return overfin.updateProfile(p.id, pin ? { ...change, pin } : change);
               }, t('manage.ownerPin'))}>{t('manage.saveLimits')}</button>
             </div>
+            </section>
           {/if}
 
           <!-- PIN: setting one on someone else's profile needs the owner's
                PIN; changing or removing one needs a fresh login. -->
           {#if me.owner || (p.id === me.id && p.kind === 'standard')}
-            <div class="toolbar">
+            <section class="field">
+            <h3>{t('manage.pin')}</h3>
+            <div class="inline">
               <input bind:value={f.pin} inputmode="numeric" pattern={pinPattern} maxlength="8"
                 placeholder={t('manage.pinHint')} aria-label={t('manage.newPin')} />
               <button onclick={() => act(p, (ownerPin) => overfin.setPin(p.id, f.pin, ownerPin), t('manage.ownerPin'))}>
@@ -119,10 +135,11 @@
                 <button onclick={() => act(p, () => overfin.removePin(p.id))}>{t('manage.removePin')}</button>
               {/if}
             </div>
+            </section>
           {/if}
 
           {#if me.owner && !p.owner}
-            <div class="toolbar">
+            <div class="panel-foot">
               <button class="danger" onclick={async () => {
                 if (await confirm(t('manage.deleteConfirm', { name: p.name }), true)) act(p, () => overfin.deleteProfile(p.id));
               }}>{t('manage.deleteProfile')}</button>
@@ -136,17 +153,24 @@
            their own. -->
       <div class="panel">
         <h2>{t('manage.devices')}</h2>
-        {#each sessions as s (s.id)}
-          <div class="toolbar">
-            <span>{s.device || t('manage.unknownDevice')}{s.profileName ? ` · ${s.profileName}` : ''}{s.current ? ` (${t('manage.thisOne')})` : ''}</span>
-            <span class="muted">{s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleString(i18n.locale) : ''}</span>
-            {#if !s.current}
-              <button onclick={async () => {
-                if (await confirmed(() => overfin.endSession(s.id), (m) => (devicesMessage = m))) reload++;
-              }}>{t('manage.signOut')}</button>
-            {/if}
-          </div>
-        {/each}
+        <ul class="list">
+          {#each sessions as s (s.id)}
+            <li>
+              <div>
+                <strong>{s.device || t('manage.unknownDevice')}</strong>
+                {#if s.current}<span class="chip">{t('manage.thisOne')}</span>{/if}
+                <div class="muted small">
+                  {s.profileName ?? ''}{s.profileName && s.lastActiveAt ? ' · ' : ''}{s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleString(i18n.locale, { dateStyle: 'medium', timeStyle: 'short' }) : ''}
+                </div>
+              </div>
+              {#if !s.current}
+                <button onclick={async () => {
+                  if (await confirmed(() => overfin.endSession(s.id), (m) => (devicesMessage = m))) reload++;
+                }}>{t('manage.signOut')}</button>
+              {/if}
+            </li>
+          {/each}
+        </ul>
         {#if me.owner && sessions.length > 1}
           <button onclick={async () => {
             if (await confirmed(() => overfin.endOtherSessions(), (m) => (devicesMessage = m))) reload++;

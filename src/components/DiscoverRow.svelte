@@ -5,12 +5,13 @@
   import { overfin } from '../lib/client';
   import CatalogCard from './CatalogCard.svelte';
 
-  let { title, list, kind, availability, found }: {
+  let { title, list, kind, availability, found = () => {}, flags = true }: {
     title: string;
     list: 'trending' | 'popular' | 'upcoming';
     kind: 'movie' | 'series';
     availability: 'all' | 'library' | 'missing';
-    found: (any: boolean) => void;
+    found?: (any: boolean) => void;
+    flags?: boolean;
   } = $props();
 
   async function load(): Promise<CatalogTitle[]> {
@@ -25,7 +26,7 @@
     <h2>{title}</h2>
     <div class="row">
       {#each items as t (t.mediaKind + t.tmdbId)}
-        <CatalogCard title={t} />
+        <CatalogCard title={t} {flags} />
       {/each}
     </div>
   {/if}

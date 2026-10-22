@@ -2,9 +2,11 @@
      in the library. Play when the library has it. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
+  import { loaded } from '../lib/loaded';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { play } from '../lib/play';
   import PageError from '../components/PageError.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
   import TMDBNotice from '../components/TMDBNotice.svelte';
 
   let { kind, tmdbId }: { kind: string; tmdbId: string } = $props();
@@ -16,16 +18,16 @@
   <PageError notFound />
 {:else}
   {#await overfin.catalogTitle(kind, tmdbId)}
-    <p class="muted">{t('app.loading')}</p>
+    <Skeleton kind="title" />
   {:then title}
     <div class="hero" class:art={!!title.images?.backdrops?.[0]}>
       {#if title.images?.backdrops?.[0]}
-        <img class="backdrop" src={overfin.imageUrl(title.images.backdrops[0], 'large')} alt="" />
+        <img class="backdrop" src={overfin.imageUrl(title.images.backdrops[0], 'large')} alt="" use:loaded />
       {/if}
       <div class="info">
         <div class="poster">
           {#if title.images?.primary}
-            <img src={overfin.imageUrl(title.images.primary, 'medium')} alt="" />
+            <img src={overfin.imageUrl(title.images.primary, 'medium')} alt="" use:loaded />
           {/if}
         </div>
         <div>
@@ -60,7 +62,21 @@
     {/if}
     {#if title.cast?.length}
       <h2>{t('discover.cast')}</h2>
-      <p class="muted">{title.cast.map((c) => c.character ? `${c.name} (${c.character})` : c.name).join(', ')}</p>
+      <div class="row">
+        {#each title.cast as c, i (i)}
+          <div class="card">
+            <div class="poster">
+              {#if c.image}
+                <img src={overfin.imageUrl(c.image, 'small')} alt="" loading="lazy" use:loaded />
+              {:else}
+                <div class="fallback">{c.name}</div>
+              {/if}
+            </div>
+            <div class="title">{c.name}</div>
+            <div class="sub">{c.character ?? ''}</div>
+          </div>
+        {/each}
+      </div>
     {/if}
     <TMDBNotice />
   {:catch error}

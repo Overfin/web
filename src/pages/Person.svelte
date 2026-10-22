@@ -1,9 +1,11 @@
 <!-- A person: who they are, and what of theirs this profile can watch. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
+  import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
 
   let { id }: { id: string } = $props();
 
@@ -17,13 +19,13 @@
 </script>
 
 {#await load()}
-  <p class="muted">{t('app.loading')}</p>
+  <Skeleton kind="title" />
 {:then { person, work }}
   {@const life = person.birthDate && person.birthDate.slice(0, 4) + (person.deathDate ? ` – ${person.deathDate.slice(0, 4)}` : '')}
   <div class="hero">
     <div class="info">
       <div class="poster">
-        {#if person.image}<img src={overfin.imageUrl(person.image, 'medium')} alt="" />{/if}
+        {#if person.image}<img src={overfin.imageUrl(person.image, 'medium')} alt="" use:loaded />{/if}
       </div>
       <div>
         <h1>{person.name}</h1>

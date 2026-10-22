@@ -4,6 +4,7 @@
   import { t, type Key } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
   import TMDBNotice from '../components/TMDBNotice.svelte';
 
   let { params }: { params: URLSearchParams } = $props();
@@ -43,7 +44,7 @@
 </div>
 
 {#if answered < rows.length && !any}
-  <p class="muted">{t('app.loading')}</p>
+  <Skeleton />
 {:else if answered === rows.length && !any}
   <p class="muted">{t('common.nothingYet')}</p>
 {/if}

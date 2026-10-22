@@ -3,11 +3,13 @@
 <script lang="ts">
   import type { Item, ItemSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
+  import { loaded } from '../lib/loaded';
   import { clock, duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
   import { play } from '../lib/play';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
   import PersonCard from '../components/PersonCard.svelte';
 
   let { id }: { id: string } = $props();
@@ -47,19 +49,19 @@
 </script>
 
 {#await load()}
-  <p class="muted">{t('app.loading')}</p>
+  <Skeleton kind="title" />
 {:then { item, children, childKind }}
   {@const position = item.userState?.positionMs ?? 0}
   {@const cast = (item.credits ?? []).filter((c) => c.role === 'actor' || c.role === 'guestStar').slice(0, 20)}
   {@const crew = (item.credits ?? []).filter((c) => c.role === 'director' || c.role === 'writer')}
   <div class="hero" class:art={!!item.images?.backdrops?.[0]}>
     {#if item.images?.backdrops?.[0]}
-      <img class="backdrop" src={overfin.imageUrl(item.images.backdrops[0], 'large')} alt="" />
+      <img class="backdrop" src={overfin.imageUrl(item.images.backdrops[0], 'large')} alt="" use:loaded />
     {/if}
     <div class="info">
       <div class="poster">
         {#if item.images?.primary}
-          <img src={overfin.imageUrl(item.images.primary, 'medium')} alt="" />
+          <img src={overfin.imageUrl(item.images.primary, 'medium')} alt="" use:loaded />
         {/if}
       </div>
       <div>

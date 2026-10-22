@@ -1,9 +1,10 @@
-<!-- A library: its titles, sorted as the person chooses, loaded page by
-     page as they scroll. A shuffle keeps its seed in the address, so a
-     reload shows the same order. -->
+<!-- A library: its titles, sorted and filtered (genre, decade, what the
+     profile watched) as the person chooses, loaded page by page as they
+     scroll. Choices live in the address, a shuffle's seed too, so a reload
+     shows the same page. -->
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { ItemPage, ItemQuery, ItemSummary } from '../lib/sdk/overfin.js';
+  import type { Genre, ItemPage, ItemQuery, ItemSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
@@ -11,10 +12,16 @@
   import { visible } from '../lib/visible';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
+  import Skeleton from '../components/Skeleton.svelte';
 
   let { id, params }: { id: string; params: URLSearchParams } = $props();
 
   const sorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'lastPlayed', 'random'] as const;
+  // What the profile did with the titles, as a filter.
+  const shows = ['all', 'unwatched', 'watched', 'inProgress', 'favorites'] as const;
+  type Show = (typeof shows)[number];
+  const thisDecade = Math.floor(new Date().getFullYear() / 10) * 10;
+  const decades = Array.from({ length: 8 }, (_, i) => thisDecade - 10 * i);
   // Which titles a library lists, by its kind.
   const kinds: Record<string, string> = { movies: 'movie', shows: 'series', musicVideos: 'musicVideo', music: 'musicAlbum', books: 'book' };
 
@@ -23,6 +30,26 @@
   // address).
   const sort = $derived((params.get('sort') || 'name') as NonNullable<ItemQuery['sort']>);
   const seed = $derived(params.get('seed') || undefined);
+  const genre = $derived(params.get('genre') || '');
+  const show = $derived<Show>(shows.includes(params.get('show') as Show) ? (params.get('show') as Show) : 'all');
+  // A decade, or "older" (before the last one listed).
+  const decade = $derived(params.get('decade') || '');
+  const filtered = $derived(!!genre || show !== 'all' || !!decade);
+
+  let genres = $state<Genre[]>([]);
+  $effect(() => {
+    overfin.genres(id).then((all) => (genres = all), () => {});
+  });
+
+  /** change goes to this library with one choice changed (a new shuffle). */
+  function change(name: string, value: string) {
+    const next = new URLSearchParams(params);
+    next.delete('seed');
+    if (value && value !== 'all' && !(name === 'sort' && value === 'name')) next.set(name, value);
+    else next.delete(name);
+    const q = next.toString();
+    go(`/library/${id}${q ? '?' + q : ''}`);
+  }
 
   let items = $state<ItemSummary[]>([]);
   let total = $state<number>();
@@ -40,6 +67,10 @@
       kind: library ? kinds[library.kind] : undefined,
       order: ['addedAt', 'premiereDate', 'communityRating', 'lastPlayed'].includes(sort) ? 'desc' : undefined,
       seed: sort === 'random' ? seed : undefined,
+      genre: genre || undefined,
+      ...(decade === 'older' ? { yearTo: decades[decades.length - 1] - 1 }
+        : decade ? { yearFrom: +decade, yearTo: +decade + 9 } : {}),
+      ...{ all: {}, unwatched: { played: false }, watched: { played: true }, inProgress: { inProgress: true }, favorites: { favorite: true } }[show],
     };
   }
 
@@ -55,7 +86,11 @@
       }
       items.push(...page.items);
       if (page.totalCount !== undefined) total = page.totalCount;
-      if (page.seed && !seed) history.replaceState(null, '', `/library/${id}?sort=random&seed=${page.seed}`);
+      if (page.seed && !seed) {
+        const next = new URLSearchParams(params);
+        next.set('seed', page.seed);
+        history.replaceState(null, '', `/library/${id}?${next}`);
+      }
       if (!page.nextCursor) finished = true;
     } catch (err) {
       error = err;
@@ -74,13 +109,36 @@
 {:else}
   <h1>{library.name}</h1>
   <div class="toolbar">
-    <select aria-label={t('library.sort')} value={sort} onchange={(event) => go(`/library/${id}?sort=${event.currentTarget.value}`)}>
+    <select aria-label={t('library.sort')} value={sort} onchange={(event) => change('sort', event.currentTarget.value)}>
       {#each sorts as value (value)}
         <option {value}>{t(`library.sort.${value}` as Key)}</option>
       {/each}
     </select>
+    {#if genres.length}
+      <select aria-label={t('library.genre')} value={genre} onchange={(event) => change('genre', event.currentTarget.value)}>
+        <option value="">{t('library.genre.all')}</option>
+        {#each genres as g (g.name)}
+          <option value={g.name}>{g.name}</option>
+        {/each}
+      </select>
+    {/if}
+    <select aria-label={t('library.decade')} value={decade} onchange={(event) => change('decade', event.currentTarget.value)}>
+      <option value="">{t('library.decade.all')}</option>
+      {#each decades as d (d)}
+        <option value={String(d)}>{t('library.decade.one', { decade: d })}</option>
+      {/each}
+      <option value="older">{t('library.decade.older', { year: decades[decades.length - 1] })}</option>
+    </select>
+    <select aria-label={t('library.show')} value={show} onchange={(event) => change('show', event.currentTarget.value)}>
+      {#each shows as value (value)}
+        <option {value}>{t(`library.show.${value}` as Key)}</option>
+      {/each}
+    </select>
+    {#if filtered}
+      <button class="link" type="button" onclick={() => go(sort === 'name' ? `/library/${id}` : `/library/${id}?sort=${sort}`)}>{t('library.clear')}</button>
+    {/if}
     {#if total !== undefined}
-      <span class="muted">{tn('library.count', total)}</span>
+      <span class="muted count">{tn('library.count', total)}</span>
     {/if}
   </div>
   <div class="grid">
@@ -88,6 +146,12 @@
       <Card {item} />
     {/each}
   </div>
+  {#if !items.length && !finished}
+    <Skeleton kind="grid" />
+  {/if}
+  {#if finished && !items.length && !error}
+    <p class="muted">{filtered ? t('library.noMatch') : t('common.nothingYet')}</p>
+  {/if}
   {#if error}
     <PageError {error} />
   {:else if !finished}

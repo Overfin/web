@@ -4,19 +4,20 @@
 <script lang="ts">
   import type { CatalogTitle } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
+  import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
 
-  let { title }: { title: CatalogTitle } = $props();
+  let { title, flags = true }: { title: CatalogTitle; flags?: boolean } = $props();
 
   const href = $derived(title.libraryItem ? `/item/${title.libraryItem.id}` : `/title/${title.mediaKind}/${title.tmdbId}`);
-  const flag = $derived(title.availability === 'available' ? t('discover.inLibrary')
+  const flag = $derived(!flags ? '' : title.availability === 'available' ? t('discover.inLibrary')
     : title.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 </script>
 
 <a class="card" {href}>
   <div class="poster">
     {#if title.images?.primary}
-      <img src={overfin.imageUrl(title.images.primary, 'small')} alt="" loading="lazy" />
+      <img src={overfin.imageUrl(title.images.primary, 'small')} alt="" loading="lazy" use:loaded />
     {:else}
       <div class="fallback">{title.name}</div>
     {/if}
