@@ -204,6 +204,7 @@ const fr: Record<keyof typeof en, string> = {
   'player.nextIn': 'dans {n} s',
   'player.playNow': 'Lire maintenant',
   'player.episodes': 'Épisodes',
+  'player.watching': 'Vous regardez',
   'player.pip': 'Image dans l’image',
   'player.position': 'Position',
   'player.skip.intro': 'Passer le générique',

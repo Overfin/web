@@ -9,7 +9,7 @@
      after 3 s without moving, and stay while paused. -->
 <script lang="ts">
   import { onDestroy, onMount, untrack } from 'svelte';
-  import type { Player, Playback, Segment, TitleSummary } from '../lib/sdk/overfin.js';
+  import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { clock, duration } from '../lib/format';
   import { i18n, t, type Key } from '../lib/i18n.svelte';
@@ -25,6 +25,12 @@
   let audio = $state('');
   let subtitles = $state('');
   let notice = $state<{ text: string; takenOver: boolean } | null>(null);
+
+  // The title's page, for the loading and pause screens: fetched as the
+  // player opens, beside the playback.
+  let about = $state<Title | null>(null);
+  // started: the first picture showed; until then, the loading screen.
+  let started = $state(false);
 
   // The video's state, as its events tell it.
   let paused = $state(true);
@@ -52,6 +58,32 @@
       return `${it.series.name} · ${t('item.seasonEpisodeShort', { season: it.seasonNumber ?? '?', episode: it.episodeNumber ?? '?' })} · ${it.name}`;
     }
     return it?.name ?? '';
+  });
+
+  // ---- The loading and pause screens -------------------------------------------
+
+  // What the screens show: the title's page when it's there, else what the
+  // playback says.
+  const shownTitle = $derived<TitleSummary | null>(about ?? playback?.title ?? null);
+  const backdrop = $derived(shownTitle?.images?.backdrops?.[0] ?? shownTitle?.images?.thumb ?? shownTitle?.images?.primary);
+  const facts = $derived.by(() => {
+    const it = shownTitle;
+    if (!it) return '';
+    if (it.kind === 'episode') {
+      return [t('item.seasonEpisodeShort', { season: it.seasonNumber ?? '?', episode: it.episodeNumber ?? '?' }), it.name].join(' · ');
+    }
+    return [it.year, it.durationMs ? duration(it.durationMs) : '', it.certification].filter(Boolean).join(' · ');
+  });
+  // The pause screen comes after a second paused, so a quick pause doesn't
+  // flash it.
+  let pauseScreen = $state(false);
+  $effect(() => {
+    if (!paused || !started || scrubbing || menu || notice) {
+      pauseScreen = false;
+      return;
+    }
+    const wait = setTimeout(() => (pauseScreen = true), 1000);
+    return () => clearTimeout(wait);
   });
 
   // ---- Volume, kept for next time ----------------------------------------
@@ -354,6 +386,7 @@
 
   onMount(async () => {
     if (!video) return;
+    overfin.title(id).then((t) => (about = t), () => {});
     loadVolume();
     video.volume = volume;
     video.muted = muted;
@@ -443,10 +476,38 @@
   <video bind:this={video} autoplay playsinline
     onclick={pictureClick} ondblclick={toggleFullscreen}
     ontimeupdate={timeUpdate} onplay={() => (paused = false)} onpause={() => (paused = true)}
-    onwaiting={() => (waiting = true)} onplaying={() => (waiting = false)} oncanplay={() => (waiting = false)}
+    onwaiting={() => (waiting = true)} onplaying={() => { waiting = false; started = true; }} oncanplay={() => (waiting = false)}
     onvolumechange={() => { if (video) { volume = video.volume; muted = video.muted; } }}></video>
 
-  {#if waiting && !notice}
+  {#if !started && !notice}
+    <div class="loading">
+      {#if backdrop}<img class="backdrop" src={overfin.imageUrl(backdrop, 'large')} alt="" />{/if}
+      <div class="loading-title">
+        {#if shownTitle?.images?.logo}
+          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} alt={shownTitle.series?.name ?? shownTitle.name} />
+        {:else if shownTitle}
+          <div class="name">{shownTitle.series?.name ?? shownTitle.name}</div>
+        {/if}
+        {#if facts}<div class="facts">{facts}</div>{/if}
+        <div class="spinner inline" aria-label={t('app.loading')}></div>
+      </div>
+    </div>
+  {/if}
+  {#if pauseScreen && shownTitle}
+    <div class="paused-screen">
+      <div class="paused-about">
+        <div class="watching">{t('player.watching')}</div>
+        {#if shownTitle.images?.logo}
+          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} alt={shownTitle.series?.name ?? shownTitle.name} />
+        {:else}
+          <h1>{shownTitle.series?.name ?? shownTitle.name}</h1>
+        {/if}
+        {#if facts}<div class="facts">{facts}</div>{/if}
+        {#if about?.overview}<p class="overview">{about.overview}</p>{/if}
+      </div>
+    </div>
+  {/if}
+  {#if waiting && started && !notice}
     <div class="spinner" aria-label={t('app.loading')}></div>
   {/if}
   <div class="captions" class:raised={shown} bind:this={captions} aria-live="off"></div>
@@ -691,6 +752,27 @@
   .episode .text { display: flex; flex-direction: column; min-width: 0; }
   .episode .name { font-weight: 600; font-size: .92rem; }
   .episode .hint { font-size: .8rem; color: rgba(255, 255, 255, .6); }
+  .loading, .paused-screen { pointer-events: none; }
+  .loading { position: absolute; z-index: 1; top: 0; right: 0; bottom: 0; left: 0; background: #000; display: flex; align-items: center; justify-content: center; }
+  .loading .backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; filter: blur(2px); }
+  .loading-title { position: relative; text-align: center; padding: 0 1.5rem; }
+  .loading-title .logo, .paused-about .logo { max-width: min(26rem, 70vw); max-height: 9rem; object-fit: contain; display: block; }
+  .loading-title .logo { margin: 0 auto; }
+  .loading-title .name { font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 700; }
+  .loading-title .facts { margin-top: .6rem; color: rgba(255, 255, 255, .8); }
+  .paused-screen {
+    position: absolute; z-index: 1; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .85), rgba(0, 0, 0, .55) 55%, rgba(0, 0, 0, .25)); animation: fade .4s;
+  }
+  .paused-about { max-width: min(36rem, 80vw); padding: 0 clamp(1.5rem, 6vw, 5rem); }
+  .watching { color: rgba(255, 255, 255, .7); font-size: .95rem; margin-bottom: .6rem; }
+  .paused-about h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 3rem); }
+  .paused-about .facts { margin: .8rem 0 .4rem; font-weight: 600; }
+  .paused-about .overview {
+    margin: .4rem 0 0; color: rgba(255, 255, 255, .85); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 5; line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  @keyframes fade { from { opacity: 0; } }
   .osd {
     position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
     background: rgba(0, 0, 0, .65); padding: .6rem 1.1rem; border-radius: var(--radius); font-size: 1.3rem; font-weight: 600;
@@ -700,6 +782,7 @@
     border: 3px solid rgba(255, 255, 255, .25); border-top-color: #fff; border-radius: 50%; animation: spin .9s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner.inline { position: relative; top: auto; left: auto; margin: 1.4rem auto 0; display: block; }
   .notice { position: absolute; z-index: 4; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); text-align: center; padding: 2rem; }
   .notice .actions button + button { margin-left: .6rem; }
   @media (max-width: 40rem) {

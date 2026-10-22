@@ -203,6 +203,7 @@ export default {
   'player.nextIn': 'in {n} s',
   'player.playNow': 'Play now',
   'player.episodes': 'Episodes',
+  'player.watching': "You're watching",
   'player.pip': 'Picture in picture',
   'player.position': 'Position',
   'player.skip.intro': 'Skip intro',
