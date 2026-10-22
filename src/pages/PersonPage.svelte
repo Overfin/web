@@ -47,7 +47,7 @@
     </div>
   </div>
   {#if here.length}
-    <h2>{t('person.inLibrary')}</h2>
+    <h2>{t('titles.inLibrary')}</h2>
     <div class="grid">
       {#each here as c (c.title.id)}
         <Card item={c.title} note={c.roles?.join(', ')} />
@@ -56,7 +56,7 @@
   {/if}
   {#if elsewhere.length}
     <div class="section-head">
-      <h2>{t('person.elsewhere')}</h2>
+      <h2>{t('titles.notInLibrary')}</h2>
       <button class="link" type="button" aria-expanded={showElsewhere} onclick={() => (showElsewhere = !showElsewhere)}>
         {showElsewhere ? t('person.hideElsewhere') : t('person.showElsewhere', { count: elsewhere.length })}
       </button>

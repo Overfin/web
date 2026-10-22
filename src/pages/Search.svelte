@@ -1,4 +1,5 @@
-<!-- Search: titles, in a library or not, and people, as one types; people
+<!-- Search: titles, those in a library apart from the others, and people,
+     as one types; people
      first when the words look like someone's name. The words never go in
      the address (they'd stay in the history): this tab keeps the last
      ones, so coming back (Back, from a result) shows the same results.
@@ -90,11 +91,21 @@
 </div>
 
 {#snippet titles(found: TitleSummary[])}
-  {#if found.length}
-    <h2>{t('search.titles')}</h2>
+  {@const here = found.filter((it) => it.availability !== 'missing')}
+  {@const away = found.filter((it) => it.availability === 'missing')}
+  {#if here.length}
+    <h2>{t('titles.inLibrary')}</h2>
     <div class="grid">
-      {#each found as item (item.id)}
+      {#each here as item (item.id)}
         <Card {item} />
+      {/each}
+    </div>
+  {/if}
+  {#if away.length}
+    <h2>{t('titles.notInLibrary')}</h2>
+    <div class="grid">
+      {#each away as item (item.id)}
+        <Card {item} flags={false} />
       {/each}
     </div>
   {/if}
