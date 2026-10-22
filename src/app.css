@@ -378,7 +378,8 @@ header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand 
 @media (max-width: 720px) {
   header { grid-template-columns: 1fr auto auto; grid-template-areas: "brand search menu" "nav nav nav"; }
 }
-.search form { margin: .5rem 0 1rem; }
+.search form { margin: .5rem 0 1rem; display: flex; justify-content: center; }
+.search > p.muted { text-align: center; }
 .search input[type=search] { width: 100%; max-width: 40rem; min-height: 3rem; font-size: 1.15rem; padding: .5rem 1rem; }
 .poster.round { border-radius: 50%; aspect-ratio: 1; }
 .card.person { width: calc(var(--card) * .85); text-align: center; }

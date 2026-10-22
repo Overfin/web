@@ -1,7 +1,7 @@
 <!-- Search: titles, in a library or not, and people, as one types; people
      first when the words look like someone's name. The words never go in
-     the address (they'd stay in the history): this tab keeps the last
-     ones, so coming back shows the same results. -->
+     the address (they'd stay in the history), nor are they kept: the
+     search opens empty every time. -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
@@ -11,7 +11,6 @@
   import Card from '../components/Card.svelte';
   import TMDBNotice from '../components/TMDBNotice.svelte';
 
-  const saved = 'overfin-web-search';
   let query = $state('');
   let input = $state<HTMLInputElement>();
   let results = $state<Awaited<ReturnType<typeof overfin.search>> | null>(null);
@@ -21,11 +20,6 @@
   let asked = 0; // only the latest search's answer is shown
 
   async function run(q: string) {
-    try {
-      sessionStorage.setItem(saved, q);
-    } catch {
-      // private browsing: nothing kept
-    }
     if (q.trim().length < 2) {
       results = null;
       return;
@@ -51,12 +45,12 @@
   }
 
   onMount(() => {
+    // Words from an earlier search, kept by an older version: forgotten.
     try {
-      query = sessionStorage.getItem(saved) ?? '';
+      sessionStorage.removeItem('overfin-web-search');
     } catch {
-      query = '';
+      // nothing to forget
     }
-    if (query) run(query);
     input?.focus();
   });
 </script>
