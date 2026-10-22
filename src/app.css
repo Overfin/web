@@ -372,3 +372,15 @@ ol.episodes .number { color: var(--muted); font-weight: 400; }
 .breadcrumbs a { color: var(--text); font-weight: 600; }
 .breadcrumbs a:hover { text-decoration: underline; }
 .breadcrumbs [aria-current] { color: var(--muted); }
+/* Search: the header's button, and the page. */
+header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand nav search menu"; }
+.search-link { grid-area: search; display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: var(--radius-s); color: var(--muted); }
+.search-link:hover, .search-link.active { color: var(--text); background: var(--panel-2); }
+.search-link svg { width: 1.4rem; height: 1.4rem; fill: currentColor; }
+@media (max-width: 720px) {
+  header { grid-template-columns: 1fr auto auto; grid-template-areas: "brand search menu" "nav nav nav"; }
+}
+.search form { margin: .5rem 0 1rem; }
+.search input[type=search] { width: 100%; max-width: 40rem; min-height: 3rem; font-size: 1.15rem; padding: .5rem 1rem; }
+.poster.round { border-radius: 50%; aspect-ratio: 1; }
+.card.person { width: calc(var(--card) * .85); text-align: center; }

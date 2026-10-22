@@ -52,6 +52,9 @@
       <a href="/library/{library.id}" class:active={here[0] === 'library' && here[1] === library.id}>{library.name}</a>
     {/each}
   </nav>
+  <a class="search-link" href="/search" aria-label={t('search.label')} title={t('search.label')} class:active={here[0] === 'search'}>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 3.9 10.6l4.2 4.2 1.4-1.4-4.2-4.2A6 6 0 0 0 10 4m0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8" /></svg>
+  </a>
   <div class="menu" bind:this={menu}>
     <button class="who" type="button" bind:this={toggle} aria-expanded={open} aria-label={t('nav.menu')}
       onclick={() => (open = !open)}>
