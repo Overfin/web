@@ -314,6 +314,10 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .meta .availability { color: var(--accent); }
 .seasons { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) .3rem; }
 .seasons button { flex: none; min-height: 2.25rem; border-radius: 999px; gap: .45rem; }
+/* Centered while they fit; scrolled from the first one when they don't
+   (justify-content: center would hide the first ones). */
+.seasons button:first-child { margin-left: auto; }
+.seasons button:last-child { margin-right: auto; }
 .seasons button.active { background: var(--text); border-color: var(--text); color: var(--bg); }
 .seasons .dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); }
 .seasons .dot.missing { background: var(--muted); }
@@ -378,3 +382,6 @@ header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand 
 .search input[type=search] { width: 100%; max-width: 40rem; min-height: 3rem; font-size: 1.15rem; padding: .5rem 1rem; }
 .poster.round { border-radius: 50%; aspect-ratio: 1; }
 .card.person { width: calc(var(--card) * .85); text-align: center; }
+ol.episodes .about { margin: .3rem 0 0; font-size: .9rem; color: var(--muted); }
+ol.episodes .about.folded { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+ol.episodes .about-toggle { min-height: 0; padding: .1rem 0; font-size: .85rem; }

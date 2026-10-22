@@ -11,6 +11,8 @@
 
   let { id }: { id: string } = $props();
   let wholeBio = $state(false);
+  // Titles no library has: folded until asked for.
+  let showElsewhere = $state(false);
 
   const day = (d: string) => new Date(d).toLocaleDateString(undefined, { dateStyle: 'long' });
 </script>
@@ -53,12 +55,19 @@
     </div>
   {/if}
   {#if elsewhere.length}
-    <h2>{t('person.elsewhere')}</h2>
-    <div class="grid">
-      {#each elsewhere as c (c.title.id)}
-        <Card item={c.title} note={c.roles?.join(', ')} flags={false} />
-      {/each}
+    <div class="section-head">
+      <h2>{t('person.elsewhere')}</h2>
+      <button class="link" type="button" aria-expanded={showElsewhere} onclick={() => (showElsewhere = !showElsewhere)}>
+        {showElsewhere ? t('person.hideElsewhere') : t('person.showElsewhere', { count: elsewhere.length })}
+      </button>
     </div>
+    {#if showElsewhere}
+      <div class="grid">
+        {#each elsewhere as c (c.title.id)}
+          <Card item={c.title} note={c.roles?.join(', ')} flags={false} />
+        {/each}
+      </div>
+    {/if}
   {/if}
   {#if !person.credits.length}<p class="muted">{t('person.nothing')}</p>{/if}
   <TMDBNotice />

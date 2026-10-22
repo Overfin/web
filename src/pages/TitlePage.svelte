@@ -64,6 +64,19 @@
   const castShown = 12;
   let wholeCast = $state(false);
   let seasonReload = $state(0);
+  // Episodes' descriptions: two lines, unless unfolded; "Read more" only
+  // on those that don't fit.
+  let unfolded = $state<Record<string, boolean>>({});
+  let longAbout = $state<Record<string, boolean>>({});
+  function overflows(node: HTMLElement, report: (long: boolean) => void) {
+    const check = () => {
+      if (node.classList.contains('folded')) report(node.scrollHeight > node.clientHeight + 1);
+    };
+    const watch = new ResizeObserver(check);
+    watch.observe(node);
+    check();
+    return { destroy: () => watch.disconnect() };
+  }
   const askable = (x: TitleSummary) => session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
   async function requestMain(x: Title) {
     const made = await ask(x.id);
@@ -234,6 +247,15 @@
               {#if e.request && e.availability !== 'available'} · {statusLabel(e.request)}
               {:else if e.availability === 'missing'} · {t('title.notHere')}{/if}
             </div>
+            {#if e.overview}
+              <p class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>{e.overview}</p>
+              {#if longAbout[e.id] || unfolded[e.id]}
+                <button class="link about-toggle" type="button" aria-expanded={!!unfolded[e.id]}
+                  onclick={() => (unfolded[e.id] = !unfolded[e.id])}>
+                  {unfolded[e.id] ? t('common.readLess') : t('common.readMore')}
+                </button>
+              {/if}
+            {/if}
           </div>
           <button class="seen-toggle" class:on={seen} type="button" aria-pressed={seen}
             aria-label={seen ? t('item.markUnwatched') : t('item.markWatched')} title={seen ? t('item.markUnwatched') : t('item.markWatched')}
