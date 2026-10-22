@@ -26,7 +26,6 @@ export default {
   'time.minutes': '{m} min',
 
   'home.continue': 'Continue watching',
-  'home.nextUp': 'Next up',
   'home.watchlist': 'My watchlist',
   'home.latest': 'Latest in {library}',
   'home.removeFromContinue': 'Remove from Continue watching',

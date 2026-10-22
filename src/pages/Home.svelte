@@ -1,4 +1,5 @@
-<!-- Home: a slideshow of featured titles, what to continue, what's next, the watchlist, what's trending
+<!-- Home: a slideshow of featured titles, what to continue (next episodes
+     included), the watchlist, what's trending
      among the library's titles, and what's new in each library (films and
      series only). -->
 <script lang="ts">
@@ -12,13 +13,12 @@
   import Slides from '../components/Slides.svelte';
 
   async function load() {
-    const [resume, nextUp, watchlist, latest] = await Promise.all([
-      overfin.resume(12),
-      overfin.nextUp(12),
+    const [resume, watchlist, latest] = await Promise.all([
+      overfin.continueWatching(20),
       overfin.watchlist().catch(() => []), // the server may not offer it
       Promise.all(session.libraries.map(async (library) => ({ library, items: await overfin.latest(library.id, 16) }))),
     ]);
-    return { resume, nextUp, watchlist, latest };
+    return { resume, watchlist, latest };
   }
 
   // Titles taken out of Continue Watching here, hidden at once.
@@ -32,7 +32,7 @@
 {#await load()}
   <Skeleton />
 {:then home}
-  {@const empty = !home.resume.length && !home.nextUp.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
+  {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
   <Slides fallback={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i })))
@@ -40,8 +40,10 @@
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
-  <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
-  <Row title={t('home.nextUp')} items={home.nextUp} wide />
+  <!-- Started titles and next episodes together; only started ones can be
+       taken out. -->
+  <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget}
+    removable={(i) => !!i.userState?.positionMs} />
   <Row title={t('home.watchlist')} items={home.watchlist} />
   {#if session.discovery}
     <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" availability="library" flags={false} />

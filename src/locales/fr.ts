@@ -27,7 +27,6 @@ const fr: Record<keyof typeof en, string> = {
   'time.minutes': '{m} min',
 
   'home.continue': 'Reprendre',
-  'home.nextUp': 'À suivre',
   'home.watchlist': 'Ma liste',
   'home.latest': 'Nouveautés dans {library}',
   'home.removeFromContinue': 'Retirer de Reprendre',
