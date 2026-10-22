@@ -42,9 +42,6 @@ const fr: Record<keyof typeof en, string> = {
 
   'nav.discover': 'Découvrir',
   'discover.title': 'Découvrir',
-  'discover.show.all': 'Tout',
-  'discover.show.library': 'Dans la bibliothèque',
-  'discover.show.missing': 'Pas encore',
   'discover.trendingMovies': 'Films tendance',
   'discover.trendingSeries': 'Séries tendance',
   'discover.popularMovies': 'Films populaires',

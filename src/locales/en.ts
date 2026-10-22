@@ -41,9 +41,6 @@ export default {
 
   'nav.discover': 'Discover',
   'discover.title': 'Discover',
-  'discover.show.all': 'Everything',
-  'discover.show.library': 'In the library',
-  'discover.show.missing': 'Not yet',
   'discover.trendingMovies': 'Trending films',
   'discover.trendingSeries': 'Trending series',
   'discover.popularMovies': 'Popular films',

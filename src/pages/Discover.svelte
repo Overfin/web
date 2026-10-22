@@ -1,18 +1,11 @@
-<!-- Discover: what's trending, popular and upcoming, films and series, with
-     what the library has and what it doesn't. -->
+<!-- Discover: what's trending, popular and upcoming, films and series, that
+     the libraries don't have (what they have is on the home page). -->
 <script lang="ts">
-  import { t, type Key } from '../lib/i18n.svelte';
-  import { replace } from '../lib/router.svelte';
+  import { t } from '../lib/i18n.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Skeleton from '../components/Skeleton.svelte';
   import TMDBNotice from '../components/TMDBNotice.svelte';
 
-  let { params }: { params: URLSearchParams } = $props();
-
-  type Show = 'all' | 'library' | 'missing';
-  const shows: Show[] = ['all', 'library', 'missing'];
-  const showKeys: Record<Show, Key> = { all: 'discover.show.all', library: 'discover.show.library', missing: 'discover.show.missing' };
-  const show = $derived<Show>(shows.includes(params.get('show') as Show) ? (params.get('show') as Show) : 'all');
 
   const rows = [
     { list: 'trending', kind: 'movie', key: 'discover.trendingMovies' },
@@ -33,15 +26,7 @@
   }
 </script>
 
-<div class="toolbar">
-  <h1>{t('discover.title')}</h1>
-  <div class="tabs" role="tablist">
-    {#each shows as s (s)}
-      <button type="button" role="tab" aria-selected={show === s} class:active={show === s}
-        onclick={() => replace(s === 'all' ? '/discover' : `/discover?show=${s}`)}>{t(showKeys[s])}</button>
-    {/each}
-  </div>
-</div>
+<h1>{t('discover.title')}</h1>
 
 {#if answered < rows.length && !any}
   <Skeleton />
@@ -49,6 +34,6 @@
   <p class="muted">{t('common.nothingYet')}</p>
 {/if}
 {#each rows as row (row.key)}
-  <DiscoverRow title={t(row.key)} list={row.list} kind={row.kind} availability={show} {found} />
+  <DiscoverRow title={t(row.key)} list={row.list} kind={row.kind} availability="missing" flags={false} {found} />
 {/each}
 <TMDBNotice />

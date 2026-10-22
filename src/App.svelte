@@ -92,7 +92,7 @@
       {:else if route.parts[0] === 'item' && route.parts[1]}
         <Item id={route.parts[1]} />
       {:else if route.parts[0] === 'discover'}
-        <Discover params={route.params} />
+        <Discover />
       {:else if route.parts[0] === 'title' && route.parts[1] && route.parts[2]}
         <Title kind={route.parts[1]} tmdbId={route.parts[2]} />
       {:else if route.parts[0] === 'person' && route.parts[1]}
