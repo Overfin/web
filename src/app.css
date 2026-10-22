@@ -363,3 +363,6 @@ ol.episodes .number { color: var(--muted); font-weight: 400; }
 .meta .certification { border: 1px solid rgba(255, 255, 255, .45); border-radius: 3px; padding: 0 .35em; font-size: .85em; line-height: 1.5; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 2rem 0 .7rem; }
 .section-head h2 { margin: 0; }
+/* A person's biography: a few lines, the rest on demand. */
+.bio { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; max-width: 46rem; }
+.bio.whole { display: block; }

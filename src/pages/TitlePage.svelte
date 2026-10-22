@@ -250,7 +250,7 @@
     </div>
     <div class={wholeCast ? 'grid' : 'row'}>
       {#each cast as c, i (i)}
-        <div class="card">
+        <svelte:element this={c.id ? 'a' : 'div'} class="card" href={c.id ? `/person/${c.id}` : undefined}>
           <div class="poster">
             {#if c.image}
               <img src={overfin.imageUrl(c.image, 'small')} alt="" loading="lazy" use:loaded />
@@ -260,7 +260,7 @@
           </div>
           <div class="title">{c.name}</div>
           <div class="sub">{c.character ?? ''}</div>
-        </div>
+        </svelte:element>
       {/each}
     </div>
   {/if}

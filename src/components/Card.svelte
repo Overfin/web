@@ -12,8 +12,8 @@
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
 
-  let { item, wide = false, flags = true, remove }: {
-    item: TitleSummary; wide?: boolean; flags?: boolean; remove?: () => void;
+  let { item, wide = false, flags = true, note = '', remove }: {
+    item: TitleSummary; wide?: boolean; flags?: boolean; note?: string; remove?: () => void;
   } = $props();
 
   const image = $derived(wide ? (item.images?.thumb ?? item.images?.backdrops?.[0] ?? item.images?.primary) : item.images?.primary);
@@ -24,7 +24,7 @@
       return `${item.series.name} · ${t('item.seasonEpisodeShort', { season: item.seasonNumber ?? '?', episode: item.episodeNumber ?? '?' })}`;
     }
     if (item.kind === 'season' && item.series) return item.series.name;
-    return item.year ?? '';
+    return [item.year, note].filter(Boolean).join(' · ');
   });
   // The request covering it: as loaded, then as made here.
   let asked = $state<TitleSummary['request'] | null>(null);

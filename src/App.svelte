@@ -15,6 +15,7 @@
   import Library from './pages/Library.svelte';
   import Manage from './pages/Manage.svelte';
   import Player from './pages/Player.svelte';
+  import PersonPage from './pages/PersonPage.svelte';
   import Profiles from './pages/Profiles.svelte';
   import Requests from './pages/Requests.svelte';
   import Setup from './pages/Setup.svelte';
@@ -98,6 +99,8 @@
         <Profiles />
       {:else if route.parts[0] === 'manage'}
         <Manage />
+      {:else if route.parts[0] === 'person' && route.parts[1]}
+        <PersonPage id={route.parts[1]} />
       {:else if route.parts[0] === 'requests'}
         <Requests />
       {:else if route.parts[0] === 'account'}
