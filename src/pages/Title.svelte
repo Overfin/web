@@ -18,7 +18,7 @@
   {#await overfin.catalogTitle(kind, tmdbId)}
     <p class="muted">{t('app.loading')}</p>
   {:then title}
-    <div class="hero">
+    <div class="hero" class:art={!!title.images?.backdrops?.[0]}>
       {#if title.images?.backdrops?.[0]}
         <img class="backdrop" src={overfin.imageUrl(title.images.backdrops[0], 'large')} alt="" />
       {/if}

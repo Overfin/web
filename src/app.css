@@ -1,70 +1,161 @@
+/* The site's look in one place: these tokens first, then everything uses them. */
 :root {
-  --bg: #0f1115;
-  --panel: #191c22;
-  --text: #e8e8ea;
-  --muted: #9a9ca3;
+  --bg: #0c0d11;
+  --panel: #16181e;
+  --panel-2: #1f222a;
+  --border: #2b2f39;
+  --text: #ececf0;
+  --muted: #a1a4ad;
   --accent: #6aa8ff;
+  --accent-hover: #8dbcff;
+  --on-accent: #0b1020;
   --danger: #ff6b6b;
+
+  /* Space: from the screen's edge, and between things. */
+  --gutter: clamp(1rem, 3vw, 2.5rem);
+  --gap: .75rem;
+  --radius-s: 6px;
+  --radius: 10px;
+
+  /* Cards: a row's width, and a grid's narrowest column. */
+  --card: clamp(7.5rem, 28vw, 10.5rem);
+  --grid-min: 9.5rem;
+
+  --header-h: 3.75rem;
   color-scheme: dark;
 }
+@media (max-width: 600px) {
+  :root { --grid-min: 6.5rem; --gap: .6rem; }
+}
+
 * { box-sizing: border-box; }
 #app { min-height: 100vh; }
 [hidden] { display: none !important; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, sans-serif; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, sans-serif; overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; color: inherit; }
-button { cursor: pointer; background: var(--panel); border: 1px solid #2c3039; border-radius: 6px; padding: .45em .9em; }
-button.primary { background: var(--accent); border-color: var(--accent); color: #0b1020; font-weight: 600; }
-button.danger { border-color: var(--danger); color: var(--danger); }
-button.link { background: none; border: none; color: var(--muted); padding: .3em .5em; }
+img { max-width: 100%; }
+
+/* Buttons: the default is secondary; one primary per place, the main action. */
+button, a.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4em;
+  min-height: 2.5rem; padding: .45em 1.1em; cursor: pointer;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-s);
+  color: var(--text); font-weight: 500; transition: background-color .15s, border-color .15s;
+}
+button:hover, a.button:hover { background: #292d37; }
+button:disabled { opacity: .55; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 650; padding-inline: 1.4em; }
+button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+button.danger { background: none; border-color: var(--danger); color: var(--danger); }
+button.danger:hover { background: rgba(255, 107, 107, .12); }
+button.link { background: none; border: none; min-height: 0; color: var(--muted); padding: .3em .5em; }
 a.link { color: var(--muted); padding: .3em .5em; }
-button.link:hover, a.link:hover, nav a:hover { color: var(--text); }
-input, select { background: var(--panel); border: 1px solid #2c3039; border-radius: 6px; padding: .45em .6em; }
+button.link:hover, a.link:hover { color: var(--text); background: none; }
+input, select { min-height: 2.5rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-s); padding: .45em .7em; }
 .muted { color: var(--muted); }
 .error { color: var(--danger); }
-main > .notice { background: var(--panel); border-left: 3px solid var(--accent); border-radius: 6px; padding: .7em 1em; margin: 0 0 1rem; }
+main > .notice { background: var(--panel); border-left: 3px solid var(--accent); border-radius: var(--radius-s); padding: .7em 1em; margin: 0 0 1rem; }
 main > .notice a { color: var(--accent); }
 
-header { display: flex; align-items: center; gap: 1rem; padding: .8rem 1.5rem; background: #0b0d10; position: sticky; top: 0; z-index: 5; }
-.brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); }
-nav { display: flex; gap: .9rem; flex: 1; overflow-x: auto; }
-nav a { color: var(--muted); white-space: nowrap; }
-nav a.active { color: var(--text); }
-main { padding: 1.2rem 1.5rem 3rem; }
+/* The header: brand, sections, then the profile menu. On phones the
+   sections take a second line that scrolls sideways. */
+header {
+  position: sticky; top: 0; z-index: 5;
+  display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand nav menu";
+  align-items: center; gap: 1.5rem; min-height: var(--header-h); padding: 0 var(--gutter);
+  background: rgba(12, 13, 17, .92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+.brand { grid-area: brand; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--accent); }
+header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; border-bottom: 2px solid transparent; }
+header nav a:hover { color: var(--text); }
+header nav a.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+.menu { grid-area: menu; position: relative; }
+.menu .who { background: none; border: none; padding: .25rem .4rem; gap: .6rem; }
+.menu .who:hover { background: var(--panel-2); }
+.menu .name { max-width: 10rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown {
+  position: absolute; right: 0; top: calc(100% + .4rem); min-width: 14rem; padding: .4rem;
+  display: grid; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+}
+.dropdown a, .dropdown button { display: flex; justify-content: flex-start; width: 100%; min-height: 2.5rem; padding: .5rem .75rem; border: none; border-radius: var(--radius-s); background: none; font-weight: 400; }
+.dropdown a:hover, .dropdown button:hover { background: var(--panel-2); }
+.dropdown label { display: grid; gap: .3rem; padding: .5rem .75rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: .3rem 0; color: var(--muted); font-size: .85rem; }
+.dropdown select { color: var(--text); font-size: 1rem; }
+@media (max-width: 720px) {
+  header { grid-template-columns: 1fr auto; grid-template-areas: "brand menu" "nav nav"; gap: 0 1rem; padding-top: .4rem; }
+  header nav { gap: 1.1rem; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) .2rem; }
+  .menu .name { display: none; }
+}
 
-h1 { font-size: 1.6rem; margin: .2rem 0 .8rem; }
-h2 { font-size: 1.1rem; margin: 1.6rem 0 .6rem; }
-.row { display: flex; gap: .8rem; overflow-x: auto; padding-bottom: .4rem; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem .8rem; }
-.card { display: block; width: 150px; flex: none; }
+main { padding: 1.5rem var(--gutter) 3rem; }
+
+h1 { font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.2rem); line-height: 1.2; margin: .2rem 0 1rem; }
+h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
+
+/* Rows scroll sideways right to the screen's edges; grids fill the width. */
+.row {
+  display: flex; gap: var(--gap); overflow-x: auto; scrollbar-width: none;
+  margin: 0 calc(-1 * var(--gutter)); padding: .2rem var(--gutter) .4rem; scroll-padding: 0 var(--gutter);
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr)); gap: 1.2rem var(--gap); }
+.card { display: block; width: var(--card); flex: none; }
 .grid .card { width: auto; }
-.poster { position: relative; aspect-ratio: 2 / 3; background: var(--panel); border-radius: 6px; overflow: hidden; }
+.poster { position: relative; aspect-ratio: 2 / 3; background: var(--panel); border-radius: var(--radius-s); overflow: hidden; }
 .poster.wide { aspect-ratio: 16 / 9; }
+.row .card.wide { width: calc(var(--card) * 1.6); }
 .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .poster .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: .5rem; text-align: center; color: var(--muted); font-size: .85rem; }
 .progress { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--accent); }
-.card .title { margin-top: .35rem; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .title { margin-top: .4rem; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .sub { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .poster { transition: transform .15s; }
 .card:hover .poster { outline: 2px solid var(--accent); }
 
-.hero { position: relative; margin: -1.2rem -1.5rem 1rem; min-height: 340px; display: flex; align-items: flex-end; background: var(--panel) center / cover no-repeat; }
-.hero img.backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
-.hero .info { position: relative; display: flex; gap: 1.5rem; padding: 1.5rem; max-width: 60rem; }
-.hero .poster { width: 170px; flex: none; }
-.meta { color: var(--muted); display: flex; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
-.actions { display: flex; gap: .6rem; margin: .8rem 0; flex-wrap: wrap; }
-.toolbar { display: flex; gap: .8rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+/* A title's top: its backdrop, darkened toward the text, never washed out. */
+.hero {
+  position: relative; margin: -1.5rem calc(-1 * var(--gutter)) 1rem;
+  display: flex; align-items: flex-end; background: var(--bg); overflow: hidden;
+}
+.hero.art { min-height: min(70vh, 30rem); }
+.hero img.backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.hero.art::before {
+  content: ""; position: absolute; z-index: 1; inset: 0;
+  background:
+    linear-gradient(to right, rgba(12, 13, 17, .95) 0%, rgba(12, 13, 17, .75) 35%, rgba(12, 13, 17, .1) 75%),
+    linear-gradient(to top, var(--bg) 0%, rgba(12, 13, 17, 0) 45%);
+}
+.hero .info { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 1.75rem; padding: 2rem var(--gutter); max-width: 64rem; }
+.hero .poster { width: 11rem; flex: none; box-shadow: 0 8px 28px rgba(0, 0, 0, .6); }
+.hero h1 { margin-bottom: .5rem; text-shadow: 0 2px 12px rgba(0, 0, 0, .6); }
+.hero .info p { max-width: 46rem; }
+.meta { color: #c9cbd1; display: flex; gap: .4rem 1rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.actions { display: flex; gap: .6rem; margin: 1rem 0; flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .hero.art { min-height: 0; padding-top: 30vh; }
+  .hero.art::before { background: linear-gradient(to top, var(--bg) 35%, rgba(12, 13, 17, .55) 70%, rgba(12, 13, 17, .2) 100%); }
+  .hero .info { flex-direction: column; align-items: flex-start; gap: 1rem; padding-bottom: 1rem; }
+  .hero .poster { width: 8rem; }
+  .hero.art .poster { display: none; }
+  .actions button { flex: 1 1 auto; }
+  .actions button.primary { flex-basis: 100%; }
+}
+.toolbar { display: flex; gap: .8rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
 
 .profiles { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 3rem; }
-.profile { width: 130px; text-align: center; background: none; border: none; }
-.avatar { width: 110px; height: 110px; margin: 0 auto .5rem; border-radius: 10px; display: grid; place-items: center; font-size: 2.6rem; font-weight: 700; background: #2a3550; }
+.profile { width: 130px; text-align: center; background: none; border: none; flex-direction: column; }
+.profile:hover { background: none; }
+.avatar { width: 110px; height: 110px; margin: 0 auto .5rem; border-radius: var(--radius); display: grid; place-items: center; font-size: 2.6rem; font-weight: 700; background: #2a3550; }
+.avatar.small { width: 2rem; height: 2rem; margin: 0; border-radius: var(--radius-s); font-size: .95rem; }
 .profile:hover .avatar { outline: 3px solid var(--accent); }
 .badge { font-size: .7rem; color: var(--muted); }
 .center { max-width: 26rem; margin: 2.5rem auto; text-align: center; }
 .center.wide { max-width: 44rem; text-align: left; }
 .panel h2 { margin-top: 0; }
 form.stack { display: grid; gap: .6rem; text-align: left; }
-.panel { background: var(--panel); border-radius: 10px; padding: 1.2rem; margin-bottom: 1rem; }
+.panel { background: var(--panel); border: 1px solid rgba(255, 255, 255, .04); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
 
 .player { position: fixed; inset: 0; background: #000; z-index: 10; display: flex; flex-direction: column; }
 .player video { flex: 1; width: 100%; min-height: 0; background: #000; }
@@ -80,19 +171,20 @@ form.stack { display: grid; gap: .6rem; text-align: left; }
 .profile:focus-visible { outline: none; }
 .profile:focus-visible .avatar { outline: 3px solid var(--accent); }
 
-dialog { background: var(--panel); color: var(--text); border: 1px solid #2c3039; border-radius: 10px; padding: 1.2rem; max-width: 26rem; }
+dialog { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; max-width: min(26rem, calc(100vw - 2rem)); }
 dialog::backdrop { background: rgba(0, 0, 0, .7); }
 dialog input { width: 100%; }
 dialog .actions { justify-content: flex-end; margin-bottom: 0; }
 /* Discovery */
 .poster .flag { position: absolute; top: .35rem; left: .35rem; font-size: .7rem; padding: .1em .45em; border-radius: 4px; background: rgba(11, 16, 32, .8); color: var(--text); }
-.tabs { display: flex; gap: .3rem; }
-.tabs button.active { border-color: var(--accent); color: var(--accent); }
-a.button { display: inline-block; background: var(--panel); border: 1px solid #2c3039; border-radius: 6px; padding: .45em .9em; color: var(--text); text-decoration: none; }
+.tabs { display: flex; gap: .3rem; flex-wrap: wrap; }
+.tabs button { min-height: 2.25rem; border-radius: 999px; }
+.tabs button.active { background: var(--text); border-color: var(--text); color: var(--bg); }
 ul.plain { list-style: none; padding: 0; margin: 0 0 1rem; }
 ul.plain li { padding: .25rem 0; }
 footer.tmdb { display: flex; gap: .6rem; align-items: center; margin-top: 2.5rem; font-size: .75rem; color: var(--muted); }
 footer.tmdb img { height: 10px; width: auto; flex: none; }
 .cardbox { position: relative; flex: none; }
-.cardbox .remove { position: absolute; top: .3rem; right: .3rem; padding: .1em .45em; font-size: .8rem; background: rgba(11, 16, 32, .8); border: none; opacity: 0; }
+.cardbox .remove { position: absolute; top: .3rem; right: .3rem; min-height: 0; padding: .1em .45em; font-size: .8rem; background: rgba(11, 16, 32, .8); border: none; opacity: 0; }
 .cardbox:hover .remove, .cardbox .remove:focus-visible { opacity: 1; }
+@media (hover: none) { .cardbox .remove { opacity: 1; } }

@@ -1,5 +1,7 @@
 <!-- The bar on top of every screen except the profile picker, account setup
-     and the player: home, the libraries, who's watching, the language. -->
+     and the player: home, discovery and the libraries, then a menu for who's
+     watching (switching, managing profiles, the account, the language,
+     logging out). On phones the libraries go to a second, scrolling line. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
   import { i18n, locales, t, type Locale } from '../lib/i18n.svelte';
@@ -7,6 +9,28 @@
   import { session, setPicked } from '../lib/session.svelte';
 
   const here = $derived(router.route.parts);
+  const name = $derived(session.me?.activeProfile?.name ?? t('nav.chooseProfile'));
+
+  let open = $state(false);
+  let menu: HTMLDivElement;
+  let toggle: HTMLButtonElement;
+
+  // The menu closes when the address changes.
+  $effect(() => {
+    void router.route;
+    open = false;
+  });
+
+  function outside(event: MouseEvent) {
+    if (open && !menu.contains(event.target as Node)) open = false;
+  }
+
+  function keydown(event: KeyboardEvent) {
+    if (open && event.key === 'Escape') {
+      open = false;
+      toggle.focus();
+    }
+  }
 
   async function logout() {
     setPicked(false);
@@ -14,6 +38,8 @@
     location.href = out.logoutUrl || '/';
   }
 </script>
+
+<svelte:window onclick={outside} onkeydown={keydown} />
 
 <header>
   <a class="brand" href="/">Overfin</a>
@@ -26,14 +52,27 @@
       <a href="/library/{library.id}" class:active={here[0] === 'library' && here[1] === library.id}>{library.name}</a>
     {/each}
   </nav>
-  <a class="link" href="/profiles">{session.me?.activeProfile?.name ?? t('nav.chooseProfile')}</a>
-  <a class="link" href="/manage">{t('nav.profiles')}</a>
-  <a class="link" href="/account">{t('nav.account')}</a>
-  <select aria-label={t('app.language')} value={i18n.locale}
-    onchange={(event) => i18n.set(event.currentTarget.value as Locale)}>
-    {#each locales as locale (locale.code)}
-      <option value={locale.code}>{locale.name}</option>
-    {/each}
-  </select>
-  <button class="link" type="button" onclick={logout}>{t('nav.logout')}</button>
+  <div class="menu" bind:this={menu}>
+    <button class="who" type="button" bind:this={toggle} aria-expanded={open} aria-label={t('nav.menu')}
+      onclick={() => (open = !open)}>
+      <span class="avatar small" aria-hidden="true">{name.slice(0, 1).toUpperCase()}</span>
+      <span class="name">{name}</span>
+    </button>
+    {#if open}
+      <div class="dropdown">
+        <a href="/profiles">{t('nav.switchProfile')}</a>
+        <a href="/manage">{t('nav.profiles')}</a>
+        <a href="/account">{t('nav.account')}</a>
+        <label>
+          {t('app.language')}
+          <select value={i18n.locale} onchange={(event) => i18n.set(event.currentTarget.value as Locale)}>
+            {#each locales as locale (locale.code)}
+              <option value={locale.code}>{locale.name}</option>
+            {/each}
+          </select>
+        </label>
+        <button type="button" onclick={logout}>{t('nav.logout')}</button>
+      </div>
+    {/if}
+  </div>
 </header>

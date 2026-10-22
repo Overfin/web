@@ -10,6 +10,8 @@ export default {
   'nav.account': 'Account',
   'nav.logout': 'Log out',
   'nav.chooseProfile': 'Choose a profile',
+  'nav.switchProfile': 'Switch profile',
+  'nav.menu': 'Profile menu',
 
   'common.back': 'Back',
   'common.backHome': 'Back home',

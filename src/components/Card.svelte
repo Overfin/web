@@ -18,7 +18,7 @@
 </script>
 
 <div class="cardbox">
-  <a class="card" href="/item/{item.id}">
+  <a class="card" class:wide href="/item/{item.id}">
     <div class="poster" class:wide>
       {#if image}
         <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" />

@@ -11,6 +11,8 @@ const fr: Record<keyof typeof en, string> = {
   'nav.account': 'Compte',
   'nav.logout': 'Se déconnecter',
   'nav.chooseProfile': 'Choisir un profil',
+  'nav.switchProfile': 'Changer de profil',
+  'nav.menu': 'Menu du profil',
 
   'common.back': 'Retour',
   'common.backHome': "Retour à l'accueil",

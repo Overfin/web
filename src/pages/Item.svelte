@@ -52,7 +52,7 @@
   {@const position = item.userState?.positionMs ?? 0}
   {@const cast = (item.credits ?? []).filter((c) => c.role === 'actor' || c.role === 'guestStar').slice(0, 20)}
   {@const crew = (item.credits ?? []).filter((c) => c.role === 'director' || c.role === 'writer')}
-  <div class="hero">
+  <div class="hero" class:art={!!item.images?.backdrops?.[0]}>
     {#if item.images?.backdrops?.[0]}
       <img class="backdrop" src={overfin.imageUrl(item.images.backdrops[0], 'large')} alt="" />
     {/if}
