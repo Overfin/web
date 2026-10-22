@@ -61,6 +61,7 @@
     {#if open}
       <div class="dropdown">
         <a href="/profiles">{t('nav.switchProfile')}</a>
+        {#if session.requests}<a href="/requests">{t('request.mine')}</a>{/if}
         <a href="/manage">{t('nav.profiles')}</a>
         <a href="/account">{t('nav.account')}</a>
         <label>

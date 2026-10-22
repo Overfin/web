@@ -3,14 +3,20 @@
 import type { Library, Me } from './sdk/overfin.js';
 import { overfin } from './client';
 
-export const session = $state<{ me: Me | null; libraries: Library[]; discovery: boolean; kidsNeedLimits: boolean }>({
-  me: null, libraries: [], discovery: false, kidsNeedLimits: false,
+export const session = $state<{ me: Me | null; libraries: Library[]; discovery: boolean; requests: boolean; kidsNeedLimits: boolean }>({
+  me: null, libraries: [], discovery: false, requests: false, kidsNeedLimits: false,
 });
 
 /** offersDiscovery asks the server whether it offers discovery (it does once
  * Seerr is connected). */
 export async function offersDiscovery(): Promise<boolean> {
   return overfin.discover('trending', 'movie', { limit: 1 }).then(() => true, () => false);
+}
+
+/** offersRequests asks the server whether it takes requests (it does once
+ * Seerr is connected). */
+export async function offersRequests(): Promise<boolean> {
+  return overfin.requests().then(() => true, () => false);
 }
 
 /** kidsNeedLimits says, for the owner, whether a kids profile has no
@@ -25,6 +31,7 @@ export async function refresh() {
   session.me = await overfin.me();
   session.libraries = await overfin.libraries().catch(() => []);
   session.discovery = await offersDiscovery();
+  session.requests = await offersRequests();
   session.kidsNeedLimits = await kidsNeedLimits();
 }
 

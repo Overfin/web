@@ -1,13 +1,16 @@
 <!-- One title in a row or grid, in a library or not: its poster (or a still,
      wide), its name, how far the profile got. Hovered or focused, a title
-     that can play shows a play button in its corner; the rest of the card
-     opens the title's page. -->
+     that can play shows a play button in its corner, and one no library has
+     a request button (when the server takes requests); the rest of the card
+     opens the title's page. A requested title says where its request is. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
-  import { t } from '../lib/i18n.svelte';
+  import { t, type Key } from '../lib/i18n.svelte';
   import { play } from '../lib/play';
+  import { ask } from '../lib/requests';
+  import { session } from '../lib/session.svelte';
 
   let { item, wide = false, flags = true, remove }: {
     item: TitleSummary; wide?: boolean; flags?: boolean; remove?: () => void;
@@ -23,7 +26,16 @@
     if (item.kind === 'season' && item.series) return item.series.name;
     return item.year ?? '';
   });
-  const flag = $derived(!flags ? '' : item.availability === 'missing' ? t('title.notHere')
+  // The request covering it: as loaded, then as made here.
+  let asked = $state<TitleSummary['request'] | null>(null);
+  const request = $derived(asked ?? item.request);
+  const askable = $derived(session.requests && !item.playable && item.availability !== 'available' && !request
+    && item.kind !== 'other');
+  async function requestIt() {
+    asked = await ask(item.id);
+  }
+  const flag = $derived(request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
+    : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 </script>
 
@@ -48,6 +60,12 @@
     <button class="act" type="button" aria-label={t('item.play') + ' : ' + item.name}
       onclick={() => play(item.id, position)}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+    </button>
+  {/if}
+  {#if askable}
+    <button class="act ask" type="button" aria-label={t('request.ask') + ' : ' + item.name} title={t('request.ask')}
+      onclick={requestIt}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v8.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4L11 12.2zM5 18h14v2H5z" /></svg>
     </button>
   {/if}
   {#if remove}

@@ -7,8 +7,11 @@
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { clock, duration } from '../lib/format';
-  import { t, tn } from '../lib/i18n.svelte';
+  import { t, tn, type Key } from '../lib/i18n.svelte';
+  import { confirm } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
+  import { ask } from '../lib/requests';
+  import { session } from '../lib/session.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
   import TMDBNotice from '../components/TMDBNotice.svelte';
@@ -54,6 +57,31 @@
     episodeMarks[e.id] = (await overfin.setPlayed(e.id, !now)).played;
   }
 
+  // Requests: the one made or cancelled here replaces what was loaded; a
+  // season's or an episode's reloads the season's episodes.
+  let mainRequest = $state<TitleSummary['request'] | null | undefined>(undefined);
+  let seasonReload = $state(0);
+  const askable = (x: TitleSummary) => session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
+  async function requestMain(x: Title) {
+    const made = await ask(x.id);
+    if (made) mainRequest = made;
+  }
+  async function cancelMain(id: string) {
+    if (!(await confirm(t('request.cancelConfirm')))) return;
+    try {
+      await overfin.cancelRequest(id);
+      mainRequest = null;
+    } catch {
+      mainRequest = undefined;
+    }
+  }
+  async function requestPart(x: TitleSummary) {
+    if (await ask(x.id)) seasonReload++;
+  }
+  const askLabel = (x: TitleSummary) => x.kind === 'series' ? t('request.askSeries')
+    : x.kind === 'season' || x.kind === 'episode' ? t('request.askSeason', { number: x.seasonNumber ?? '?' }) : t('request.ask');
+  const statusLabel = (r: NonNullable<TitleSummary['request']>) => t(`request.status.${r.status}` as Key);
+
   function availabilityText(x: TitleSummary): string {
     if (x.availability === 'missing') return t('title.notHere');
     if (x.availability === 'partiallyAvailable' && x.episodeCount) {
@@ -68,6 +96,7 @@
   <Skeleton kind="title" />
 {:then title}
   {@const seasonID = seasonOf(title)}
+  {@const request = mainRequest === undefined ? title.request : mainRequest}
   {@const position = title.userState?.positionMs ?? 0}
   {@const played = marks.played ?? title.userState?.played ?? false}
   {@const favorite = marks.favorite ?? title.userState?.favorite ?? false}
@@ -103,6 +132,16 @@
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
         <div class="actions">
+          {#if !title.playable && askable(title)}
+            {#if request}
+              <span class="request-status">{statusLabel(request)}</span>
+              {#if request.status === 'pending'}
+                <button onclick={() => cancelMain(request.id)}>{t('request.cancel')}</button>
+              {/if}
+            {:else}
+              <button class="primary" onclick={() => requestMain(title)}>{askLabel(title)}</button>
+            {/if}
+          {/if}
           {#if title.playable}
             {#if position}
               <button class="primary" onclick={() => play(title.id, position)}>{t('item.resumeFrom', { time: clock(position) })}</button>
@@ -133,13 +172,23 @@
       {/each}
     </div>
   {/if}
-  {#key seasonID}
-  {#await title.kind === 'season' ? Promise.resolve(title) : seasonID ? overfin.title(seasonID) : Promise.resolve(null)}
+  {#key `${seasonID}:${seasonReload}`}
+  {#await title.kind === 'season' && !seasonReload ? Promise.resolve(title) : title.kind === 'season' ? overfin.title(title.id)
+    : seasonID ? overfin.title(seasonID) : Promise.resolve(null)}
     {#if title.kind === 'series'}<Skeleton kind="list" />{/if}
   {:then season}
   {#if season?.episodes?.length}
     {#if title.kind === 'series'}
-      <h2>{seasonName(season)}{#if availabilityText(season)} <span class="muted small">· {availabilityText(season)}</span>{/if}</h2>
+      <div class="season-head">
+        <h2>{seasonName(season)}{#if availabilityText(season)} <span class="muted small">· {availabilityText(season)}</span>{/if}</h2>
+        {#if askable(season)}
+          {#if season.request}
+            <span class="request-status">{statusLabel(season.request)}</span>
+          {:else}
+            <button onclick={() => requestPart(season)}>{askLabel(season)}</button>
+          {/if}
+        {/if}
+      </div>
     {:else}
       <h2>{t('item.episodes')}</h2>
     {/if}
@@ -158,6 +207,10 @@
               <button class="act" type="button" aria-label={t('item.play') + ' : ' + e.name} onclick={() => play(e.id, at)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
               </button>
+            {:else if askable(e) && !e.request}
+              <button class="act ask" type="button" aria-label={askLabel(e)} title={askLabel(e)} onclick={() => requestPart(e)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v8.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4L11 12.2zM5 18h14v2H5z" /></svg>
+              </button>
             {/if}
           </div>
           <div class="text">
@@ -165,7 +218,8 @@
             <div class="muted small">
               {#if e.airDate}{new Date(e.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}{/if}
               {#if e.durationMs} · {duration(e.durationMs)}{/if}
-              {#if e.availability === 'missing'} · {t('title.notHere')}{/if}
+              {#if e.request && e.availability !== 'available'} · {statusLabel(e.request)}
+              {:else if e.availability === 'missing'} · {t('title.notHere')}{/if}
             </div>
           </div>
           <button class="seen-toggle" class:on={seen} type="button" aria-pressed={seen}

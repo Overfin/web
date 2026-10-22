@@ -344,3 +344,18 @@ ol.episodes .number { color: var(--muted); font-weight: 400; }
 @media (max-width: 600px) {
   ol.episodes li { grid-template-columns: 7.5rem 1fr auto; gap: .7rem; padding: .4rem 0; }
 }
+/* The request button: the same place as play, quieter. */
+.cardbox .act.ask, ol.episodes .act.ask { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+.cardbox .act.ask:hover, ol.episodes .act.ask:hover { background: #292d37; }
+.act.ask svg { margin-left: 0; }
+.request-status { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 1rem; border-radius: var(--radius-s); background: rgba(106, 168, 255, .15); color: var(--accent); font-weight: 600; }
+.season-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 2rem 0 .7rem; }
+.season-head h2 { margin: 0; }
+/* My requests. */
+.list.requests li { justify-content: flex-start; }
+.list.requests .thumb { flex: none; width: 3.5rem; aspect-ratio: 2 / 3; border-radius: var(--radius-s); overflow: hidden; background: var(--panel-2); }
+.list.requests .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.list.requests .what { flex: 1; min-width: 0; }
+.chip.status.approved, .chip.status.processing { color: var(--accent); border-color: rgba(106, 168, 255, .4); }
+.chip.status.available, .chip.status.partiallyAvailable { color: #6ad38e; border-color: rgba(106, 211, 142, .4); }
+.chip.status.declined, .chip.status.failed { color: var(--danger); border-color: rgba(255, 107, 107, .4); }

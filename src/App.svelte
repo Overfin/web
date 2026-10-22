@@ -4,7 +4,7 @@
   import { explain, isError, overfin } from './lib/client';
   import { t } from './lib/i18n.svelte';
   import { go, router } from './lib/router.svelte';
-  import { offersDiscovery, picked, session } from './lib/session.svelte';
+  import { offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
   import Dialog from './components/Dialog.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
@@ -16,6 +16,7 @@
   import Manage from './pages/Manage.svelte';
   import Player from './pages/Player.svelte';
   import Profiles from './pages/Profiles.svelte';
+  import Requests from './pages/Requests.svelte';
   import Setup from './pages/Setup.svelte';
   import TitlePage from './pages/TitlePage.svelte';
 
@@ -39,7 +40,7 @@
     }
     const [libraries, profiles] = await Promise.all([overfin.libraries().catch(() => []), overfin.profiles()]);
     session.libraries = libraries;
-    session.discovery = await offersDiscovery();
+    [session.discovery, session.requests] = await Promise.all([offersDiscovery(), offersRequests()]);
     session.kidsNeedLimits = profiles.some((p) => p.ceilingsNeeded) && !!session.me.activeProfile?.owner;
     // "Who's watching?" once per tab, when there's a choice.
     const where = router.route.parts[0];
@@ -97,6 +98,8 @@
         <Profiles />
       {:else if route.parts[0] === 'manage'}
         <Manage />
+      {:else if route.parts[0] === 'requests'}
+        <Requests />
       {:else if route.parts[0] === 'account'}
         <Account />
       {:else}
