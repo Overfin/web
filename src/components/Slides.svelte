@@ -11,9 +11,8 @@
   import { t } from '../lib/i18n.svelte';
   import { loaded } from '../lib/loaded';
   import { play } from '../lib/play';
-  import { session } from '../lib/session.svelte';
 
-  let { fallback }: { fallback: TitleSummary[] } = $props();
+  let { trending, fallback }: { trending: { movie: TitleSummary[]; series: TitleSummary[] }; fallback: TitleSummary[] } = $props();
 
   const count = 8;
   const every = 8000;
@@ -29,28 +28,25 @@
 
   /** ids picks the titles: trending films and series in turn, else the
    * newest. */
-  async function ids(): Promise<string[]> {
-    if (session.discovery) {
-      const [films, series] = await Promise.all((['movie', 'series'] as const).map((kind) =>
-        overfin.discover('trending', kind, { availability: 'library', limit: count }).then((p) => p.items, () => [])));
-      const mixed: string[] = [];
-      for (let i = 0; i < count; i++) {
-        for (const title of [films[i], series[i]]) {
-          if (title && title.availability !== 'missing') mixed.push(title.id);
-        }
+  function ids(): string[] {
+    const mixed: string[] = [];
+    for (let i = 0; i < count; i++) {
+      for (const title of [trending.movie[i], trending.series[i]]) {
+        if (title && title.availability !== 'missing') mixed.push(title.id);
       }
-      if (mixed.length) return mixed.slice(0, count);
     }
+    if (mixed.length) return mixed.slice(0, count);
     return fallback.slice(0, count).map((item) => item.id);
   }
 
   $effect(() => {
-    ids().then(async (chosen) => {
-      // Each title's page, for its overview and genres; those that fail
-      // are left out.
-      const items = await Promise.all(chosen.map((id) => overfin.title(id).catch(() => null)));
-      slides = items.filter((it): it is Title => !!it?.images?.backdrops?.[0]);
-    });
+    const chosen = ids();
+    if (!chosen.length) return;
+    // Each title's page, for its overview and genres, in one request; those
+    // that fail are left out.
+    overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
+      slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]);
+    }, () => {});
   });
 
   function show(i: number) {

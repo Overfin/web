@@ -1,21 +1,23 @@
-<!-- One of Discover's rows, loaded on its own: it shows as soon as it's
-     there, without waiting for the others, and only if it has titles. -->
+<!-- One of Discover's rows, loaded on its own (unless its titles are
+     given): it shows as soon as it's there, without waiting for the
+     others, and only if it has titles. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import Card from './Card.svelte';
 
-  let { title, list, kind, availability, found = () => {}, flags = true }: {
+  let { title, list, kind, availability, found = () => {}, flags = true, items: given }: {
     title: string;
     list: 'trending' | 'popular' | 'upcoming';
     kind: 'movie' | 'series';
     availability: 'all' | 'library' | 'missing';
     found?: (any: boolean) => void;
     flags?: boolean;
+    items?: TitleSummary[];
   } = $props();
 
   async function load(): Promise<TitleSummary[]> {
-    const { items } = await overfin.discover(list, kind, { availability, limit: 20 });
+    const { items } = given ? { items: given } : await overfin.discover(list, kind, { availability, limit: 20 });
     found(items.length > 0);
     return items;
   }
