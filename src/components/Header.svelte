@@ -46,7 +46,7 @@
   <nav>
     <a href="/" class:active={here.length === 0}>{t('nav.home')}</a>
     {#if session.discovery}
-      <a href="/discover" class:active={here[0] === 'discover' || here[0] === 'title'}>{t('nav.discover')}</a>
+      <a href="/discover" class:active={here[0] === 'discover'}>{t('nav.discover')}</a>
     {/if}
     {#each session.libraries as library (library.id)}
       <a href="/library/{library.id}" class:active={here[0] === 'library' && here[1] === library.id}>{library.name}</a>

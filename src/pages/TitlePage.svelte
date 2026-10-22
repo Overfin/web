@@ -143,7 +143,7 @@
     {:else}
       <h2>{t('item.episodes')}</h2>
     {/if}
-    {#if season.overview && title.kind === 'series'}<p class="muted season-overview">{season.overview}</p>{/if}
+    {#if season.overview && title.kind === 'series' && season.overview !== title.overview}<p class="muted season-overview">{season.overview}</p>{/if}
     <ol class="episodes">
       {#each season.episodes as e (e.id)}
         {@const seen = episodeMarks[e.id] ?? e.userState?.played ?? false}
