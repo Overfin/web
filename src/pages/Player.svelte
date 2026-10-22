@@ -8,12 +8,12 @@
      plays or pauses; a double-click is full screen. The controls hide
      after 3 s without moving, and stay while paused. -->
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
-  import type { Player, Playback, Segment } from '../lib/sdk/overfin.js';
+  import { onDestroy, onMount, untrack } from 'svelte';
+  import type { Player, Playback, Segment, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
-  import { clock } from '../lib/format';
+  import { clock, duration } from '../lib/format';
   import { i18n, t, type Key } from '../lib/i18n.svelte';
-  import { takeStart } from '../lib/play';
+  import { playInstead, takeStart } from '../lib/play';
   import SeekBar from '../components/SeekBar.svelte';
 
   let { id }: { id: string } = $props();
@@ -35,8 +35,8 @@
   let muted = $state(false);
   let fullscreen = $state(false);
   let scrubbing = $state(false);
-  // The menu open: audio, subtitles, or none.
-  let menu = $state<'' | 'audio' | 'subtitles'>('');
+  // The menu open: audio, subtitles, the episodes, or none.
+  let menu = $state<'' | 'audio' | 'subtitles' | 'episodes'>('');
   // The seek-bar previews, all fetched as playback starts, so they show
   // at once; kept here so the browser keeps them.
   let sheets: HTMLImageElement[] = [];
@@ -147,6 +147,10 @@
       case ' ': case 'Spacebar': togglePlay(); break;
       case 'f': case 'F': toggleFullscreen(); break;
       case 'm': case 'M': toggleMute(); break;
+      case 'n': case 'N':
+        if (!next) return;
+        goNext();
+        break;
       case 'Escape':
         if (!menu) return; // the browser leaves full screen by itself
         menu = '';
@@ -186,7 +190,7 @@
   // add up to a step.
   let wheelRest = 0;
   function wheel(event: WheelEvent) {
-    if (menu && (event.target as HTMLElement).closest('.tracks')) return; // the menu scrolls
+    if (menu && (event.target as HTMLElement).closest('.tracks, .episodes')) return; // the menu scrolls
     event.preventDefault();
     const dy = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
     if (Math.abs(dy) >= 50) {
@@ -278,6 +282,72 @@
     segment = sg && skippable.includes(sg.kind) && player.positionMs < sg.endMs - 1000 ? sg : null;
   }
   const skippable = ['intro', 'recap', 'outro', 'preview', 'commercial'];
+
+  // ---- The next episode ------------------------------------------------------
+
+  // Offered when the credits start, or 30 s before the end: it plays
+  // after a 10 s countdown (counted while playing), at once with "Play
+  // now" or N, or not after "Cancel". The end of the episode plays it too.
+  const next = $derived(playback?.next?.playable ? playback.next : null);
+  let dismissed = $state(false);
+  let countdown = $state(0);
+  const upNextAt = $derived.by(() => {
+    if (!next || durationMs < 120_000) return Infinity;
+    const credits = playback?.segments?.find((sg) => sg.kind === 'outro');
+    return Math.min(credits ? credits.startMs : Infinity, durationMs - 30_000);
+  });
+  const upNext = $derived(!!next && !dismissed && positionMs >= upNextAt);
+  $effect(() => {
+    if (!upNext) {
+      countdown = 0;
+      return;
+    }
+    if (untrack(() => countdown) === 0) countdown = 10;
+    if (paused) return;
+    const tick = setInterval(() => {
+      countdown = untrack(() => countdown) - 1;
+      if (countdown <= 0) {
+        clearInterval(tick);
+        goNext();
+      }
+    }, 1000);
+    return () => clearInterval(tick);
+  });
+  function goNext() {
+    const n = next;
+    if (!n) return;
+    close();
+    playInstead(n.id, n.userState?.played ? 0 : (n.userState?.positionMs ?? 0));
+  }
+
+  // ---- The episodes, without leaving -------------------------------------------
+
+  let seasons = $state<TitleSummary[]>([]);
+  let seasonId = $state('');
+  let episodes = $state<TitleSummary[] | null>(null);
+  async function openEpisodes() {
+    if (menu === 'episodes') {
+      menu = '';
+      return;
+    }
+    menu = 'episodes';
+    const ep = playback?.title;
+    if (!ep?.series) return;
+    if (!seasons.length) seasons = (await overfin.title(ep.series.id).catch(() => null))?.seasons ?? [];
+    await showSeason(seasonId || ep.season?.id || '');
+  }
+  async function showSeason(id: string) {
+    if (!id) return;
+    seasonId = id;
+    episodes = null;
+    episodes = (await overfin.title(id).catch(() => null))?.episodes ?? [];
+  }
+  function playEpisode(e: TitleSummary) {
+    menu = '';
+    if (e.id === playback?.title?.id || !e.playable) return;
+    close();
+    playInstead(e.id, e.userState?.played ? 0 : (e.userState?.positionMs ?? 0));
+  }
   function skip() {
     if (segment) seekTo(segment.endMs);
   }
@@ -317,6 +387,10 @@
         },
         onError(err) {
           notice = { text: explain(err), takenOver: false };
+        },
+        // At the end of an episode, the next one, unless cancelled.
+        onEnded() {
+          if (next && !dismissed) goNext();
         },
       });
     } catch (err) {
@@ -391,8 +465,50 @@
     </div>
   </div>
 
-  {#if segment}
+  {#if segment && !(upNext && segment.kind === 'outro')}
     <button class="skip" onclick={skip}>{t(`player.skip.${segment.kind}` as Key)}</button>
+  {/if}
+
+  {#if upNext && next}
+    <div class="upnext" role="dialog" aria-label={t('player.next')}>
+      <div class="still">
+        {#if next.images?.primary}<img src={overfin.imageUrl(next.images.primary, 'small')} alt="" />{/if}
+      </div>
+      <div class="about">
+        <div class="label">{t('player.next')} · {t('player.nextIn', { n: countdown })}</div>
+        <div class="name">{t('item.seasonEpisodeShort', { season: next.seasonNumber ?? '?', episode: next.episodeNumber ?? '?' })} · {next.name}</div>
+        <div class="choices">
+          <button class="primary" onclick={goNext}>{t('player.playNow')}</button>
+          <button onclick={() => (dismissed = true)}>{t('common.cancel')}</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  {#if menu === 'episodes'}
+    <aside class="episodes" aria-label={t('player.episodes')}>
+      {#if seasons.length > 1}
+        <div class="season-tabs">
+          {#each seasons as s (s.id)}
+            <button class="tab" class:active={s.id === seasonId} onclick={() => showSeason(s.id)}>{s.name}</button>
+          {/each}
+        </div>
+      {/if}
+      {#if episodes === null}
+        <p class="muted">{t('app.loading')}</p>
+      {:else}
+        {#each episodes as e (e.id)}
+          <button class="episode" class:current={e.id === playback?.title?.id} disabled={!e.playable && e.id !== playback?.title?.id}
+            onclick={() => playEpisode(e)}>
+            <span class="still">{#if e.images?.primary}<img src={overfin.imageUrl(e.images.primary, 'small')} alt="" loading="lazy" />{/if}</span>
+            <span class="text">
+              <span class="name">{e.episodeNumber}. {e.name}</span>
+              {#if e.durationMs}<span class="hint">{duration(e.durationMs)}{#if e.userState?.played} · ✓{/if}</span>{/if}
+            </span>
+          </button>
+        {/each}
+      {/if}
+    </aside>
   {/if}
 
   <div class="bottom controls" role="toolbar" tabindex="-1"
@@ -406,6 +522,11 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
         {/if}
       </button>
+      {#if next}
+        <button class="icon" onclick={goNext} aria-label={t('player.next')} title={t('player.next') + ' (N)'}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6zm10-12v12h2V6z" /></svg>
+        </button>
+      {/if}
       <div class="volume">
         <button class="icon" onclick={toggleMute} aria-label={muted ? t('player.unmute') : t('player.mute')} title={muted ? t('player.unmute') : t('player.mute')}>
           {#if muted || volume === 0}
@@ -419,6 +540,12 @@
       </div>
       <span class="clock">{clock(positionMs)} / {clock(durationMs)}</span>
       <span class="grow"></span>
+      {#if playback?.title?.kind === 'episode' && playback.title.series}
+        <button class="icon" class:on={menu === 'episodes'} onclick={openEpisodes} aria-expanded={menu === 'episodes'}
+          aria-label={t('player.episodes')} title={t('player.episodes')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h4v4H3zm6 1h12v2H9zM3 10h4v4H3zm6 1h12v2H9zm-6 4h4v4H3zm6 1h12v2H9z" /></svg>
+        </button>
+      {/if}
       {#if playback?.audioTracks?.length}
         <div class="menuwrap">
           <button class="icon" class:on={menu === 'audio'} onclick={() => (menu = menu === 'audio' ? '' : 'audio')}
@@ -533,6 +660,37 @@
     display: table; margin: 0 auto .15em; padding: .05em .4em; background: rgba(0, 0, 0, .65); border-radius: 4px;
     white-space: pre-line; text-shadow: 0 1px 2px #000;
   }
+  .upnext {
+    position: absolute; z-index: 3; right: clamp(.75rem, 2vw, 1.5rem); bottom: 7.5rem; display: flex; align-items: stretch;
+    width: min(30rem, 92vw); background: rgba(20, 22, 28, .95); border: 1px solid rgba(255, 255, 255, .15); border-radius: var(--radius); overflow: hidden;
+  }
+  .upnext .still { flex: none; width: 9rem; background: #000; }
+  .upnext .still img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .upnext .about { padding: .6rem .8rem; min-width: 0; }
+  .upnext .label { font-size: .8rem; color: rgba(255, 255, 255, .7); }
+  .upnext .name { font-weight: 600; margin: .15rem 0 .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .upnext .choices { display: flex; flex-wrap: nowrap; }
+  .upnext .choices button { min-height: 2.2rem; padding: .3rem .9rem; font-size: .9rem; white-space: nowrap; }
+  .upnext .choices button + button { margin-left: .4rem; }
+  aside.episodes {
+    position: absolute; z-index: 3; top: 4rem; right: clamp(.75rem, 2vw, 1.5rem); bottom: 5.5rem; width: min(24rem, 90vw);
+    overflow-y: auto; padding: .8rem; background: rgba(14, 16, 20, .97); border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: var(--radius);
+  }
+  .season-tabs { display: flex; flex-wrap: wrap; margin-bottom: .6rem; }
+  .season-tabs .tab { min-height: 2rem; padding: .2rem .7rem; margin: 0 .35rem .35rem 0; border-radius: 999px; font-size: .85rem; }
+  .season-tabs .tab.active { background: #fff; color: #000; border-color: #fff; }
+  .episode {
+    display: flex; align-items: center; justify-content: flex-start; width: 100%; text-align: left; background: none; border: none; color: #fff;
+    padding: .4rem; margin-bottom: .2rem; border-radius: var(--radius-s); min-height: 0;
+  }
+  .episode:hover:not(:disabled), .episode.current { background: rgba(255, 255, 255, .1); }
+  .episode:disabled { opacity: .45; cursor: default; }
+  .episode .still { flex: none; width: 7rem; height: 3.95rem; border-radius: 4px; overflow: hidden; background: #000; margin-right: .6rem; }
+  .episode .still img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .episode .text { display: flex; flex-direction: column; min-width: 0; }
+  .episode .name { font-weight: 600; font-size: .92rem; }
+  .episode .hint { font-size: .8rem; color: rgba(255, 255, 255, .6); }
   .osd {
     position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
     background: rgba(0, 0, 0, .65); padding: .6rem 1.1rem; border-radius: var(--radius); font-size: 1.3rem; font-weight: 600;

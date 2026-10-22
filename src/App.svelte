@@ -95,7 +95,8 @@
       {:else if route.parts[0] === 'title' && route.parts[1]}
         <TitlePage id={route.parts[1]} params={route.params} />
       {:else if route.parts[0] === 'play' && route.parts[1]}
-        <Player id={route.parts[1]} />
+        <!-- A new player for each title, as the next episode replaces one. -->
+        {#key route.parts[1]}<Player id={route.parts[1]} />{/key}
       {:else if route.parts[0] === 'profiles'}
         <Profiles />
       {:else if route.parts[0] === 'manage'}
