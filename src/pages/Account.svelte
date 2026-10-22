@@ -1,5 +1,6 @@
-<!-- The account: downloading one's data, deleting the account. Both need a
-     fresh login, or the profile's PIN. -->
+<!-- The account: how one signs in (with Overfin's own sign-in), downloading
+     one's data, deleting the account. Changes need a fresh login, or the
+     profile's PIN. -->
 <script lang="ts">
   import { explain, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
@@ -9,6 +10,31 @@
 
   let message = $state('');
   const profile = $derived(session.me?.activeProfile);
+
+  // How the account holder signs in, with Overfin's own sign-in only (the
+  // server answers 404 otherwise, and the section stays hidden).
+  let signin = $state<{ email: string; hasPassword: boolean; codes: boolean } | null>(null);
+  let editing = $state(false);
+  let newPassword = $state('');
+  overfin.signinInfo().then((s) => (signin = s), () => {});
+
+  async function savePassword(event: SubmitEvent) {
+    event.preventDefault();
+    if (await confirmed(() => overfin.setPassword(newPassword), (m) => (message = m))) {
+      signin = signin && { ...signin, hasPassword: true };
+      editing = false;
+      newPassword = '';
+      await notice(t('account.passwordSaved'));
+    }
+  }
+
+  async function removePassword() {
+    if (!(await confirm(t('account.removeConfirm'), true))) return;
+    if (await confirmed(() => overfin.removePassword(), (m) => (message = m))) {
+      signin = signin && { ...signin, hasPassword: false };
+      await notice(t('account.passwordRemoved'));
+    }
+  }
 
   async function download() {
     await confirmed(async (pin) => {
@@ -45,6 +71,32 @@
 
 <div class="center wide">
   <h1>{t('account.title')}</h1>
+  {#if signin && profile?.owner}
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.signinTitle')}</h2>
+        <p class="muted">
+          {t(signin.hasPassword ? 'account.signinPassword' : signin.codes ? 'account.signinCode' : 'account.signinLink', { email: signin.email })}
+        </p>
+        {#if editing}
+          <form class="password" onsubmit={savePassword}>
+            <input type="password" autocomplete="new-password" minlength="10" maxlength="256" required
+              aria-label={t('account.newPassword')} placeholder={t('account.newPassword')} bind:value={newPassword} />
+            <button class="primary" type="submit">{t('account.savePassword')}</button>
+            <button type="button" onclick={() => (editing = false)}>{t('common.cancel')}</button>
+          </form>
+        {/if}
+      </div>
+      {#if !editing}
+        <div class="actions">
+          {#if signin.hasPassword && signin.codes}
+            <button onclick={removePassword}>{t('account.removePassword')}</button>
+          {/if}
+          <button onclick={() => (editing = true)}>{t(signin.hasPassword ? 'account.changePassword' : 'account.setPassword')}</button>
+        </div>
+      {/if}
+    </div>
+  {/if}
   {#if profile?.kind !== 'kids'}
     <div class="panel setting">
       <div>
@@ -72,3 +124,9 @@
   {/if}
   {#if message}<p class="error">{message}</p>{/if}
 </div>
+
+<style>
+  .password { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .9rem; }
+  .password input { flex: 1 1 16rem; min-width: 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: .6rem; flex: none; }
+</style>
