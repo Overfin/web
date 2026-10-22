@@ -58,11 +58,18 @@
     }, () => {});
   });
 
-  // Where the slideshow would be, had it gone on while away.
+  // Where the slideshow would be, had it gone on while away (where it was,
+  // when motion is reduced).
   function resume() {
     const at = last ? slides.findIndex((sl) => sl.id === last!.id) : -1;
-    if (!last || at < 0 || still) {
-      show(0);
+    // A first visit (or a slide gone from the list) starts anywhere, so
+    // the same one doesn't always come first.
+    if (!last || at < 0) {
+      show(Math.floor(Math.random() * slides.length));
+      return;
+    }
+    if (still) {
+      show(at);
       return;
     }
     const away = Date.now() - last.since;
