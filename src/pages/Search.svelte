@@ -1,6 +1,7 @@
-<!-- Search: titles, in a library or not, and people, as one types. The
-     words never go in the address (they'd stay in the history): this tab
-     keeps the last ones, so coming back shows the same results. -->
+<!-- Search: titles, in a library or not, and people, as one types; people
+     first when the words look like someone's name. The words never go in
+     the address (they'd stay in the history): this tab keeps the last
+     ones, so coming back shows the same results. -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
@@ -13,7 +14,7 @@
   const saved = 'overfin-web-search';
   let query = $state('');
   let input = $state<HTMLInputElement>();
-  let results = $state<{ titles: TitleSummary[]; people: Awaited<ReturnType<typeof overfin.search>>['people'] } | null>(null);
+  let results = $state<Awaited<ReturnType<typeof overfin.search>> | null>(null);
   let searching = $state(false);
   let error = $state('');
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -72,30 +73,12 @@
     {#if !results.titles.length && !results.people.length}
       <p class="muted">{t('search.nothing')}</p>
     {/if}
-    {#if results.titles.length}
-      <h2>{t('search.titles')}</h2>
-      <div class="grid">
-        {#each results.titles as item (item.id)}
-          <Card {item} />
-        {/each}
-      </div>
-    {/if}
-    {#if results.people.length}
-      <h2>{t('search.people')}</h2>
-      <div class="row">
-        {#each results.people as p (p.id)}
-          <a class="card person" href="/person/{p.id}">
-            <div class="poster round">
-              {#if p.image}
-                <img src={overfin.imageUrl(p.image, 'small')} alt="" loading="lazy" use:loaded />
-              {:else}
-                <div class="fallback initials">{p.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</div>
-              {/if}
-            </div>
-            <div class="title">{p.name}</div>
-          </a>
-        {/each}
-      </div>
+    {#if results.peopleFirst}
+      {@render people(results.people)}
+      {@render titles(results.titles)}
+    {:else}
+      {@render titles(results.titles)}
+      {@render people(results.people)}
     {/if}
     <TMDBNotice />
   {:else if searching}
@@ -104,3 +87,34 @@
     <p class="muted">{t('search.hint')}</p>
   {/if}
 </div>
+
+{#snippet titles(found: TitleSummary[])}
+  {#if found.length}
+    <h2>{t('search.titles')}</h2>
+    <div class="grid">
+      {#each found as item (item.id)}
+        <Card {item} />
+      {/each}
+    </div>
+  {/if}
+{/snippet}
+
+{#snippet people(found: Awaited<ReturnType<typeof overfin.search>>['people'])}
+  {#if found.length}
+    <h2>{t('search.people')}</h2>
+    <div class="row">
+      {#each found as p (p.id)}
+        <a class="card person" href="/person/{p.id}">
+          <div class="poster round">
+            {#if p.image}
+              <img src={overfin.imageUrl(p.image, 'small')} alt="" loading="lazy" use:loaded />
+            {:else}
+              <div class="fallback initials">{p.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</div>
+            {/if}
+          </div>
+          <div class="title">{p.name}</div>
+        </a>
+      {/each}
+    </div>
+  {/if}
+{/snippet}
