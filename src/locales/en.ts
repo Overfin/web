@@ -32,6 +32,13 @@ export default {
   'home.removeFromContinue': 'Remove from Continue watching',
   'home.trendingMovies': 'Trending films here',
   'home.trendingSeries': 'Trending series here',
+  'home.featured': 'Featured',
+  'home.slide': '{n} of {total}',
+  'home.moreInfo': 'More info',
+  'home.seeSeries': 'See the series',
+  'home.resume': 'Resume',
+  'home.previous': 'Previous',
+  'home.next': 'Next',
 
   'nav.discover': 'Discover',
   'discover.title': 'Discover',

@@ -33,6 +33,13 @@ const fr: Record<keyof typeof en, string> = {
   'home.removeFromContinue': 'Retirer de Reprendre',
   'home.trendingMovies': 'Films tendance, ici',
   'home.trendingSeries': 'Séries tendance, ici',
+  'home.featured': 'À la une',
+  'home.slide': '{n} sur {total}',
+  'home.moreInfo': 'Plus d’infos',
+  'home.seeSeries': 'Voir la série',
+  'home.resume': 'Reprendre',
+  'home.previous': 'Précédent',
+  'home.next': 'Suivant',
 
   'nav.discover': 'Découvrir',
   'discover.title': 'Découvrir',

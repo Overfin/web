@@ -1,4 +1,4 @@
-<!-- Home: what to continue, what's next, the watchlist, what's trending
+<!-- Home: a slideshow of featured titles, what to continue, what's next, the watchlist, what's trending
      among the library's titles, and what's new in each library (films and
      series only). -->
 <script lang="ts">
@@ -9,6 +9,7 @@
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Row from '../components/Row.svelte';
   import Skeleton from '../components/Skeleton.svelte';
+  import Slides from '../components/Slides.svelte';
 
   async function load() {
     const [resume, nextUp, watchlist, latest] = await Promise.all([
@@ -32,6 +33,10 @@
   <Skeleton />
 {:then home}
   {@const empty = !home.resume.length && !home.nextUp.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
+  <!-- Without discovery, the slideshow shows the newest, from every
+       library in turn. -->
+  <Slides fallback={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i })))
+    .sort((a, b) => a.i - b.i).map((x) => x.item)} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
