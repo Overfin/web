@@ -566,7 +566,6 @@
     </button>
     <div class="title">
       {title}
-      {#if playback && playback.method !== 'direct'}<span class="method">{t(`player.method.${playback.method}` as Key)}</span>{/if}
     </div>
   </div>
 
@@ -765,7 +764,6 @@
   .idle .controls, .idle .skip { opacity: 0; pointer-events: none; }
   .top { top: 0; display: flex; align-items: center; background: linear-gradient(rgba(0, 0, 0, .7), transparent); padding-bottom: 2.5rem; }
   .top .title { margin-left: .5rem; font-size: 1.05rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px #000; }
-  .method { margin-left: .6rem; font-size: .8rem; font-weight: 400; color: rgba(255, 255, 255, .7); }
   .bottom { bottom: 0; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); padding-top: 3rem; }
   .buttons { display: flex; align-items: center; }
   .buttons > * + * { margin-left: .35rem; }

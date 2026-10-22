@@ -255,8 +255,6 @@ export default {
   'player.takenOver': 'Playback continued on {device}.',
   'player.anotherDevice': 'another device',
   'player.continueHere': 'Continue here',
-  'player.method.remux': 'repackaged',
-  'player.method.transcode': 'transcoded',
 
   'request.ask': 'Request',
   'request.askSeries': 'Request the series',

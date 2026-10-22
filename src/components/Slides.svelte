@@ -4,6 +4,12 @@
      the pointer or the keyboard is on it, while the tab is hidden, and when
      the system asks for less motion. Arrows, dots, swipes and the arrow
      keys move it too. -->
+<script lang="ts" module>
+  // Which slide showed last, and since when: kept while the site is open,
+  // so coming back to the home page goes on where the slideshow would be.
+  let last: { id: string; since: number } | null = null;
+</script>
+
 <script lang="ts">
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -19,6 +25,8 @@
 
   let slides = $state<Title[]>([]);
   let index = $state(0);
+  // How long the slide on show stays: shorter for one resumed midway.
+  let wait = $state(0);
   // Slides shown so far, and the next one: only their backdrops load.
   let seen = $state(new Set([0, 1]));
   let hovered = $state(false);
@@ -46,18 +54,36 @@
     // that fail are left out.
     overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
       slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]);
+      resume();
     }, () => {});
   });
+
+  // Where the slideshow would be, had it gone on while away.
+  function resume() {
+    const at = last ? slides.findIndex((sl) => sl.id === last!.id) : -1;
+    if (!last || at < 0 || still) {
+      show(0);
+      return;
+    }
+    const away = Date.now() - last.since;
+    const i = (at + Math.floor(away / every)) % slides.length;
+    const since = Date.now() - (away % every);
+    show(i);
+    last = { id: slides[i].id, since };
+    wait = every - (away % every);
+  }
 
   function show(i: number) {
     if (!slides.length) return;
     index = (i + slides.length) % slides.length;
     seen = new Set([...seen, index, (index + 1) % slides.length]);
+    last = { id: slides[index].id, since: Date.now() };
+    wait = every;
   }
 
   $effect(() => {
     if (still || hovered || focused || hidden || slides.length < 2) return;
-    const timer = setTimeout(() => show(index + 1), every);
+    const timer = setTimeout(() => show(index + 1), wait || every);
     return () => clearTimeout(timer);
   });
 

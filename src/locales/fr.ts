@@ -256,8 +256,6 @@ const fr: Record<keyof typeof en, string> = {
   'player.takenOver': 'La lecture continue sur {device}.',
   'player.anotherDevice': 'un autre appareil',
   'player.continueHere': 'Continuer ici',
-  'player.method.remux': 'réempaqueté',
-  'player.method.transcode': 'transcodé',
 
   'request.ask': 'Demander',
   'request.askSeries': 'Demander la série',
