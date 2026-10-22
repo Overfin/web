@@ -12,7 +12,7 @@
   import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { clock, duration } from '../lib/format';
-  import { i18n, t, type Key } from '../lib/i18n.svelte';
+  import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
   import SeekBar from '../components/SeekBar.svelte';
 
@@ -41,8 +41,8 @@
   let muted = $state(false);
   let fullscreen = $state(false);
   let scrubbing = $state(false);
-  // The menu open: audio, subtitles, the episodes, or none.
-  let menu = $state<'' | 'audio' | 'subtitles' | 'episodes'>('');
+  // The menu open: audio, subtitles, the episodes, the settings, or none.
+  let menu = $state<'' | 'audio' | 'subtitles' | 'episodes' | 'settings'>('');
   // The seek-bar previews, all fetched as playback starts, so they show
   // at once; kept here so the browser keeps them.
   let sheets: HTMLImageElement[] = [];
@@ -352,6 +352,50 @@
     playInstead(n.id, n.userState?.played ? 0 : (n.userState?.positionMs ?? 0));
   }
 
+  // ---- Quality and how it plays ------------------------------------------------
+
+  // Limits offered: those below the file's own bitrate (above, nothing
+  // would change).
+  const qualities = [40_000, 20_000, 10_000, 6_000, 4_000, 2_000, 1_000];
+  const offered = $derived(qualities.filter((k) => !playback?.info?.bitrateKbps || k < playback.info.bitrateKbps));
+  let maxBitrate = $state(0);
+  let showInfo = $state(false);
+  function chooseQuality(kbps: number) {
+    menu = '';
+    if (kbps === maxBitrate) return;
+    maxBitrate = kbps;
+    player?.setMaxBitrate(kbps);
+  }
+  const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} Mb/s`;
+  const rangeName = (r?: string) => !r ? '' : r === 'SDR' ? 'SDR' : r === 'HDR10Plus' ? 'HDR10+'
+    : r.startsWith('DOVI') ? `Dolby Vision${r.includes('HDR10Plus') ? ' (HDR10+)' : r.includes('HDR10') ? ' (HDR10)' : r.includes('HLG') ? ' (HLG)' : ''}` : r;
+  // A language's name in the site's language, from a media file's code
+  // ("fre", "eng"…); the code itself when it's not known.
+  const bibliographic: Record<string, string> = { fre: 'fr', ger: 'de', chi: 'zh', cze: 'cs', dut: 'nl', gre: 'el', per: 'fa',
+    rum: 'ro', slo: 'sk', ice: 'is', may: 'ms', wel: 'cy', baq: 'eu', geo: 'ka', arm: 'hy', alb: 'sq', bur: 'my', mac: 'mk', mao: 'mi' };
+  function languageName(code?: string) {
+    if (!code) return '';
+    try {
+      const name = new Intl.DisplayNames([i18n.locale], { type: 'language' }).of(bibliographic[code] ?? code);
+      return name && name !== code ? name : code;
+    } catch {
+      return code;
+    }
+  }
+  const reasonText = (r: string) => has(`player.reason.${r}`) ? t(`player.reason.${r}` as Key) : r;
+  const videoLine = $derived.by(() => {
+    const v = playback?.info?.video;
+    if (!v) return '';
+    return [[v.codec?.toUpperCase(), v.profile].filter(Boolean).join(' '), v.width && v.height ? `${v.width}×${v.height}` : '',
+      v.bitDepth ? `${v.bitDepth} bits` : '', rangeName(v.range), v.bitrateKbps ? mbps(v.bitrateKbps) : ''].filter(Boolean).join(' · ');
+  });
+  const audioLine = $derived.by(() => {
+    const a = playback?.info?.audio;
+    if (!a) return '';
+    const ch = a.channels === 6 ? '5.1' : a.channels === 8 ? '7.1' : a.channels === 2 ? t('player.stereo') : a.channels ? `${a.channels} ch` : '';
+    return [a.codec?.toUpperCase(), ch, languageName(a.language), a.bitrateKbps ? mbps(a.bitrateKbps) : ''].filter(Boolean).join(' · ');
+  });
+
   // ---- The episodes, without leaving -------------------------------------------
 
   let seasons = $state<TitleSummary[]>([]);
@@ -546,6 +590,28 @@
     </div>
   {/if}
 
+  {#if showInfo && playback}
+    <div class="info-panel">
+      <button class="close" type="button" aria-label={t('common.close')} onclick={() => (showInfo = false)}>✕</button>
+      <dl>
+        <dt>{t('player.infoMethod')}</dt>
+        <dd>{t(`player.infoMethod.${playback.method}` as Key)}</dd>
+        {#if playback.info?.reasons?.length}
+          <dt>{t('player.infoWhy')}</dt>
+          <dd>{#each playback.info.reasons as r}<div>{reasonText(r)}</div>{/each}</dd>
+        {/if}
+        {#if videoLine}<dt>{t('player.infoVideo')}</dt><dd>{videoLine}</dd>{/if}
+        {#if audioLine}<dt>{t('player.audio')}</dt><dd>{audioLine}</dd>{/if}
+        {#if playback.info?.container}
+          <dt>{t('player.infoFile')}</dt>
+          <dd>{[playback.info.container.toUpperCase(), playback.info.bitrateKbps ? mbps(playback.info.bitrateKbps) : ''].filter(Boolean).join(' · ')}</dd>
+        {/if}
+        <dt>{t('player.quality')}</dt>
+        <dd>{maxBitrate ? mbps(maxBitrate) : t('player.qualityAuto')}</dd>
+      </dl>
+    </div>
+  {/if}
+
   {#if menu === 'episodes'}
     <aside class="episodes" aria-label={t('player.episodes')}>
       {#if seasons.length > 1}
@@ -640,6 +706,23 @@
           {/if}
         </div>
       {/if}
+      <div class="menuwrap">
+        <button class="icon" class:on={menu === 'settings'} onclick={() => (menu = menu === 'settings' ? '' : 'settings')}
+          aria-expanded={menu === 'settings'} aria-label={t('player.settings')} title={t('player.settings')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 0 0-1.7-1L15 3h-4l-.4 2.7a7.5 7.5 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 0 0 1.7 1L11 21h4l.4-2.7a7.5 7.5 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" /></svg>
+        </button>
+        {#if menu === 'settings'}
+          <div class="tracks" role="dialog" aria-label={t('player.settings')}>
+            <h3>{t('player.quality')}</h3>
+            <button class="choice" class:chosen={!maxBitrate} onclick={() => chooseQuality(0)}>{t('player.qualityAuto')}</button>
+            {#each offered as kbps (kbps)}
+              <button class="choice" class:chosen={maxBitrate === kbps} onclick={() => chooseQuality(kbps)}>{mbps(kbps)}</button>
+            {/each}
+            <h3>{t('player.info')}</h3>
+            <button class="choice" class:chosen={showInfo} onclick={() => { showInfo = !showInfo; menu = ''; }}>{t('player.showInfo')}</button>
+          </div>
+        {/if}
+      </div>
       {#if canPip}
         <button class="icon" onclick={togglePip} aria-label={t('player.pip')} title={t('player.pip')}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 11h-8v6h8zm4 8V5a2 2 0 0 0-2-2H3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2zm-2 0H3V5h18z" /></svg>
@@ -773,6 +856,15 @@
     display: -webkit-box; -webkit-line-clamp: 5; line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
   }
   @keyframes fade { from { opacity: 0; } }
+  .info-panel {
+    position: absolute; z-index: 3; top: 4rem; left: clamp(.75rem, 2vw, 1.5rem); max-width: min(30rem, 90vw);
+    background: rgba(14, 16, 20, .9); border: 1px solid rgba(255, 255, 255, .15); border-radius: var(--radius);
+    padding: .7rem 2.2rem .7rem .9rem; font-size: .88rem;
+  }
+  .info-panel dl { margin: 0; display: grid; grid-template-columns: auto 1fr; }
+  .info-panel dt { color: rgba(255, 255, 255, .6); padding: .15rem 1rem .15rem 0; }
+  .info-panel dd { margin: 0; padding: .15rem 0; }
+  .info-panel .close { position: absolute; top: .3rem; right: .3rem; background: none; border: none; color: #fff; min-height: 0; padding: .3rem .5rem; }
   .osd {
     position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
     background: rgba(0, 0, 0, .65); padding: .6rem 1.1rem; border-radius: var(--radius); font-size: 1.3rem; font-weight: 600;
