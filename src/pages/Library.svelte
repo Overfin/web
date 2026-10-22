@@ -14,7 +14,7 @@
 
   let { id, params }: { id: string; params: URLSearchParams } = $props();
 
-  const sorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'random'] as const;
+  const sorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'lastPlayed', 'random'] as const;
   // Which titles a library lists, by its kind.
   const kinds: Record<string, string> = { movies: 'movie', shows: 'series', musicVideos: 'musicVideo', music: 'musicAlbum', books: 'book' };
 
@@ -38,7 +38,7 @@
       sort,
       limit: 60,
       kind: library ? kinds[library.kind] : undefined,
-      order: ['addedAt', 'premiereDate', 'communityRating'].includes(sort) ? 'desc' : undefined,
+      order: ['addedAt', 'premiereDate', 'communityRating', 'lastPlayed'].includes(sort) ? 'desc' : undefined,
       seed: sort === 'random' ? seed : undefined,
     };
   }

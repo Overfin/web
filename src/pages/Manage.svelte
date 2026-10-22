@@ -1,6 +1,6 @@
 <!-- Profiles and devices. The owner manages every profile (names, kids
-     limits, PINs, deleting) and every device; another profile only its own
-     PIN and devices. -->
+     limits, libraries and hidden tags, PINs, deleting) and every device;
+     another profile only its own PIN and devices. -->
 <script lang="ts">
   import type { Profile, Ratings } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -9,6 +9,7 @@
   import { i18n, t } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
+  import AccessPicker from '../components/AccessPicker.svelte';
   import CeilingPicker from '../components/CeilingPicker.svelte';
   import PageError from '../components/PageError.svelte';
 
@@ -16,16 +17,20 @@
   const pinPattern = '[0-9]{4,8}';
 
   // Each profile's form, and its message, set up as the profiles load.
-  interface Form { name: string; kids: boolean; movie: string; series: string; pin: string; message: string }
+  interface Form {
+    name: string; kids: boolean; movie: string; series: string; pin: string; message: string;
+    allLibraries: boolean; libraries: string[]; hiddenTags: string[];
+  }
   const forms = $state<Record<string, Form>>({});
   let devicesMessage = $state('');
 
   let reload = $state(0);
   async function load() {
-    const [all, ratings, sessions] = await Promise.all([
+    const [all, ratings, sessions, tags] = await Promise.all([
       overfin.profiles(),
       me?.owner ? overfin.ratings() : Promise.resolve<Ratings>({ country: '', movie: [], series: [] }),
       overfin.sessions(),
+      me?.owner ? overfin.tags() : Promise.resolve<string[]>([]),
     ]);
     if (me?.owner) session.kidsNeedLimits = all.some((p) => p.ceilingsNeeded);
     const profiles = me?.owner ? all : all.filter((p) => p.id === me?.id);
@@ -33,9 +38,10 @@
       forms[p.id] = {
         name: p.name, kids: p.kind === 'kids', pin: '', message: '',
         movie: p.movieCeiling ?? ratings.movie[0]?.name ?? '', series: p.seriesCeiling ?? ratings.series[0]?.name ?? '',
+        allLibraries: !p.libraries, libraries: p.libraries ?? [], hiddenTags: p.blockedTags ?? [],
       };
     }
-    return { profiles, ratings, sessions };
+    return { profiles, ratings, sessions, tags };
   }
   const data = $derived.by(() => {
     void reload;
@@ -57,7 +63,7 @@
     <h1>{me.owner ? t('manage.titleOwner') : t('manage.titleSelf')}</h1>
     {#await data}
       <p class="muted">{t('app.loading')}</p>
-    {:then { profiles, ratings, sessions }}
+    {:then { profiles, ratings, sessions, tags }}
       {#each profiles as p (p.id)}
         {@const f = forms[p.id]}
         <div class="panel">
@@ -76,16 +82,25 @@
             </div>
           {/if}
 
-          <!-- Limits: kids or standard, and the ceilings for films and series.
-               Changing them needs the owner's PIN, if the owner has one. -->
+          <!-- Limits: kids or standard, the ceilings for films and series, the
+               libraries and the hidden tags. Changing them needs the owner's
+               PIN, if the owner has one. -->
           {#if me.owner && !p.owner}
             <div class="toolbar">
               <label><input type="checkbox" bind:checked={f.kids} /> {t('manage.kidsProfile')}</label>
               {#if f.kids}<CeilingPicker {ratings} bind:movie={f.movie} bind:series={f.series} />{/if}
+            </div>
+            <AccessPicker libraries={session.libraries} {tags}
+              bind:all={f.allLibraries} bind:chosen={f.libraries} bind:hidden={f.hiddenTags} />
+            <div class="toolbar">
               <button onclick={() => act(p, (pin) => {
+                const access = {
+                  libraries: f.allLibraries ? null : f.libraries,
+                  blockedTags: f.hiddenTags.length ? f.hiddenTags : null,
+                };
                 const change = f.kids
-                  ? { kind: 'kids' as const, movieCeiling: f.movie, seriesCeiling: f.series }
-                  : { kind: 'standard' as const };
+                  ? { kind: 'kids' as const, movieCeiling: f.movie, seriesCeiling: f.series, ...access }
+                  : { kind: 'standard' as const, ...access };
                 return overfin.updateProfile(p.id, pin ? { ...change, pin } : change);
               }, t('manage.ownerPin'))}>{t('manage.saveLimits')}</button>
             </div>

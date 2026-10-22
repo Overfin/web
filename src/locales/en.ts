@@ -56,6 +56,7 @@ export default {
   'library.sort.addedAt': 'Recently added',
   'library.sort.premiereDate': 'Release date',
   'library.sort.communityRating': 'Rating',
+  'library.sort.lastPlayed': 'Recently watched',
   'library.sort.random': 'Shuffle',
   'library.count.one': '{count} item',
   'library.count.other': '{count} items',
@@ -138,6 +139,10 @@ export default {
   'profiles.mine': 'My profile',
   'profiles.pinFor': 'PIN for {name}',
   'profiles.kids': 'Kids',
+
+  'access.allLibraries': 'Every library',
+  'access.hiddenTags': 'Hidden tags',
+  'access.noTags': 'The library has no tags.',
 
   'ceilings.movie': 'Films up to',
   'ceilings.series': 'Series up to',

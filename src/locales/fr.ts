@@ -57,6 +57,7 @@ const fr: Record<keyof typeof en, string> = {
   'library.sort.addedAt': 'Ajouts récents',
   'library.sort.premiereDate': 'Date de sortie',
   'library.sort.communityRating': 'Note',
+  'library.sort.lastPlayed': 'Vus récemment',
   'library.sort.random': 'Au hasard',
   'library.count.one': '{count} titre',
   'library.count.other': '{count} titres',
@@ -139,6 +140,10 @@ const fr: Record<keyof typeof en, string> = {
   'profiles.mine': 'Mon profil',
   'profiles.pinFor': 'Code pour {name}',
   'profiles.kids': 'Enfants',
+
+  'access.allLibraries': 'Toutes les bibliothèques',
+  'access.hiddenTags': 'Étiquettes masquées',
+  'access.noTags': "La bibliothèque n'a aucune étiquette.",
 
   'ceilings.movie': "Films jusqu'à",
   'ceilings.series': "Séries jusqu'à",
