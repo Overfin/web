@@ -200,7 +200,6 @@ export default {
   'player.fullscreen': 'Full screen',
   'player.exitFullscreen': 'Exit full screen',
   'player.pip': 'Picture in picture',
-  'player.tracks': 'Audio and subtitles',
   'player.position': 'Position',
   'player.skip.intro': 'Skip intro',
   'player.skip.recap': 'Skip recap',

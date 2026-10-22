@@ -35,7 +35,11 @@
   let muted = $state(false);
   let fullscreen = $state(false);
   let scrubbing = $state(false);
-  let menu = $state(false);
+  // The menu open: audio, subtitles, or none.
+  let menu = $state<'' | 'audio' | 'subtitles'>('');
+  // The seek-bar previews, all fetched as playback starts, so they show
+  // at once; kept here so the browser keeps them.
+  let sheets: HTMLImageElement[] = [];
   let segment = $state<Segment | null>(null);
 
   const durationMs = $derived(playback?.durationMs || (video && Number.isFinite(video.duration) ? video.duration * 1000 : 0));
@@ -145,7 +149,7 @@
       case 'm': case 'M': toggleMute(); break;
       case 'Escape':
         if (!menu) return; // the browser leaves full screen by itself
-        menu = false;
+        menu = '';
         break;
       default: return;
     }
@@ -168,7 +172,7 @@
   let lastPointer = 'mouse';
   function pictureClick() {
     if (menu) {
-      menu = false;
+      menu = '';
       return;
     }
     if (lastPointer !== 'mouse' && !shown) {
@@ -182,7 +186,7 @@
   // add up to a step.
   let wheelRest = 0;
   function wheel(event: WheelEvent) {
-    if (menu && (event.target as HTMLElement).closest('.menu')) return; // the menu scrolls
+    if (menu && (event.target as HTMLElement).closest('.tracks')) return; // the menu scrolls
     event.preventDefault();
     const dy = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
     if (Math.abs(dy) >= 50) {
@@ -215,6 +219,32 @@
     else wake();
   });
 
+  // Subtitles are drawn here, not by the browser: above the controls
+  // while they show, at the bottom when they hide, in Overfin's style. The
+  // browser still reads the track the SDK turns on (kept hidden), and says
+  // when its lines change.
+  let captions = $state<HTMLDivElement>();
+  let cueTrack: TextTrack | null = null;
+  function drawCues() {
+    if (!captions) return;
+    const lines = Array.from(cueTrack?.activeCues ?? []) as VTTCue[];
+    captions.replaceChildren(...lines.map((cue) => {
+      const line = document.createElement('span');
+      line.append(cue.getCueAsHTML()); // the server sanitized it (WebVTT, rule 11)
+      return line;
+    }));
+  }
+  function followCues() {
+    if (!video) return;
+    const track = Array.from(video.textTracks).find((tr) => tr.mode !== 'disabled') ?? null;
+    if (track && track.mode === 'showing') track.mode = 'hidden';
+    if (track === cueTrack) return;
+    cueTrack?.removeEventListener('cuechange', drawCues);
+    cueTrack = track;
+    cueTrack?.addEventListener('cuechange', drawCues);
+    drawCues();
+  }
+
   // ---- The video's events ------------------------------------------------------
 
   function timeUpdate() {
@@ -224,6 +254,7 @@
     for (let i = 0; i < b.length; i++) {
       if (b.start(i) <= video.currentTime + 1 && b.end(i) >= video.currentTime) bufferedMs = b.end(i) * 1000;
     }
+    followCues();
     const sg = player.segmentAt();
     segment = sg && skippable.includes(sg.kind) && player.positionMs < sg.endMs - 1000 ? sg : null;
   }
@@ -248,6 +279,11 @@
         onStart(pb) {
           notice = null;
           playback = pb;
+          sheets = (pb.trickplay?.sheets ?? []).map((url) => {
+            const img = new Image();
+            img.src = url;
+            return img;
+          });
           audio = pb.audioTrack ?? '';
           subtitles = player?.subtitleTrack ?? pb.subtitleTrack ?? '';
         },
@@ -285,12 +321,13 @@
   function chooseAudio(trackId: string) {
     audio = trackId;
     player?.setAudioTrack(trackId);
-    menu = false;
+    menu = '';
   }
   function chooseSubtitles(trackId: string) {
     subtitles = trackId;
     player?.setSubtitleTrack(trackId || null);
-    menu = false;
+    menu = '';
+    queueMicrotask(followCues);
   }
 </script>
 
@@ -308,6 +345,7 @@
   {#if waiting && !notice}
     <div class="spinner" aria-label={t('app.loading')}></div>
   {/if}
+  <div class="captions" class:raised={shown} bind:this={captions} aria-live="off"></div>
   {#if osd}
     <div class="osd" aria-live="polite">{osd}</div>
   {/if}
@@ -330,7 +368,7 @@
   <div class="bottom controls" role="toolbar" tabindex="-1"
     onpointerenter={() => (overControls = true)} onpointerleave={() => (overControls = false)}>
     <SeekBar {positionMs} {durationMs} {bufferedMs} trickplay={playback?.trickplay} seek={seekTo} bind:scrubbing />
-    <div class="row">
+    <div class="buttons">
       <button class="icon" onclick={togglePlay} aria-label={paused ? t('player.play') : t('player.pause')} title={paused ? t('player.play') : t('player.pause')}>
         {#if paused}
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
@@ -351,31 +389,35 @@
       </div>
       <span class="clock">{clock(positionMs)} / {clock(durationMs)}</span>
       <span class="grow"></span>
-      {#if (playback?.audioTracks?.length ?? 0) > 1 || playback?.subtitleTracks?.length}
+      {#if playback?.audioTracks?.length}
         <div class="menuwrap">
-          <button class="icon" class:on={menu} onclick={() => (menu = !menu)} aria-expanded={menu}
-            aria-label={t('player.tracks')} title={t('player.tracks')}>
+          <button class="icon" class:on={menu === 'audio'} onclick={() => (menu = menu === 'audio' ? '' : 'audio')}
+            aria-expanded={menu === 'audio'} aria-label={t('player.audio')} title={t('player.audio')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12.9 15-2.5-2.5v-.1A17 17 0 0 0 14 6h3V4h-7V2H8v2H1v2h11.2c-.7 1.9-1.7 3.8-3.2 5.4-1-1.1-1.8-2.3-2.4-3.4h-2c.7 1.6 1.7 3.2 3 4.6l-5 5L4 19l5-5 3.1 3.1zm5.6-5h-2L12 22h2l1.1-3h4.8l1.1 3h2zm-2.6 7 1.6-4.3 1.6 4.3z" /></svg>
+          </button>
+          {#if menu === 'audio'}
+            <div class="tracks" role="dialog" aria-label={t('player.audio')}>
+              <h3>{t('player.audio')}</h3>
+              {#each playback.audioTracks as track (track.id)}
+                <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{track.label}</button>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
+      {#if playback?.subtitleTracks?.length}
+        <div class="menuwrap">
+          <button class="icon" class:on={menu === 'subtitles'} onclick={() => (menu = menu === 'subtitles' ? '' : 'subtitles')}
+            aria-expanded={menu === 'subtitles'} aria-label={t('player.subtitles')} title={t('player.subtitles')}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM4 12h4v2H4zm10 6H4v-2h10zm6 0h-4v-2h4zm0-4H10v-2h10z" /></svg>
           </button>
-          {#if menu}
-            <div class="menu" role="dialog" aria-label={t('player.tracks')}>
-              {#if (playback?.audioTracks?.length ?? 0) > 1}
-                <section>
-                  <h3>{t('player.audio')}</h3>
-                  {#each playback?.audioTracks ?? [] as track (track.id)}
-                    <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{track.label}</button>
-                  {/each}
-                </section>
-              {/if}
-              {#if playback?.subtitleTracks?.length}
-                <section>
-                  <h3>{t('player.subtitles')}</h3>
-                  <button class="choice" class:chosen={!subtitles} onclick={() => chooseSubtitles('')}>{t('player.noSubtitles')}</button>
-                  {#each playback.subtitleTracks as track (track.id)}
-                    <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{track.label}</button>
-                  {/each}
-                </section>
-              {/if}
+          {#if menu === 'subtitles'}
+            <div class="tracks" role="dialog" aria-label={t('player.subtitles')}>
+              <h3>{t('player.subtitles')}</h3>
+              <button class="choice" class:chosen={!subtitles} onclick={() => chooseSubtitles('')}>{t('player.noSubtitles')}</button>
+              {#each playback.subtitleTracks as track (track.id)}
+                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{track.label}</button>
+              {/each}
             </div>
           {/if}
         </div>
@@ -416,15 +458,16 @@
      rows: positions and margins spelled out. */
   .player { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: #000; z-index: 10; overflow: hidden; color: #fff; }
   .player.idle { cursor: none; }
-  video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; }
-  .controls { position: absolute; left: 0; right: 0; padding: .6rem clamp(.75rem, 2vw, 1.5rem); transition: opacity .25s; }
+  /* Layers, spelled out: a video can be composited above what follows it. */
+  video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 0; }
+  .controls { position: absolute; z-index: 2; left: 0; right: 0; padding: .6rem clamp(.75rem, 2vw, 1.5rem); transition: opacity .25s; }
   .idle .controls, .idle .skip { opacity: 0; pointer-events: none; }
   .top { top: 0; display: flex; align-items: center; background: linear-gradient(rgba(0, 0, 0, .7), transparent); padding-bottom: 2.5rem; }
   .top .title { margin-left: .5rem; font-size: 1.05rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px #000; }
   .method { margin-left: .6rem; font-size: .8rem; font-weight: 400; color: rgba(255, 255, 255, .7); }
   .bottom { bottom: 0; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); padding-top: 3rem; }
-  .row { display: flex; align-items: center; }
-  .row > * + * { margin-left: .35rem; }
+  .buttons { display: flex; align-items: center; }
+  .buttons > * + * { margin-left: .35rem; }
   .grow { flex: 1; }
   .icon {
     width: 2.75rem; height: 2.75rem; min-height: 0; padding: .55rem; background: none; border: none; border-radius: 50%;
@@ -436,31 +479,40 @@
   .volume input { width: 6rem; min-height: 0; padding: 0; margin-left: .2rem; accent-color: var(--accent); background: none; border: none; }
   .clock { font-variant-numeric: tabular-nums; font-size: .9rem; margin-left: .6rem; white-space: nowrap; }
   .skip {
-    position: absolute; right: clamp(.75rem, 2vw, 1.5rem); bottom: 7rem; transition: opacity .25s;
+    position: absolute; z-index: 2; right: clamp(.75rem, 2vw, 1.5rem); bottom: 7rem; transition: opacity .25s;
     background: rgba(20, 22, 28, .85); border: 1px solid rgba(255, 255, 255, .4); color: #fff; font-weight: 600;
   }
   .menuwrap { position: relative; }
-  .menu {
-    position: absolute; right: 0; bottom: 3.2rem; min-width: 15rem; max-height: 60vh; overflow-y: auto;
+  .tracks {
+    position: absolute; z-index: 3; right: 0; bottom: 3.2rem; min-width: 15rem; max-height: 60vh; overflow-y: auto;
     background: rgba(20, 22, 28, .95); border: 1px solid rgba(255, 255, 255, .15); border-radius: var(--radius); padding: .4rem;
   }
-  .menu h3 { margin: .4rem .6rem .2rem; font-size: .8rem; font-weight: 600; color: rgba(255, 255, 255, .6); text-transform: uppercase; letter-spacing: .04em; }
+  .tracks h3 { margin: .4rem .6rem .2rem; font-size: .8rem; font-weight: 600; color: rgba(255, 255, 255, .6); text-transform: uppercase; letter-spacing: .04em; }
   .choice {
     display: block; width: 100%; text-align: left; background: none; border: none; color: #fff; min-height: 2.4rem;
     padding: .4rem .6rem .4rem 1.8rem; border-radius: var(--radius-s); position: relative;
   }
   .choice:hover { background: rgba(255, 255, 255, .1); }
   .choice.chosen::before { content: '✓'; position: absolute; left: .6rem; color: var(--accent); }
+  .captions {
+    position: absolute; z-index: 1; left: 5%; right: 5%; bottom: 4%; text-align: center; pointer-events: none;
+    transition: bottom .25s; font-size: clamp(1rem, 2.6vw, 2.1rem); line-height: 1.35; color: #fff;
+  }
+  .captions.raised { bottom: 9.5rem; }
+  .captions :global(span) {
+    display: table; margin: 0 auto .15em; padding: .05em .4em; background: rgba(0, 0, 0, .65); border-radius: 4px;
+    white-space: pre-line; text-shadow: 0 1px 2px #000;
+  }
   .osd {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+    position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
     background: rgba(0, 0, 0, .65); padding: .6rem 1.1rem; border-radius: var(--radius); font-size: 1.3rem; font-weight: 600;
   }
   .spinner {
-    position: absolute; top: 50%; left: 50%; width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; pointer-events: none;
+    position: absolute; z-index: 1; top: 50%; left: 50%; width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; pointer-events: none;
     border: 3px solid rgba(255, 255, 255, .25); border-top-color: #fff; border-radius: 50%; animation: spin .9s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .notice { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); text-align: center; padding: 2rem; }
+  .notice { position: absolute; z-index: 4; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); text-align: center; padding: 2rem; }
   .notice .actions button + button { margin-left: .6rem; }
   @media (max-width: 40rem) {
     .volume input { display: none; }

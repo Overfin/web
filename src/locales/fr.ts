@@ -201,7 +201,6 @@ const fr: Record<keyof typeof en, string> = {
   'player.fullscreen': 'Plein écran',
   'player.exitFullscreen': 'Quitter le plein écran',
   'player.pip': 'Image dans l’image',
-  'player.tracks': 'Audio et sous-titres',
   'player.position': 'Position',
   'player.skip.intro': 'Passer le générique',
   'player.skip.recap': 'Passer le récapitulatif',
