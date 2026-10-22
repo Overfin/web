@@ -148,8 +148,8 @@
           {#if !title.playable && askable(title)}
             {#if request}
               <span class="request-status">{statusLabel(request)}</span>
-              {#if request.status === 'pending'}
-                <button onclick={() => cancelMain(request.id)}>{t('request.cancel')}</button>
+              {#if request.status === 'pending' && request.id}
+                <button onclick={() => cancelMain(request.id!)}>{t('request.cancel')}</button>
               {/if}
             {:else}
               <button class="primary" onclick={() => requestMain(title)}>{askLabel(title)}</button>
