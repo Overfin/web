@@ -117,9 +117,18 @@
       {/if}
       <div>
         {#if title.series}
-          <p class="parent"><a href="/title/{title.series.id}">{title.series.name}</a>
-            {#if title.kind === 'episode'}· {t('item.seasonEpisode', { season: title.seasonNumber ?? '?', episode: title.episodeNumber ?? '?' })}{/if}
-          </p>
+          <!-- Where it is: its series, and an episode's season. -->
+          <nav class="breadcrumbs" aria-label={t('title.breadcrumbs')}>
+            <ol>
+              <li><a href="/title/{title.series.id}">{title.series.name}</a></li>
+              {#if title.kind === 'episode' && title.season}
+                <li><a href="/title/{title.season.id}">{title.season.name || seasonName(title)}</a></li>
+                <li aria-current="page">{t('title.episodeNumber', { number: title.episodeNumber ?? '?' })}</li>
+              {:else}
+                <li aria-current="page">{seasonName(title)}</li>
+              {/if}
+            </ol>
+          </nav>
         {/if}
         {#if title.images?.logo && title.kind !== 'episode' && title.kind !== 'season'}
           <h1 class="logo"><img src={overfin.imageUrl(title.images.logo, 'medium')} alt={title.name} /></h1>

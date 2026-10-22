@@ -366,3 +366,9 @@ ol.episodes .number { color: var(--muted); font-weight: 400; }
 /* A person's biography: a few lines, the rest on demand. */
 .bio { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; max-width: 46rem; }
 .bio.whole { display: block; }
+/* Breadcrumbs: series › season › episode. */
+.breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .5rem; list-style: none; margin: 0 0 .4rem; padding: 0; color: #c9cbd1; }
+.breadcrumbs li + li::before { content: "›"; margin-right: .5rem; color: var(--muted); }
+.breadcrumbs a { color: var(--text); font-weight: 600; }
+.breadcrumbs a:hover { text-decoration: underline; }
+.breadcrumbs [aria-current] { color: var(--muted); }

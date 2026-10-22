@@ -101,6 +101,8 @@ export default {
   'item.seasonEpisode': 'Season {season}, episode {episode}',
   'item.seasonEpisodeShort': 'S{season}E{episode}',
 
+  'title.breadcrumbs': 'Where it is',
+  'title.episodeNumber': 'Episode {number}',
   'title.notHere': 'Not here yet',
   'title.watched': 'Watched',
   'title.partly': '{have} of {aired} episodes',
