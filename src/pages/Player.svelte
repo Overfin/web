@@ -12,7 +12,7 @@
   import type { Player, Playback, Segment } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { clock } from '../lib/format';
-  import { t, type Key } from '../lib/i18n.svelte';
+  import { i18n, t, type Key } from '../lib/i18n.svelte';
   import { takeStart } from '../lib/play';
   import SeekBar from '../components/SeekBar.svelte';
 
@@ -225,9 +225,16 @@
   // when its lines change.
   let captions = $state<HTMLDivElement>();
   let cueTrack: TextTrack | null = null;
+  let drawn = '';
   function drawCues() {
     if (!captions) return;
-    const lines = Array.from(cueTrack?.activeCues ?? []) as VTTCue[];
+    // The lines at this time, from the cues: the browser's active cues
+    // lag while paused at the start.
+    const now = video?.currentTime ?? 0;
+    const lines = (Array.from(cueTrack?.cues ?? []) as VTTCue[]).filter((c) => c.startTime <= now && now < c.endTime);
+    const shownNow = lines.map((c) => c.text).join('\n');
+    if (shownNow === drawn) return;
+    drawn = shownNow;
     captions.replaceChildren(...lines.map((cue) => {
       const line = document.createElement('span');
       line.append(cue.getCueAsHTML()); // the server sanitized it (WebVTT, rule 11)
@@ -236,12 +243,23 @@
   }
   function followCues() {
     if (!video) return;
+    // A track's lines arrive when its file has loaded.
+    for (const el of Array.from(video.querySelectorAll('track'))) {
+      if (!el.dataset.followed) {
+        el.dataset.followed = '1';
+        el.addEventListener('load', () => {
+          drawn = '\u0000';
+          drawCues();
+        });
+      }
+    }
     const track = Array.from(video.textTracks).find((tr) => tr.mode !== 'disabled') ?? null;
     if (track && track.mode === 'showing') track.mode = 'hidden';
     if (track === cueTrack) return;
     cueTrack?.removeEventListener('cuechange', drawCues);
     cueTrack = track;
     cueTrack?.addEventListener('cuechange', drawCues);
+    drawn = '\u0000'; // drawn again, whatever was there
     drawCues();
   }
 
@@ -255,6 +273,7 @@
       if (b.start(i) <= video.currentTime + 1 && b.end(i) >= video.currentTime) bufferedMs = b.end(i) * 1000;
     }
     followCues();
+    drawCues();
     const sg = player.segmentAt();
     segment = sg && skippable.includes(sg.kind) && player.positionMs < sg.endMs - 1000 ? sg : null;
   }
@@ -269,12 +288,18 @@
     video.volume = volume;
     video.muted = muted;
     document.addEventListener('fullscreenchange', onFullscreen);
+    // A subtitle track turned on or off (by the SDK, or as the stream
+    // starts), even while paused.
+    video.textTracks.addEventListener('change', followCues);
+    video.textTracks.addEventListener('addtrack', followCues);
     window.addEventListener('keydown', key, { capture: true });
     window.addEventListener('keyup', keyUp, { capture: true });
     try {
       player = await overfin.play(video, id, {
         startMs: takeStart(),
         Hls: await hls(),
+        // The site's language, when the video has it.
+        audioLanguage: i18n.locale,
         // Every (re)start: the title and the track menus.
         onStart(pb) {
           notice = null;
@@ -323,11 +348,16 @@
     player?.setAudioTrack(trackId);
     menu = '';
   }
+  // The subtitles chosen are the profile's from now on: their language
+  // (or none) starts its next playbacks. A track without a known
+  // language changes nothing kept.
   function chooseSubtitles(trackId: string) {
     subtitles = trackId;
     player?.setSubtitleTrack(trackId || null);
     menu = '';
     queueMicrotask(followCues);
+    const language = trackId ? playback?.subtitleTracks?.find((tr) => tr.id === trackId)?.language : '';
+    if (language !== undefined) overfin.setSubtitleLanguage(language).catch(() => {});
   }
 </script>
 
