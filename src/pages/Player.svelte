@@ -22,7 +22,7 @@
   const title = $derived.by(() => {
     if (!playback) return '';
     const it = playback.title;
-    let name = it?.name ?? playback.item.name;
+    let name = it.name;
     if (it?.kind === 'episode' && it.series) {
       name = `${it.series.name} · ${t('item.seasonEpisodeShort', { season: it.seasonNumber ?? '?', episode: it.episodeNumber ?? '?' })} · ${name}`;
     }

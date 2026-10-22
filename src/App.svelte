@@ -14,7 +14,6 @@
   import Home from './pages/Home.svelte';
   import Library from './pages/Library.svelte';
   import Manage from './pages/Manage.svelte';
-  import Person from './pages/Person.svelte';
   import Player from './pages/Player.svelte';
   import Profiles from './pages/Profiles.svelte';
   import Setup from './pages/Setup.svelte';
@@ -92,8 +91,6 @@
         <Discover />
       {:else if route.parts[0] === 'title' && route.parts[1]}
         <TitlePage id={route.parts[1]} params={route.params} />
-      {:else if route.parts[0] === 'person' && route.parts[1]}
-        <Person id={route.parts[1]} />
       {:else if route.parts[0] === 'play' && route.parts[1]}
         <Player id={route.parts[1]} />
       {:else if route.parts[0] === 'profiles'}

@@ -4,7 +4,7 @@
      shows the same page. -->
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { Genre, ItemQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
+  import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
@@ -22,13 +22,13 @@
   type Show = (typeof shows)[number];
   const thisDecade = Math.floor(new Date().getFullYear() / 10) * 10;
   const decades = Array.from({ length: 8 }, (_, i) => thisDecade - 10 * i);
-  // Which titles a library lists, by its kind.
-  const kinds: Record<string, string> = { movies: 'movie', shows: 'series', musicVideos: 'musicVideo', music: 'musicAlbum', books: 'book' };
+  // Which titles a library lists, by its kind: films or series.
+  const kinds: Record<string, 'movie' | 'series'> = { movies: 'movie', shows: 'series' };
 
   const library = $derived(session.libraries.find((l) => l.id === id));
   // The page is shown anew for another library or sort (App keys it on the
   // address).
-  const sort = $derived((params.get('sort') || 'name') as NonNullable<ItemQuery['sort']>);
+  const sort = $derived((params.get('sort') || 'name') as NonNullable<TitleQuery['sort']>);
   const seed = $derived(params.get('seed') || undefined);
   const genre = $derived(params.get('genre') || '');
   const show = $derived<Show>(shows.includes(params.get('show') as Show) ? (params.get('show') as Show) : 'all');
@@ -59,7 +59,7 @@
   let loading = false;
   let pages: AsyncGenerator<TitlePage> | undefined;
 
-  function query(): ItemQuery {
+  function query(): TitleQuery {
     return {
       library: id,
       sort,

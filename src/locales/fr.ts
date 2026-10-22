@@ -104,8 +104,6 @@ const fr: Record<keyof typeof en, string> = {
   'title.watched': 'Vu',
   'title.partly': '{have} épisodes sur {aired}',
   'title.specials': 'Épisodes spéciaux',
-  'person.inLibrary': 'Dans la bibliothèque',
-  'person.nothing': 'Rien ici.',
 
   'account.title': 'Compte',
   'account.dataTitle': 'Vos données',

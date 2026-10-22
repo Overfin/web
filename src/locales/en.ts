@@ -103,8 +103,6 @@ export default {
   'title.watched': 'Watched',
   'title.partly': '{have} of {aired} episodes',
   'title.specials': 'Specials',
-  'person.inLibrary': 'In the library',
-  'person.nothing': 'Nothing here.',
 
   'account.title': 'Account',
   'account.dataTitle': 'Your data',
