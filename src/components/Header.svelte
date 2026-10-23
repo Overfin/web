@@ -7,6 +7,7 @@
   import { overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
   import { librariesHref } from '../lib/lastlibrary';
+  import Brand from './Brand.svelte';
   import { router } from '../lib/router.svelte';
   import { session, setPicked } from '../lib/session.svelte';
 
@@ -58,7 +59,7 @@
 <svelte:window onclick={outside} onkeydown={keydown} />
 
 <header>
-  <a class="brand" href="/"><img src="/logo.svg" alt="" width="30" height="30" />Overfin</a>
+  <Brand />
   <nav>
     <a href="/" class:active={here.length === 0}>{t('nav.home')}</a>
     {#if session.discovery}

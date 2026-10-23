@@ -43,6 +43,7 @@ const fr: Record<keyof typeof en, string> = {
 
   'nav.discover': 'Découvrir',
   'nav.libraries': 'Bibliothèques',
+  'app.poweredBy': 'Propulsé par',
   'discover.title': 'Découvrir',
   'discover.trendingMovies': 'Films tendance',
   'discover.trendingSeries': 'Séries tendance',

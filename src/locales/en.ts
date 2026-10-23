@@ -42,6 +42,7 @@ export default {
 
   'nav.discover': 'Discover',
   'nav.libraries': 'Libraries',
+  'app.poweredBy': 'Powered by',
   'discover.title': 'Discover',
   'discover.trendingMovies': 'Trending films',
   'discover.trendingSeries': 'Trending series',

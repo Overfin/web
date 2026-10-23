@@ -6,7 +6,10 @@
   import { go, router } from './lib/router.svelte';
   import { offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
   import { applyTheme, rememberTheme } from './lib/theme';
+  import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
+  import PoweredBy from './components/PoweredBy.svelte';
+  import { brand } from './lib/brand.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
   import Skeleton from './components/Skeleton.svelte';
@@ -88,7 +91,7 @@
   <!-- The page's own shape while the session loads, under a header with
        the brand only, so nothing moves once it's there. -->
   <header>
-    <a class="brand" href="/"><img src="/logo.svg" alt="" width="30" height="30" />Overfin</a>
+    <Brand />
     <nav class="placeholder" aria-hidden="true"></nav>
   </header>
   <main><Skeleton {...loadingShape(route.parts[0])} /></main>
@@ -141,4 +144,5 @@
     {/key}
   </main>
 {/if}
+{#if brand.custom && route.parts[0] !== 'play'}<PoweredBy />{/if}
 <Dialog />

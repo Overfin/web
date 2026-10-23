@@ -92,8 +92,20 @@ header {
   background: linear-gradient(180deg, rgba(var(--bg-rgb), .94), rgba(var(--bg-rgb), .82)); backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
 }
-.brand { grid-area: brand; display: inline-flex; align-items: center; gap: .45rem; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
-.brand img { display: block; width: 1.9rem; height: 1.9rem; }
+.brand { grid-area: brand; display: inline-flex; align-items: center; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
+/* Overfin's banner, or the operator's: as tall as the logo, never too
+   wide. With a banner for light pages, each shows on its own. */
+.brand svg, .brand img { display: block; height: 1.9rem; width: auto; max-width: 12rem; object-fit: contain; object-position: left; }
+.brand img.light { display: none; }
+:root[data-theme="light"] .brand img.light { display: block; }
+:root[data-theme="light"] .brand img.dark { display: none; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .brand img.light { display: block; }
+  :root:not([data-theme]) .brand img.dark { display: none; }
+}
+/* "Powered by Overfin", under the page. */
+footer.powered { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: 1.5rem var(--gutter) 2rem; font-size: .8rem; color: var(--muted); }
+footer.powered svg { display: block; height: 1.2rem; width: auto; color: var(--text); }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; border-bottom: 2px solid transparent; }
 header nav a:hover { color: var(--text); }
