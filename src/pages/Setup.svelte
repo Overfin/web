@@ -6,7 +6,7 @@
   import { explain, OverfinError, overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
 
-  let { claim, done }: { claim?: 'move' | 'link'; done: () => void } = $props();
+  let { claim, done }: { claim?: 'copy'; done: () => void } = $props();
 
   let message = $state('');
   let username = $state('');
@@ -46,7 +46,7 @@
     <div class="panel">
       <h2>{t('setup.bringTitle')}</h2>
       <p>{t('setup.bringIntro')}</p>
-      {#if claim === 'move'}<p class="muted">{t('setup.moveNote')}</p>{/if}
+      <p class="muted">{t('setup.copyNote')}</p>
       <form class="stack" onsubmit={bring}>
         <label>{t('setup.username')} <input bind:value={username} name="username" autocomplete="username" required /></label>
         <label>{t('setup.password')} <input bind:value={password} name="password" type="password" autocomplete="current-password" required /></label>

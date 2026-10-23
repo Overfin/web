@@ -24,7 +24,7 @@
 
   type Phase =
     | { kind: 'loading' }
-    | { kind: 'setup'; claim?: 'move' | 'link' }
+    | { kind: 'setup'; claim?: 'copy' }
     | { kind: 'blocked'; title: string; message: string }
     | { kind: 'ready' };
   let phase = $state<Phase>({ kind: 'loading' });
