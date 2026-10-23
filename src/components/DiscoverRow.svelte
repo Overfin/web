@@ -5,6 +5,7 @@
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import Card from './Card.svelte';
+  import ScrollRow from './ScrollRow.svelte';
 
   let { title, list, kind, availability, found = () => {}, flags = true, items: given }: {
     title: string;
@@ -26,11 +27,11 @@
 {#await load() then items}
   {#if items.length}
     <h2>{title}</h2>
-    <div class="row">
+    <ScrollRow>
       {#each items as t (t.id)}
         <Card item={t} {flags} />
       {/each}
-    </div>
+    </ScrollRow>
   {/if}
 {:catch}
   <!-- A row that can't load is left out; the others still show. -->

@@ -59,11 +59,11 @@
   const bare = $derived(route.parts[0] === 'profiles' || route.parts[0] === 'play');
 
   // loadingShape is the placeholder that looks like the page at a path.
-  function loadingShape(where: string | undefined): 'home' | 'title' | 'grid' | 'rows' {
-    if (!where) return 'home';
-    if (where === 'title' || where === 'person') return 'title';
-    if (where === 'library') return 'grid';
-    return 'rows';
+  function loadingShape(where: string | undefined): { kind: 'home' | 'title' | 'grid' | 'rows'; heading?: boolean } {
+    if (!where) return { kind: 'home' };
+    if (where === 'title' || where === 'person') return { kind: 'title' };
+    if (where === 'library') return { kind: 'grid', heading: true };
+    return { kind: 'rows', heading: true };
   }
 
   $effect(() => {
@@ -79,7 +79,7 @@
     <a class="brand" href="/"><img src="/logo.svg" alt="" width="30" height="30" />Overfin</a>
     <nav class="placeholder" aria-hidden="true"></nav>
   </header>
-  <main><Skeleton kind={loadingShape(route.parts[0])} /></main>
+  <main><Skeleton {...loadingShape(route.parts[0])} /></main>
 {:else if phase.kind === 'setup'}
   <main><Setup claim={phase.claim} done={start} /></main>
 {:else if phase.kind === 'blocked'}

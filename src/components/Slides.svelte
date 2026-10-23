@@ -5,12 +5,6 @@
      the pointer or the keyboard is on it, while the tab is hidden, and when
      the system asks for less motion. Arrows, dots, swipes and the arrow
      keys move it too. -->
-<script lang="ts" module>
-  // Which slide showed last, and since when: kept while the site is open,
-  // so coming back to the home page goes on where the slideshow would be.
-  let last: { id: string; since: number } | null = null;
-</script>
-
 <script lang="ts">
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -34,8 +28,6 @@
   // Until the titles are there, the slideshow keeps its place.
   let pending = $state(true);
   let index = $state(0);
-  // How long the slide on show stays: shorter for one resumed midway.
-  let wait = $state(0);
   // Slides shown so far, and the next one: only their backdrops load.
   let seen = $state(new Set([0, 1]));
   // Each series' episode to play (the one in progress, the next, or the
@@ -88,38 +80,15 @@
     overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
       slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]).slice(0, count);
       pending = false;
-      resume();
+      // The mix is new each time: it starts at its first slide.
+      show(0);
     }, () => (pending = false));
   });
-
-  // Where the slideshow would be, had it gone on while away (where it was,
-  // when motion is reduced).
-  function resume() {
-    const at = last ? slides.findIndex((sl) => sl.id === last!.id) : -1;
-    // A first visit (or a slide gone from the list) starts anywhere, so
-    // the same one doesn't always come first.
-    if (!last || at < 0) {
-      show(Math.floor(Math.random() * slides.length));
-      return;
-    }
-    if (still) {
-      show(at);
-      return;
-    }
-    const away = Date.now() - last.since;
-    const i = (at + Math.floor(away / every)) % slides.length;
-    const since = Date.now() - (away % every);
-    show(i);
-    last = { id: slides[i].id, since };
-    wait = every - (away % every);
-  }
 
   function show(i: number) {
     if (!slides.length) return;
     index = (i + slides.length) % slides.length;
     seen = new Set([...seen, index, (index + 1) % slides.length]);
-    last = { id: slides[index].id, since: Date.now() };
-    wait = every;
   }
 
   $effect(() => {
@@ -133,7 +102,7 @@
 
   $effect(() => {
     if (still || hovered || focused || hidden || slides.length < 2) return;
-    const timer = setTimeout(() => show(index + 1), wait || every);
+    const timer = setTimeout(() => show(index + 1), every);
     return () => clearTimeout(timer);
   });
 

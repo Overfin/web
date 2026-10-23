@@ -4,12 +4,17 @@
 <script lang="ts">
   import { t } from '../lib/i18n.svelte';
 
-  let { kind = 'rows' }: { kind?: 'home' | 'title' | 'rows' | 'grid' | 'list' } = $props();
+  // heading: the page has a title (and a toolbar, over a grid) above.
+  let { kind = 'rows', heading = false }: { kind?: 'home' | 'title' | 'rows' | 'grid' | 'list'; heading?: boolean } = $props();
   const cards = Array.from({ length: 12 }, (_, i) => i);
 </script>
 
 <div class="skeleton" role="status">
   <span class="sr-only">{t('app.loading')}</span>
+  {#if heading}
+    <div class="line page-title"></div>
+    {#if kind === 'grid'}<div class="line toolbar"></div>{/if}
+  {/if}
   {#if kind === 'home'}
     <!-- The slideshow's place, so nothing moves when it comes. -->
     <div class="slides loading">
@@ -26,9 +31,11 @@
       <div class="info">
         <div class="poster"></div>
         <div class="lines">
-          <div class="line wide"></div>
-          <div class="line"></div>
+          <div class="line logo"></div>
           <div class="line short"></div>
+          <div class="line buttons"></div>
+          <div class="line"></div>
+          <div class="line"></div>
         </div>
       </div>
     </div>
