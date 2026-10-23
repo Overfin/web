@@ -15,7 +15,6 @@
   import { session } from '../lib/session.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
-  import TMDBNotice from '../components/TMDBNotice.svelte';
 
   let { id, params }: { id: string; params: URLSearchParams } = $props();
 
@@ -325,7 +324,6 @@
       {/each}
     </div>
   {/if}
-  <TMDBNotice />
 {:catch error}
   <PageError {error} />
 {/await}

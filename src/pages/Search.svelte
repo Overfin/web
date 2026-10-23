@@ -11,7 +11,6 @@
   import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
   import Card from '../components/Card.svelte';
-  import TMDBNotice from '../components/TMDBNotice.svelte';
 
   const saved = 'overfin-web-search';
   let query = $state('');
@@ -82,7 +81,6 @@
       {@render titles(results.titles)}
       {@render people(results.people)}
     {/if}
-    <TMDBNotice />
   {:else if searching}
     <p class="muted">{t('app.loading')}</p>
   {:else}

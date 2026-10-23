@@ -4,7 +4,6 @@
   import { t } from '../lib/i18n.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Skeleton from '../components/Skeleton.svelte';
-  import TMDBNotice from '../components/TMDBNotice.svelte';
 
 
   const rows = [
@@ -36,4 +35,3 @@
 {#each rows as row (row.key)}
   <DiscoverRow title={t(row.key)} list={row.list} kind={row.kind} availability="missing" flags={false} {found} />
 {/each}
-<TMDBNotice />

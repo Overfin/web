@@ -8,8 +8,7 @@
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
-  import PoweredBy from './components/PoweredBy.svelte';
-  import { brand } from './lib/brand.svelte';
+  import SiteFooter from './components/SiteFooter.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
   import Skeleton from './components/Skeleton.svelte';
@@ -144,5 +143,5 @@
     {/key}
   </main>
 {/if}
-{#if brand.custom && route.parts[0] !== 'play'}<PoweredBy />{/if}
+{#if route.parts[0] !== 'play'}<SiteFooter />{/if}
 <Dialog />

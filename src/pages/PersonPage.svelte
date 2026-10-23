@@ -7,7 +7,6 @@
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
-  import TMDBNotice from '../components/TMDBNotice.svelte';
 
   let { id }: { id: string } = $props();
   let wholeBio = $state(false);
@@ -70,7 +69,6 @@
     {/if}
   {/if}
   {#if !person.credits.length}<p class="muted">{t('person.nothing')}</p>{/if}
-  <TMDBNotice />
 {:catch error}
   <PageError {error} />
 {/await}

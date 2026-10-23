@@ -105,9 +105,14 @@ header {
   :root:not([data-theme]) .brand img.light { display: block; }
   :root:not([data-theme]) .brand img.dark { display: none; }
 }
-/* "Powered by Overfin", under the page. */
-footer.powered { display: flex; align-items: center; justify-content: center; gap: .5rem; padding: 1.5rem var(--gutter) 2rem; font-size: .8rem; color: var(--muted); }
-footer.powered svg { display: block; height: 1.2rem; width: auto; color: var(--text); }
+/* The bottom of every page: "Powered by Overfin" (with the operator's
+   brand), then TMDB's attribution, small, last. */
+footer.site-foot { display: grid; justify-items: center; gap: .6rem; padding: 1.5rem var(--gutter) 1.5rem; text-align: center; }
+footer.site-foot p { margin: 0; }
+.powered { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--muted); }
+.powered svg { display: block; height: 1.2rem; width: auto; color: var(--text); }
+.tmdb { max-width: 48rem; font-size: .65rem; line-height: 1.5; color: var(--faint); }
+.tmdb img { display: inline; height: 7px; width: auto; margin-right: .4rem; vertical-align: 0; opacity: .8; }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; border-bottom: 2px solid transparent; }
 header nav a:hover { color: var(--text); }
@@ -238,8 +243,7 @@ dialog .actions { justify-content: flex-end; margin-bottom: 0; }
 .poster .flag { position: absolute; z-index: 1; top: .4rem; left: .4rem; font-size: .7rem; padding: .15em .5em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); backdrop-filter: blur(6px); border: 1px solid var(--hairline); color: var(--text); }
 ul.plain { list-style: none; padding: 0; margin: 0 0 1rem; }
 ul.plain li { padding: .25rem 0; }
-footer.tmdb { display: flex; gap: .6rem; align-items: center; margin-top: 2.5rem; font-size: .75rem; color: var(--muted); }
-footer.tmdb img { height: 10px; width: auto; flex: none; }
+
 .cardbox { position: relative; flex: none; }
 .cardbox .remove { position: absolute; top: .3rem; right: .3rem; min-height: 0; padding: .1em .45em; font-size: .8rem; background: rgba(var(--panel-rgb), .85); border: none; opacity: 0; }
 .cardbox:hover .remove, .cardbox .remove:focus-visible { opacity: 1; }
