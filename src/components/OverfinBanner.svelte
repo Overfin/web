@@ -1,7 +1,7 @@
 <!-- Overfin's banner: its logo and its name as one picture, the name in the
      text's color, so it suits dark and light pages. The same as the
      server's (internal/theme/banner.svg). -->
-<svg class="overfin-banner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 100" overflow="visible" role="img" aria-label="Overfin">
+<svg class="overfin-banner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" overflow="visible" role="img" aria-label="Overfin">
   <defs>
     <linearGradient id="ofb-fin" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#7B5CF0"/><stop offset="1" stop-color="#3FA9F5"/></linearGradient>
     <linearGradient id="ofb-o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF4D5E"/><stop offset="1" stop-color="#FF8A3D"/></linearGradient>
