@@ -1,6 +1,7 @@
 <!-- The account: how one signs in (with Overfin's own sign-in), downloading
-     one's data, deleting the account. Changes need a fresh login, or the
-     profile's PIN. -->
+     one's data, bringing a history from the service this site replaces,
+     deleting the account. Changes need a fresh login, or the profile's
+     PIN. -->
 <script lang="ts">
   import { explain, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
@@ -17,6 +18,26 @@
   let editing = $state(false);
   let newPassword = $state('');
   overfin.signinInfo().then((s) => (signin = s), () => {});
+
+  // Bringing the history of a previous account into this profile, when the
+  // server offers it (once per account; never to kids profiles).
+  let bring = $state(false);
+  let username = $state('');
+  let password = $state('');
+  overfin.historyCopy().then((h) => (bring = h.available), () => {});
+
+  async function copyHistory(event: SubmitEvent) {
+    event.preventDefault();
+    message = '';
+    try {
+      await overfin.copyHistory(username, password);
+      password = '';
+      bring = false;
+      await notice(t('account.brought'));
+    } catch (err) {
+      message = explain(err);
+    }
+  }
 
   async function savePassword(event: SubmitEvent) {
     event.preventDefault();
@@ -111,6 +132,17 @@
         <p class="muted">{t('account.historyText')}</p>
       </div>
       <button onclick={clearHistory}>{t('account.clearHistory')}</button>
+    </div>
+  {/if}
+  {#if bring}
+    <div class="panel">
+      <h2>{t('account.bringTitle')}</h2>
+      <p class="muted">{t('account.bringText')}</p>
+      <form class="password" onsubmit={copyHistory}>
+        <input bind:value={username} name="username" autocomplete="username" required aria-label={t('setup.username')} placeholder={t('setup.username')} />
+        <input bind:value={password} name="password" type="password" autocomplete="current-password" required aria-label={t('setup.password')} placeholder={t('setup.password')} />
+        <button class="primary" type="submit">{t('account.bring')}</button>
+      </form>
     </div>
   {/if}
   {#if profile?.owner}
