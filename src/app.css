@@ -310,7 +310,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 
 /* The home page's slideshow: full width under the header, slides cross-fade. */
 .slides {
-  position: relative; margin: -1.5rem calc(-1 * var(--gutter)) 1rem; height: min(75vh, 44rem); min-height: 26rem;
+  position: relative; margin: -1.5rem calc(-1 * var(--gutter)) 0; height: min(75vh, 44rem); min-height: 26rem;
   overflow: hidden; background: var(--bg); touch-action: pan-y;
 }
 .slide { position: absolute; inset: 0; display: flex; align-items: flex-end; opacity: 0; transition: opacity .7s; }
@@ -323,7 +323,9 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
     linear-gradient(to right, rgba(12, 13, 17, .92) 0%, rgba(12, 13, 17, .6) 38%, rgba(12, 13, 17, 0) 70%),
     linear-gradient(to top, var(--bg) 0%, rgba(12, 13, 17, 0) 40%);
 }
-.slide .content { position: relative; z-index: 2; max-width: 38rem; padding: 0 var(--gutter) 4rem; }
+.slide .content { position: relative; z-index: 2; max-width: 38rem; padding: 0 var(--gutter) 2.5rem; }
+/* The first row sits close under the slideshow: its fade is space enough. */
+.slides + h2 { margin-top: .5rem; }
 .slide .logo { display: block; max-width: min(24rem, 70vw); max-height: 9rem; width: auto; height: auto; margin-bottom: 1rem; object-fit: contain; object-position: left bottom; filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
 .slide h2 { font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3rem); line-height: 1.1; margin: 0 0 .75rem; text-shadow: 0 2px 12px rgba(0, 0, 0, .6); }
 .slide .overview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: #d6d8dd; }
@@ -336,7 +338,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides .nav:hover { background: rgba(12, 13, 17, .75); }
 .slides .prev { left: 1rem; }
 .slides .next { right: 1rem; }
-.slides .dots { position: absolute; z-index: 3; right: var(--gutter); bottom: 1.6rem; display: flex; gap: .45rem; }
+.slides .dots { position: absolute; z-index: 3; right: var(--gutter); bottom: 3.45rem; display: flex; gap: .45rem; }
 .slides .dots button { width: .6rem; height: .6rem; min-height: 0; padding: 0; border: none; box-shadow: none; border-radius: 999px; background: rgba(255, 255, 255, .35); transition: width .3s, background-color .3s; }
 .slides .dots button.current { width: 1.6rem; background: var(--text); }
 @media (max-width: 600px) {

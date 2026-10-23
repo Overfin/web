@@ -29,6 +29,9 @@
   let wait = $state(0);
   // Slides shown so far, and the next one: only their backdrops load.
   let seen = $state(new Set([0, 1]));
+  // Each series' episode to play (the one in progress, the next, or the
+  // first), asked for when its slide first shows; null when it has none.
+  let episodes = $state<Record<string, { id: string; positionMs: number } | null>>({});
   let hovered = $state(false);
   let focused = $state(false);
   let hidden = $state(false);
@@ -89,6 +92,15 @@
   }
 
   $effect(() => {
+    const item = slides[index];
+    if (!item || item.kind !== 'series' || item.id in episodes) return;
+    episodes[item.id] = null;
+    overfin.upNext(item.id).then((up) => {
+      episodes[item.id] = { id: up.title.id, positionMs: up.positionMs };
+    }, () => {});
+  });
+
+  $effect(() => {
     if (still || hovered || focused || hidden || slides.length < 2) return;
     const timer = setTimeout(() => show(index + 1), wait || every);
     return () => clearTimeout(timer);
@@ -144,6 +156,12 @@
             {#if item.playable}
               <button class="primary" onclick={() => play(item.id, position)}>
                 {position ? t('home.resume') : t('item.play')}
+              </button>
+              <a class="button" href="/title/{item.id}">{t('home.moreInfo')}</a>
+            {:else if episodes[item.id]}
+              {@const ep = episodes[item.id]!}
+              <button class="primary" onclick={() => play(ep.id, ep.positionMs)}>
+                {ep.positionMs ? t('home.resume') : t('item.play')}
               </button>
               <a class="button" href="/title/{item.id}">{t('home.moreInfo')}</a>
             {:else}
