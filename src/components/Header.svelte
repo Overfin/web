@@ -54,7 +54,7 @@
 <svelte:window onclick={outside} onkeydown={keydown} />
 
 <header>
-  <a class="brand" href="/">Overfin</a>
+  <a class="brand" href="/"><img src="/logo.svg" alt="" width="30" height="30" />Overfin</a>
   <nav>
     <a href="/" class:active={here.length === 0}>{t('nav.home')}</a>
     {#if session.discovery}

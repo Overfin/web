@@ -66,7 +66,8 @@ header {
   align-items: center; gap: 1.5rem; min-height: var(--header-h); padding: 0 var(--gutter);
   background: rgba(12, 13, 17, .92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, .05);
 }
-.brand { grid-area: brand; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--accent); }
+.brand { grid-area: brand; display: inline-flex; align-items: center; gap: .45rem; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
+.brand img { display: block; width: 1.9rem; height: 1.9rem; }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; border-bottom: 2px solid transparent; }
 header nav a:hover { color: var(--text); }
