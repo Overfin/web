@@ -58,6 +58,14 @@
   const key = $derived(route.parts.join('/') + '?' + route.params.toString());
   const bare = $derived(route.parts[0] === 'profiles' || route.parts[0] === 'play');
 
+  // loadingShape is the placeholder that looks like the page at a path.
+  function loadingShape(where: string | undefined): 'home' | 'title' | 'grid' | 'rows' {
+    if (!where) return 'home';
+    if (where === 'title' || where === 'person') return 'title';
+    if (where === 'library') return 'grid';
+    return 'rows';
+  }
+
   $effect(() => {
     void key;
     window.scrollTo(0, 0);
@@ -65,7 +73,13 @@
 </script>
 
 {#if phase.kind === 'loading'}
-  <main><Skeleton /></main>
+  <!-- The page's own shape while the session loads, under a header with
+       the brand only, so nothing moves once it's there. -->
+  <header>
+    <a class="brand" href="/"><img src="/logo.svg" alt="" width="30" height="30" />Overfin</a>
+    <nav class="placeholder" aria-hidden="true"></nav>
+  </header>
+  <main><Skeleton kind={loadingShape(route.parts[0])} /></main>
 {:else if phase.kind === 'setup'}
   <main><Setup claim={phase.claim} done={start} /></main>
 {:else if phase.kind === 'blocked'}

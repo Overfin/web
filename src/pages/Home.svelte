@@ -56,7 +56,7 @@
 </script>
 
 {#await load()}
-  <Skeleton />
+  <Skeleton kind="home" />
 {:then home}
   {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
   <!-- Without discovery, the slideshow shows the newest, from every

@@ -31,6 +31,8 @@
   const every = 8000;
 
   let slides = $state<Title[]>([]);
+  // Until the titles are there, the slideshow keeps its place.
+  let pending = $state(true);
   let index = $state(0);
   // How long the slide on show stays: shorter for one resumed midway.
   let wait = $state(0);
@@ -77,13 +79,17 @@
 
   $effect(() => {
     const chosen = ids();
-    if (!chosen.length) return;
+    if (!chosen.length) {
+      pending = false;
+      return;
+    }
     // Each title's page, for its overview and genres, in one request; those
     // that fail are left out.
     overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
       slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]).slice(0, count);
+      pending = false;
       resume();
-    }, () => {});
+    }, () => (pending = false));
   });
 
   // Where the slideshow would be, had it gone on while away (where it was,
@@ -150,7 +156,16 @@
 
 <svelte:document onvisibilitychange={() => (hidden = document.hidden)} />
 
-{#if slides.length}
+{#if pending}
+  <div class="slides loading" aria-hidden="true">
+    <div class="content">
+      <div class="line logo"></div>
+      <div class="line short"></div>
+      <div class="line"></div>
+      <div class="line buttons"></div>
+    </div>
+  </div>
+{:else if slides.length}
   <!-- Keys reach it from its own buttons and links: the arrows move it. -->
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <section class="slides" aria-roledescription="carousel" aria-label={t('home.featured')}

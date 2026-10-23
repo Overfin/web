@@ -1,14 +1,26 @@
-<!-- What a screen will look like, while it loads: a title's top, rows of
-     cards, a grid, or a list of panels. Screen readers hear "Loading…". -->
+<!-- What a screen will look like, while it loads: the home page's
+     slideshow and rows, a title's top, rows of cards, a grid, or a list of
+     panels. Screen readers hear "Loading…". -->
 <script lang="ts">
   import { t } from '../lib/i18n.svelte';
 
-  let { kind = 'rows' }: { kind?: 'title' | 'rows' | 'grid' | 'list' } = $props();
+  let { kind = 'rows' }: { kind?: 'home' | 'title' | 'rows' | 'grid' | 'list' } = $props();
   const cards = Array.from({ length: 12 }, (_, i) => i);
 </script>
 
 <div class="skeleton" role="status">
   <span class="sr-only">{t('app.loading')}</span>
+  {#if kind === 'home'}
+    <!-- The slideshow's place, so nothing moves when it comes. -->
+    <div class="slides loading">
+      <div class="content">
+        <div class="line logo"></div>
+        <div class="line short"></div>
+        <div class="line"></div>
+        <div class="line buttons"></div>
+      </div>
+    </div>
+  {/if}
   {#if kind === 'title'}
     <div class="hero art">
       <div class="info">
