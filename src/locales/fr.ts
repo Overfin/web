@@ -85,6 +85,10 @@ const fr: Record<keyof typeof en, string> = {
   'library.noMatch': 'Aucun titre ne correspond à ces filtres.',
 
   'item.play': 'Lecture',
+  'item.score': 'Utilisateurs de TMDB : {value} sur 10, d’après {votes} votes',
+  'item.listAdd': 'Ajouter à ma liste',
+  'item.listRemove': 'Retirer de ma liste',
+  'item.favoriteRemove': 'Retirer des favoris',
   'item.markWatched': 'Marquer comme vu',
   'item.markUnwatched': 'Marquer comme non vu',
   'item.favoriteAdd': 'Ajouter aux favoris',

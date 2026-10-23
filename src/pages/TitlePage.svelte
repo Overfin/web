@@ -10,6 +10,7 @@
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { confirm } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
+  import { score } from '../lib/score';
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
   import PageError from '../components/PageError.svelte';
@@ -152,6 +153,12 @@
           {#if title.airDate}<span>{new Date(title.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
           {:else if title.year}<span>{title.year}</span>{/if}
           {#if title.certification}<span class="certification">{title.certification}</span>{/if}
+          {#if score(title)}{@const s = score(title)!}
+            <span class="score" title={t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}
+              <span class="sr-only">{t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}</span>
+            </span>
+          {/if}
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
           {#if title.genres?.length}<span>{title.genres.join(', ')}</span>{/if}
           {#if availabilityText(title)}<span class="availability">{availabilityText(title)}</span>{/if}
@@ -188,11 +195,22 @@
               <button class="primary" onclick={() => play(title.id, 0)}>{t('item.play')}</button>
             {/if}
           {/if}
+          <!-- My list, watched, favorite: icons that fill in when on. -->
           {#if onList !== null}
-            <button onclick={toggleList}>{onList ? t('item.watchlistOn') : t('item.watchlistAdd')}</button>
+            {@const label = onList ? t('item.listRemove') : t('item.listAdd')}
+            <button class="toggle" class:on={onList} aria-pressed={onList} aria-label={label} title={label} onclick={toggleList}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2-6.5 4.2v-16a1 1 0 0 1 1-1z" /></svg>
+            </button>
           {/if}
-          <button onclick={() => togglePlayed(played)}>{played ? t('item.markUnwatched') : t('item.markWatched')}</button>
-          <button onclick={() => toggleFavorite(favorite)}>{favorite ? t('item.favoriteOn') : t('item.favoriteAdd')}</button>
+          <button class="toggle" class:on={played} aria-pressed={played} aria-label={played ? t('item.markUnwatched') : t('item.markWatched')}
+            title={played ? t('item.markUnwatched') : t('item.markWatched')} onclick={() => togglePlayed(played)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path class="mark" d="M7.8 12.3l2.8 2.8 5.6-5.8" /></svg>
+          </button>
+          <button class="toggle heart" class:on={favorite} aria-pressed={favorite}
+            aria-label={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')} title={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')}
+            onclick={() => toggleFavorite(favorite)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
+          </button>
         </div>
         {#if title.overview}<p class="overview">{title.overview}</p>{/if}
       </div>

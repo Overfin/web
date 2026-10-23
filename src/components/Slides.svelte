@@ -11,6 +11,8 @@
   import { duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
   import { loaded } from '../lib/loaded';
+  import { score } from '../lib/score';
+  import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
 
   let { trending, latest, random, acclaimed }: {
@@ -150,13 +152,19 @@
         {/if}
         <div class="content">
           {#if item.images?.logo}
-            <img class="logo" src={overfin.imageUrl(item.images.logo, 'medium')} alt={item.name} />
+            <img class="logo" src={overfin.imageUrl(item.images.logo, 'medium')} alt={item.name} use:weigh />
           {:else}
             <h2>{item.name}</h2>
           {/if}
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
             {#if item.certification}<span class="certification">{item.certification}</span>{/if}
+            {#if score(item)}{@const s = score(item)!}
+              <span class="score" title={t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}
+                <span class="sr-only">{t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}</span>
+              </span>
+            {/if}
             {#if item.durationMs && item.kind === 'movie'}<span>{duration(item.durationMs)}</span>{/if}
             {#if item.genres?.length}<span>{item.genres.slice(0, 3).join(', ')}</span>{/if}
           </div>

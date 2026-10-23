@@ -84,6 +84,10 @@ export default {
   'library.noMatch': 'No titles match these filters.',
 
   'item.play': 'Play',
+  'item.score': 'TMDB users: {value} out of 10, from {votes} votes',
+  'item.listAdd': 'Add to my list',
+  'item.listRemove': 'Remove from my list',
+  'item.favoriteRemove': 'Remove from favorites',
   'item.markWatched': 'Mark as watched',
   'item.markUnwatched': 'Mark as not watched',
   'item.favoriteAdd': 'Add to favorites',

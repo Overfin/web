@@ -514,3 +514,16 @@ ol.episodes .about-toggle { min-height: 0; padding: .1rem 0; font-size: .85rem; 
   .shift.prev { left: calc(.75rem - var(--gutter)); }
   .shift.next { right: calc(.75rem - var(--gutter)); }
 }
+
+/* Users' score, with a small star. */
+.meta .score { display: inline-flex; align-items: center; gap: .3em; color: #f2c14e; font-weight: 600; }
+.meta .score svg { width: 1em; height: 1em; fill: currentColor; }
+
+/* A title's list, watched and favorite: round icons that fill in when on. */
+.actions .toggle { width: 2.5rem; padding: 0; border-radius: 50%; color: var(--text); }
+.actions .toggle svg { width: 1.3rem; height: 1.3rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.actions .toggle.on { color: var(--accent); border-color: rgba(106, 168, 255, .55); }
+.actions .toggle.on svg { fill: currentColor; }
+.actions .toggle.on svg .mark { stroke: var(--on-accent); fill: none; }
+.actions .toggle.heart.on { color: #ff6b8a; border-color: rgba(255, 107, 138, .55); }
+@media (max-width: 600px) { .actions .toggle { flex: 0 0 auto; } }
