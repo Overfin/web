@@ -2,6 +2,12 @@
      included), the watchlist, what's trending
      among the library's titles, and what's new in each library (films and
      series only). -->
+<script lang="ts" module>
+  // The slideshow's random picks: new each time the site opens, the same
+  // while browsing it.
+  const seed = String(Math.floor(Math.random() * 1e9));
+</script>
+
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -23,12 +29,17 @@
         ['/discover', { list: 'trending', mediaKind: kind, availability: 'library', limit: 20 }]),
       ...session.libraries.map((library): [string, Record<string, string | number>] =>
         ['/titles/latest', { library: library.id, limit: 16 }]),
+      // For the slideshow: the library at random, and its best rated.
+      ['/titles', { kind: ['movie', 'series'], sort: 'random', seed, limit: 30 }],
+      ['/titles', { kind: ['movie', 'series'], sort: 'communityRating', order: 'desc', limit: 40 }],
     ]);
     // A row that failed is empty; Continue Watching failing fails the page.
     const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
     if (answers[0] instanceof Error) throw answers[0];
-    const rest = answers.slice(2 + trending.length);
+    const rest = answers.slice(2 + trending.length, 2 + trending.length + session.libraries.length);
+    const [random, acclaimed] = answers.slice(-2).map(items);
     return {
+      random, acclaimed,
       resume: items(answers[0]),
       watchlist: items(answers[1]), // the server may not offer it
       trending: trending.length ? { movie: items(answers[2]), series: items(answers[3]) } : { movie: [], series: [] },
@@ -50,8 +61,8 @@
   {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides trending={home.trending} fallback={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i })))
-    .sort((a, b) => a.i - b.i).map((x) => x.item)} />
+  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed}
+    latest={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
