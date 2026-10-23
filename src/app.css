@@ -97,6 +97,8 @@ header {
    wide. With a banner for light pages, each shows on its own. */
 .brand svg, .brand img { display: block; height: 1.9rem; width: auto; max-width: 12rem; object-fit: contain; object-position: left; }
 .brand img.light { display: none; }
+/* Its place, kept while the brand isn't known yet. */
+.brand .pending { display: block; height: 1.9rem; width: 7rem; }
 :root[data-theme="light"] .brand img.light { display: block; }
 :root[data-theme="light"] .brand img.dark { display: none; }
 @media (prefers-color-scheme: light) {

@@ -1,25 +1,21 @@
 // Whose brand the site shows: Overfin's, or the operator's own once they
 // switch it on (their name, logo and banners). It's read once, before
-// anyone signs in, and gives the tab its title and icon.
+// anyone signs in, and gives the tab its title and icon. Until it's known,
+// the header's brand, the title and the icon stay empty: neither brand
+// shows before its time.
 import type { Branding } from './sdk/overfin.js';
 import { overfin } from './client';
 
-export const brand = $state<Branding>({ custom: false, name: 'Overfin', banner: {} });
+export const brand = $state<Branding & { ready: boolean }>({ ready: false, custom: false, name: 'Overfin', banner: {} });
 
 export async function loadBrand(): Promise<void> {
-  let b: Branding;
   try {
-    b = await overfin.branding();
+    Object.assign(brand, await overfin.branding());
   } catch {
-    return; // Overfin's, as the page has it
+    // Overfin's, then.
   }
-  Object.assign(brand, b);
-  document.title = b.name;
-  if (b.custom && b.logo) {
-    const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (icon) {
-      icon.removeAttribute('type');
-      icon.href = b.logo;
-    }
-  }
+  document.title = brand.name;
+  const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (icon) icon.href = brand.custom && brand.logo ? brand.logo : '/logo.svg';
+  brand.ready = true;
 }

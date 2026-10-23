@@ -7,7 +7,9 @@
 </script>
 
 <a class="brand" href="/" aria-label={brand.name}>
-  {#if !brand.custom}
+  {#if !brand.ready}
+    <span class="pending"></span>
+  {:else if !brand.custom}
     <OverfinBanner />
   {:else if brand.banner.dark}
     <img class:dark={!!brand.banner.light} src={brand.banner.dark} alt={brand.name} />
