@@ -5,6 +5,7 @@
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router } from './lib/router.svelte';
   import { offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
+  import { applyTheme, rememberTheme } from './lib/theme';
   import Dialog from './components/Dialog.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
@@ -72,6 +73,14 @@
   $effect(() => {
     void key;
     window.scrollTo(0, 0);
+  });
+
+  // The active profile's look, once it's known; the player is always dark.
+  $effect(() => {
+    if (!session.me) return;
+    const theme = session.me.activeProfile?.theme;
+    applyTheme(route.parts[0] === 'play' ? 'dark' : theme);
+    rememberTheme(theme);
   });
 </script>
 

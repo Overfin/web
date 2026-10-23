@@ -7,6 +7,7 @@
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t, tn, type Key } from '../lib/i18n.svelte';
+  import { rememberLibrary } from '../lib/lastlibrary';
   import { go } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
   import { visible } from '../lib/visible';
@@ -26,6 +27,8 @@
   const kinds: Record<string, 'movie' | 'series'> = { movies: 'movie', shows: 'series' };
 
   const library = $derived(session.libraries.find((l) => l.id === id));
+  // svelte-ignore state_referenced_locally
+  rememberLibrary(id);
   // The page is shown anew for another library or sort (App keys it on the
   // address).
   const sort = $derived((params.get('sort') || 'name') as NonNullable<TitleQuery['sort']>);
@@ -107,7 +110,17 @@
 {#if !library}
   <PageError notFound />
 {:else}
-  <h1>{library.name}</h1>
+  <!-- With several libraries, their names on top: this one marked. -->
+  {#if session.libraries.length > 1}
+    <nav class="pills" aria-label={t('nav.libraries')}>
+      {#each session.libraries as l (l.id)}
+        <a href="/library/{l.id}" class:active={l.id === id} aria-current={l.id === id ? 'page' : undefined}>{l.name}</a>
+      {/each}
+    </nav>
+    <h1 class="sr-only">{library.name}</h1>
+  {:else}
+    <h1>{library.name}</h1>
+  {/if}
   <div class="toolbar">
     <select aria-label={t('library.sort')} value={sort} onchange={(event) => change('sort', event.currentTarget.value)}>
       {#each sorts as value (value)}

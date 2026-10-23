@@ -1,15 +1,19 @@
 <!-- The bar on top of every screen except the profile picker, account setup
-     and the player: home, discovery and the libraries, then a menu for who's
-     watching (switching, managing profiles, the account, the language,
-     logging out). On phones the libraries go to a second, scrolling line. -->
+     and the player: home, discovery and the libraries (one item, however
+     many there are), then a menu for who's watching (switching, managing
+     profiles, the account, logging out). On phones the sections go to a
+     second, scrolling line. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
+  import { librariesHref } from '../lib/lastlibrary';
   import { router } from '../lib/router.svelte';
   import { session, setPicked } from '../lib/session.svelte';
 
   const here = $derived(router.route.parts);
   const name = $derived(session.me?.activeProfile?.name ?? t('nav.chooseProfile'));
+  // Where Libraries leads: read again as the address changes.
+  const libraries = $derived((void router.route, librariesHref(session.libraries)));
 
   let open = $state(false);
   let menu: HTMLDivElement;
@@ -60,9 +64,11 @@
     {#if session.discovery}
       <a href="/discover" class:active={here[0] === 'discover'}>{t('nav.discover')}</a>
     {/if}
-    {#each session.libraries as library (library.id)}
-      <a href="/library/{library.id}" class:active={here[0] === 'library' && here[1] === library.id}>{library.name}</a>
-    {/each}
+    {#if session.libraries.length === 1}
+      <a href="/library/{session.libraries[0].id}" class:active={here[0] === 'library'}>{session.libraries[0].name}</a>
+    {:else if libraries}
+      <a href={libraries} class:active={here[0] === 'library'}>{t('nav.libraries')}</a>
+    {/if}
   </nav>
   <a class="search-link" href="/search" aria-label={t('search.label')} title={t('search.label')} class:active={here[0] === 'search'}
     onclick={newSearch}>

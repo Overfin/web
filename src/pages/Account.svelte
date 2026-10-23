@@ -35,6 +35,22 @@
     }
   }
 
+  // This profile's look: it applies at once, and each profile chooses its
+  // own.
+  // svelte-ignore state_referenced_locally
+  let theme = $state<'' | 'light' | 'dark'>(profile?.theme ?? '');
+
+  async function saveTheme() {
+    if (!profile) return;
+    message = '';
+    try {
+      const changed = await overfin.updateProfile(profile.id, { theme });
+      if (session.me) session.me.activeProfile = changed;
+    } catch (err) {
+      message = explain(err);
+    }
+  }
+
   // Bringing the history of a previous account into this profile, when the
   // server offers it (once per account; never to kids profiles).
   let bring = $state(false);
@@ -146,6 +162,19 @@
         </select>
         <button class="primary" disabled={language === session.me?.language} onclick={saveLanguage}>{t('account.languageSave')}</button>
       </div>
+    </div>
+  {/if}
+  {#if profile}
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.themeTitle')}</h2>
+        <p class="muted">{t('account.themeText')}</p>
+      </div>
+      <select bind:value={theme} onchange={saveTheme} aria-label={t('account.themeTitle')}>
+        <option value="">{t('account.themeDevice')}</option>
+        <option value="light">{t('account.themeLight')}</option>
+        <option value="dark">{t('account.themeDark')}</option>
+      </select>
     </div>
   {/if}
   {#if profile?.kind !== 'kids'}

@@ -409,6 +409,18 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .seasons button:first-child { margin-left: auto; }
 .seasons button:last-child { margin-right: auto; }
 .seasons button.active { background: var(--text); border-color: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+/* A row of names, one chosen (the libraries): centered while they fit,
+   scrolling sideways when they don't. */
+.pills { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: .2rem calc(-1 * var(--gutter)) 1.4rem; padding: .2rem var(--gutter) .3rem; }
+.pills a {
+  flex: none; display: inline-flex; align-items: center; min-height: 2.25rem; padding: .3em 1.1em; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font-weight: 500; white-space: nowrap;
+  transition: background-color .15s, border-color .15s;
+}
+.pills a:first-child { margin-left: auto; }
+.pills a:last-child { margin-right: auto; }
+.pills a:hover { background-color: var(--panel-3); border-color: var(--border-strong); }
+.pills a.active { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; }
 .seasons .dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); }
 .seasons .dot.missing { background: var(--muted); }
 .season-overview { max-width: 50rem; margin-top: -.3rem; }
