@@ -2,7 +2,7 @@
      watching?"), then the screen the address names. -->
 <script lang="ts">
   import { explain, isError, overfin } from './lib/client';
-  import { t } from './lib/i18n.svelte';
+  import { i18n, t } from './lib/i18n.svelte';
   import { go, router } from './lib/router.svelte';
   import { offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
   import Dialog from './components/Dialog.svelte';
@@ -24,7 +24,7 @@
 
   type Phase =
     | { kind: 'loading' }
-    | { kind: 'setup'; claim?: 'copy' }
+    | { kind: 'setup'; claim?: 'copy'; languages: { tag: string; name: string }[]; language: string }
     | { kind: 'blocked'; title: string; message: string }
     | { kind: 'ready' };
   let phase = $state<Phase>({ kind: 'loading' });
@@ -33,9 +33,12 @@
     phase = { kind: 'loading' };
     try {
       session.me = await overfin.me();
+      i18n.follow(session.me.language);
     } catch (err) {
-      if (isError(err, 'account-setup-required')) phase = { kind: 'setup', claim: err.problem.claim };
-      else if (isError(err, 'account-not-allowed')) phase = { kind: 'blocked', title: t('access.none'), message: explain(err) };
+      if (isError(err, 'account-setup-required')) {
+        if (err.problem.language) i18n.follow(err.problem.language);
+        phase = { kind: 'setup', claim: err.problem.claim, languages: err.problem.languages ?? [], language: err.problem.language ?? '' };
+      } else if (isError(err, 'account-not-allowed')) phase = { kind: 'blocked', title: t('access.none'), message: explain(err) };
       else if (isError(err, 'invitation-required')) phase = { kind: 'blocked', title: t('access.invitation'), message: explain(err) };
       else phase = { kind: 'blocked', title: '', message: explain(err) };
       return;
@@ -81,7 +84,7 @@
   </header>
   <main><Skeleton {...loadingShape(route.parts[0])} /></main>
 {:else if phase.kind === 'setup'}
-  <main><Setup claim={phase.claim} done={start} /></main>
+  <main><Setup claim={phase.claim} languages={phase.languages} language={phase.language} done={start} /></main>
 {:else if phase.kind === 'blocked'}
   <main>
     <div class="center">

@@ -6,7 +6,7 @@
   import { explain, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
   import { confirm, notice } from '../lib/dialog.svelte';
-  import { t } from '../lib/i18n.svelte';
+  import { i18n, t } from '../lib/i18n.svelte';
   import { session, setPicked } from '../lib/session.svelte';
 
   let message = $state('');
@@ -18,6 +18,22 @@
   let editing = $state(false);
   let newPassword = $state('');
   overfin.signinInfo().then((s) => (signin = s), () => {});
+
+  // The account's language, among those offered: the owner's to change, and
+  // applied only once saved.
+  // svelte-ignore state_referenced_locally
+  let language = $state(session.me?.language ?? '');
+
+  async function saveLanguage() {
+    message = '';
+    try {
+      session.me = await overfin.setLanguage(language);
+      i18n.follow(session.me.language);
+      await notice(t('account.languageSaved'));
+    } catch (err) {
+      message = explain(err);
+    }
+  }
 
   // Bringing the history of a previous account into this profile, when the
   // server offers it (once per account; never to kids profiles).
@@ -116,6 +132,20 @@
           <button onclick={() => (editing = true)}>{t(signin.hasPassword ? 'account.changePassword' : 'account.setPassword')}</button>
         </div>
       {/if}
+    </div>
+  {/if}
+  {#if profile?.owner && (session.me?.languages.length ?? 0) > 1}
+    <div class="panel setting">
+      <div>
+        <h2>{t('app.language')}</h2>
+        <p class="muted">{t('account.languageText')}</p>
+      </div>
+      <div class="actions">
+        <select bind:value={language} aria-label={t('app.language')}>
+          {#each session.me?.languages ?? [] as l (l.tag)}<option value={l.tag}>{l.name}</option>{/each}
+        </select>
+        <button class="primary" disabled={language === session.me?.language} onclick={saveLanguage}>{t('account.languageSave')}</button>
+      </div>
     </div>
   {/if}
   {#if profile?.kind !== 'kids'}

@@ -118,6 +118,9 @@ const fr: Record<keyof typeof en, string> = {
 
   'account.title': 'Compte',
   'account.dataTitle': 'Vos données',
+  'account.languageText': 'Du site, des titres et des courriels, pour tout le compte.',
+  'account.languageSave': 'Enregistrer',
+  'account.languageSaved': 'Langue enregistrée.',
   'account.bringTitle': 'Récupérer votre historique',
   'account.bringText': 'Vous aviez déjà un compte chez nous ? Récupérez ce que vous y avez regardé, où vous en étiez et vos favoris dans ce profil. Votre mot de passe sert une seule fois et n’est pas conservé ; votre ancien compte reste tel quel.',
   'account.bring': 'Récupérer',

@@ -1,5 +1,5 @@
 // Translations: every text the site shows goes through t(). The language is
-// the browser's, until the person picks one; it's remembered on this device.
+// the account's, from the server; before it's known, the browser's.
 import en from '../locales/en';
 import fr from '../locales/fr';
 
@@ -7,19 +7,13 @@ export type Key = keyof typeof en;
 
 const catalogs = { en, fr } satisfies Record<string, Record<Key, string>>;
 export type Locale = keyof typeof catalogs;
-export const locales: { code: Locale; name: string }[] = [
-  { code: 'en', name: 'English' },
-  { code: 'fr', name: 'Français' },
-];
-
-const storageKey = 'overfin-web-locale';
 
 function initial(): Locale {
+  // A language picked on this device before the account had one is gone.
   try {
-    const saved = localStorage.getItem(storageKey);
-    if (saved && saved in catalogs) return saved as Locale;
+    localStorage.removeItem('overfin-web-locale');
   } catch {
-    // Storage may be off: the browser's languages decide.
+    // Storage may be off.
   }
   for (const lang of globalThis.navigator?.languages ?? []) {
     const code = lang.slice(0, 2).toLowerCase();
@@ -39,11 +33,12 @@ export const i18n = {
   set(locale: Locale) {
     current = locale;
     if (typeof document !== 'undefined') document.documentElement.lang = locale;
-    try {
-      localStorage.setItem(storageKey, locale);
-    } catch {
-      // Not remembered, then.
-    }
+  },
+  /** follow sets the site's language from the account's ("fr-CA"): its
+   * language, when the site has texts in it, else English. */
+  follow(tag: string) {
+    const code = tag.slice(0, 2).toLowerCase();
+    this.set(code in catalogs ? (code as Locale) : 'en');
   },
 };
 

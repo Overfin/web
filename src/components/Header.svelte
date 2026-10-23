@@ -4,7 +4,7 @@
      logging out). On phones the libraries go to a second, scrolling line. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
-  import { i18n, locales, t, type Locale } from '../lib/i18n.svelte';
+  import { t } from '../lib/i18n.svelte';
   import { router } from '../lib/router.svelte';
   import { session, setPicked } from '../lib/session.svelte';
 
@@ -80,14 +80,6 @@
         {#if session.requests}<a href="/requests">{t('request.mine')}</a>{/if}
         <a href="/manage">{t('nav.profiles')}</a>
         <a href="/account">{t('nav.account')}</a>
-        <label>
-          {t('app.language')}
-          <select value={i18n.locale} onchange={(event) => i18n.set(event.currentTarget.value as Locale)}>
-            {#each locales as locale (locale.code)}
-              <option value={locale.code}>{locale.name}</option>
-            {/each}
-          </select>
-        </label>
         <button type="button" onclick={logout}>{t('nav.logout')}</button>
       </div>
     {/if}
