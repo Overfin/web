@@ -538,4 +538,5 @@ ol.episodes .about-toggle { min-height: 0; padding: .1rem 0; font-size: .85rem; 
 .actions .toggle.on svg { fill: currentColor; }
 .actions .toggle.on svg .mark { stroke: var(--on-accent); fill: none; }
 .actions .toggle.heart.on { color: #ff6b8a; border-color: rgba(255, 107, 138, .55); }
+.favorites { align-self: center; font-size: .9rem; color: var(--text); opacity: .8; white-space: nowrap; }
 @media (max-width: 600px) { .actions .toggle { flex: 0 0 auto; } }

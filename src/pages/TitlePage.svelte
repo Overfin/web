@@ -58,9 +58,14 @@
       await notice(explain(err));
     }
   }
+  // How many profiles here marked it, when the server says (two others at
+  // least): the profile's own mark moves it at once.
+  let favoriteShift = $state(0);
   async function toggleFavorite(now: boolean) {
     try {
-      marks.favorite = (await overfin.setFavorite(id, !now)).favorite;
+      const after = (await overfin.setFavorite(id, !now)).favorite;
+      if (after !== now) favoriteShift += after ? 1 : -1;
+      marks.favorite = after;
     } catch (err) {
       await notice(explain(err));
     }
@@ -229,6 +234,10 @@
             onclick={() => toggleFavorite(favorite)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
           </button>
+          {#if title.favoriteCount}
+            {@const n = title.favoriteCount + favoriteShift}
+            <span class="favorites" title={t('item.favoriteCount', { n: String(n) })}>{t('item.favoriteCount', { n: String(n) })}</span>
+          {/if}
         </div>
         {#if title.overview}<p class="overview">{title.overview}</p>{/if}
       </div>
