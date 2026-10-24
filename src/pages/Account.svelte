@@ -14,7 +14,7 @@
 
   // How the account holder signs in, with Overfin's own sign-in only (the
   // server answers 404 otherwise, and the section stays hidden).
-  let signin = $state<{ email: string; hasPassword: boolean; codes: boolean } | null>(null);
+  let signin = $state<{ email: string; hasPassword: boolean; reset: boolean } | null>(null);
   let editing = $state(false);
   let newPassword = $state('');
   overfin.signinInfo().then((s) => (signin = s), () => {});
@@ -81,14 +81,6 @@
     }
   }
 
-  async function removePassword() {
-    if (!(await confirm(t('account.removeConfirm'), true))) return;
-    if (await confirmed(() => overfin.removePassword(), (m) => (message = m))) {
-      signin = signin && { ...signin, hasPassword: false };
-      await notice(t('account.passwordRemoved'));
-    }
-  }
-
   async function download() {
     await confirmed(async (pin) => {
       const data = await overfin.exportData(pin);
@@ -129,7 +121,7 @@
       <div>
         <h2>{t('account.signinTitle')}</h2>
         <p class="muted">
-          {t(signin.hasPassword ? 'account.signinPassword' : signin.codes ? 'account.signinCode' : 'account.signinLink', { email: signin.email })}
+          {t('account.signinPassword', { email: signin.email })}
         </p>
         {#if editing}
           <form class="password" onsubmit={savePassword}>
@@ -142,10 +134,7 @@
       </div>
       {#if !editing}
         <div class="actions">
-          {#if signin.hasPassword && signin.codes}
-            <button onclick={removePassword}>{t('account.removePassword')}</button>
-          {/if}
-          <button onclick={() => (editing = true)}>{t(signin.hasPassword ? 'account.changePassword' : 'account.setPassword')}</button>
+          <button onclick={() => (editing = true)}>{t('account.changePassword')}</button>
         </div>
       {/if}
     </div>

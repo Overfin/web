@@ -1,8 +1,9 @@
-<!-- Setting the account up: a fresh one, or, when the server offers it,
-     bringing one from the service this site replaces. People may never have
-     heard of the software underneath, so the wording is about their
-     previous account. With several languages offered, the account's is
-     chosen here too; the page shows itself in it at once. -->
+<!-- Setting the account up: a fresh one, named after its owner's profile
+     with a PIN if they want one, or, when the server offers it, bringing one
+     from the service this site replaces. People may never have heard of the
+     software underneath, so the wording is about their previous account.
+     With several languages offered, the account's is chosen here too; the
+     page shows itself in it at once. -->
 <script lang="ts">
   import { explain, OverfinError, overfin } from '../lib/client';
   import { i18n, t } from '../lib/i18n.svelte';
@@ -23,11 +24,20 @@
   let message = $state('');
   let username = $state('');
   let password = $state('');
+  // The owner profile's name, and its PIN if they want one.
+  let profileName = $state('');
+  let pin = $state('');
 
-  async function create() {
+  async function create(event: SubmitEvent) {
+    event.preventDefault();
     message = '';
     try {
       const me = await overfin.createAccount();
+      const owner = me.activeProfile;
+      if (owner && profileName.trim() && profileName.trim() !== owner.name) {
+        await overfin.updateProfile(owner.id, { name: profileName.trim() });
+      }
+      if (owner && pin) await overfin.setPin(owner.id, pin);
       await finish(me.language);
     } catch (err) {
       message = explain(err);
@@ -59,7 +69,14 @@
   {/if}
   <div class="panel">
     <p>{t('setup.fresh')}</p>
-    <button class="primary block" onclick={create}>{t('setup.create')}</button>
+    <form class="stack" onsubmit={create}>
+      <label>{t('setup.profileName')} <input bind:value={profileName} maxlength="32" required autocomplete="nickname" /></label>
+      <label>{t('setup.pin')}
+        <input bind:value={pin} inputmode="numeric" pattern="[0-9]{'{'}4,8{'}'}" maxlength="8" autocomplete="off" placeholder={t('manage.pinHint')} />
+      </label>
+      <p class="muted small">{t('setup.pinNote')}</p>
+      <button class="primary block" type="submit">{t('setup.create')}</button>
+    </form>
   </div>
   {#if claim}
     <div class="divider"><span>{t('setup.or')}</span></div>
