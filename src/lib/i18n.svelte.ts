@@ -42,9 +42,12 @@ export const i18n = {
   },
 };
 
-/** t returns the text for key in the current language, with {values} filled in. */
+/** t returns the text for key in the current language, with {values}
+ * filled in. A key built at runtime from a value the site doesn't know yet
+ * (a new request status, say) comes back as it is, rather than breaking
+ * the page. */
 export function t(key: Key, values: Record<string, string | number> = {}): string {
-  const text = catalogs[current][key] ?? en[key];
+  const text: string = catalogs[current][key] ?? en[key] ?? key;
   return text.replace(/\{(\w+)\}/g, (match, name: string) => (name in values ? String(values[name]) : match));
 }
 

@@ -4,11 +4,11 @@
      chosen season's episodes, those no library has too. -->
 <script lang="ts">
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
-  import { overfin } from '../lib/client';
+  import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { clock, duration } from '../lib/format';
   import { t, tn, type Key } from '../lib/i18n.svelte';
-  import { confirm } from '../lib/dialog.svelte';
+  import { confirm, notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
   import { ask } from '../lib/requests';
@@ -37,24 +37,43 @@
     overfin.onWatchlist(id).then((on) => (onList = on)).catch(() => {}); // not offered here
   });
   async function toggleList() {
+    const was = onList;
     onList = !onList;
-    await (onList ? overfin.addToWatchlist(id) : overfin.removeFromWatchlist(id));
+    try {
+      await (onList ? overfin.addToWatchlist(id) : overfin.removeFromWatchlist(id));
+    } catch (err) {
+      onList = was; // as it still is
+      await notice(explain(err));
+    }
   }
 
   // Watched and favorite, as the profile marks them: what the server says
-  // back replaces what the page loaded.
+  // back replaces what the page loaded. A failure is said, and changes
+  // nothing.
   let marks = $state<{ played?: boolean; favorite?: boolean }>({});
   async function togglePlayed(now: boolean) {
-    marks.played = (await overfin.setPlayed(id, !now)).played;
+    try {
+      marks.played = (await overfin.setPlayed(id, !now)).played;
+    } catch (err) {
+      await notice(explain(err));
+    }
   }
   async function toggleFavorite(now: boolean) {
-    marks.favorite = (await overfin.setFavorite(id, !now)).favorite;
+    try {
+      marks.favorite = (await overfin.setFavorite(id, !now)).favorite;
+    } catch (err) {
+      await notice(explain(err));
+    }
   }
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
   async function toggleEpisode(e: TitleSummary) {
     const now = episodeMarks[e.id] ?? e.userState?.played ?? false;
-    episodeMarks[e.id] = (await overfin.setPlayed(e.id, !now)).played;
+    try {
+      episodeMarks[e.id] = (await overfin.setPlayed(e.id, !now)).played;
+    } catch (err) {
+      await notice(explain(err));
+    }
   }
 
   // Requests: the one made or cancelled here replaces what was loaded; a

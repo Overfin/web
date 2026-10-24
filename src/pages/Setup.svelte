@@ -28,11 +28,15 @@
   let profileName = $state('');
   let pin = $state('');
 
+  // The account, once made: trying again after a later step failed goes
+  // on from there.
+  let created: Awaited<ReturnType<typeof overfin.createAccount>> | null = null;
+
   async function create(event: SubmitEvent) {
     event.preventDefault();
     message = '';
     try {
-      const me = await overfin.createAccount();
+      const me = created ?? (created = await overfin.createAccount());
       const owner = me.activeProfile;
       if (owner && profileName.trim() && profileName.trim() !== owner.name) {
         await overfin.updateProfile(owner.id, { name: profileName.trim() });

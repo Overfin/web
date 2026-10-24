@@ -92,7 +92,7 @@
       if (page.seed && !seed) {
         const next = new URLSearchParams(params);
         next.set('seed', page.seed);
-        history.replaceState(null, '', `/library/${id}?${next}`);
+        history.replaceState(history.state, '', `/library/${id}?${next}`);
       }
       if (!page.nextCursor) finished = true;
     } catch (err) {

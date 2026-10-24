@@ -26,17 +26,28 @@ export const router = {
   },
 };
 
+// Each entry the app adds to the history counts how many of the site's own
+// come before it, so Back can tell whether it stays on the site.
+function depth(): number {
+  return typeof history.state?.depth === 'number' ? history.state.depth : 0;
+}
+
 /** go shows another screen, adding it to the history. */
 export function go(path: string) {
   if (path === location.pathname + location.search) return;
-  history.pushState(null, '', path);
+  history.pushState({ depth: depth() + 1 }, '', path);
   current = parse();
 }
 
 /** replace changes the address without a new history entry. */
 export function replace(path: string) {
-  history.replaceState(null, '', path);
+  history.replaceState({ depth: depth() }, '', path);
   current = parse();
+}
+
+/** canGoBack says whether Back leads to one of the site's own screens. */
+export function canGoBack(): boolean {
+  return depth() > 0;
 }
 
 // Clicks on links to the site's own pages stay in the app. Anything else (a

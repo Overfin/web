@@ -18,9 +18,14 @@
   } = $props();
 
   async function load(): Promise<TitleSummary[]> {
-    const { items } = given ? { items: given } : await overfin.discover(list, kind, { availability, limit: 20 });
-    found(items.length > 0);
-    return items;
+    try {
+      const { items } = given ? { items: given } : await overfin.discover(list, kind, { availability, limit: 20 });
+      found(items.length > 0);
+      return items;
+    } catch (err) {
+      found(false); // answered, with nothing: the page doesn't wait for it
+      throw err;
+    }
   }
 </script>
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { clock, duration } from './format';
-import { i18n, t, tn } from './i18n.svelte';
+import { i18n, t, tn, type Key } from './i18n.svelte';
 
 describe('format', () => {
   it('shows positions as a clock', () => {
@@ -16,6 +16,10 @@ describe('format', () => {
 });
 
 describe('t', () => {
+  it('shows a key built from a value it does not know as it is', () => {
+    i18n.set('fr');
+    expect(t('request.status.deleted' as Key)).toBe('request.status.deleted');
+  });
   it('fills in values, and leaves unknown ones visible', () => {
     i18n.set('en');
     expect(t('home.latest', { library: 'Movies' })).toBe('Latest in Movies');

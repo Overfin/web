@@ -14,6 +14,7 @@
   import { clock, duration } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
+  import { canGoBack, replace } from '../lib/router.svelte';
   import SeekBar from '../components/SeekBar.svelte';
 
   let { id }: { id: string } = $props();
@@ -428,7 +429,8 @@
     if (!id) return;
     seasonId = id;
     episodes = null;
-    episodes = (await overfin.title(id).catch(() => null))?.episodes ?? [];
+    const found = (await overfin.title(id).catch(() => null))?.episodes ?? [];
+    if (seasonId === id) episodes = found; // not if another season was chosen since
   }
   function playEpisode(e: TitleSummary) {
     menu = '';
@@ -482,6 +484,8 @@
           if (next && !dismissed) goNext();
         },
       });
+      // Left while it was starting: nobody watches it.
+      if (left) close();
     } catch (err) {
       notice = { text: explain(err), takenOver: false };
     }
@@ -490,13 +494,22 @@
     fullscreen = !!document.fullscreenElement;
   }
 
+  // Back where the person came from; opened from a link, to the title's
+  // page.
+  function back() {
+    if (canGoBack()) history.back();
+    else replace(`/title/${id}`);
+  }
+
   // Leaving the screen, or the page, ends the playback.
+  let left = false;
   function close() {
     const p = player;
     player = null;
     p?.close();
   }
   onDestroy(() => {
+    left = true;
     close();
     clearTimeout(hideTimer);
     clearTimeout(osdTimer);
@@ -579,7 +592,7 @@
 
   <div class="top controls" role="toolbar" tabindex="-1"
     onpointerenter={() => (overControls = true)} onpointerleave={() => (overControls = false)}>
-    <button class="icon" onclick={() => history.back()} aria-label={t('player.back')} title={t('player.back')}>
+    <button class="icon" onclick={back} aria-label={t('player.back')} title={t('player.back')}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z" /></svg>
     </button>
     <div class="title">
@@ -764,7 +777,7 @@
           {#if notice.takenOver}
             <button class="primary" onclick={() => player?.continueHere()}>{t('player.continueHere')}</button>
           {/if}
-          <button onclick={() => history.back()}>{t('common.back')}</button>
+          <button onclick={back}>{t('common.back')}</button>
         </div>
       </div>
     </div>

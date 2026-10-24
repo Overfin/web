@@ -30,7 +30,12 @@
       await refresh();
       go('/');
     } catch (err) {
-      if (isError(err, 'pin-required')) return choose(p);
+      // A PIN set since the list was read: ask it, once; the list is read
+      // again too.
+      if (isError(err, 'pin-required') && pin === undefined) {
+        reload++;
+        return choose({ ...p, hasPin: true });
+      }
       message = explain(err);
     }
   }

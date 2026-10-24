@@ -2,7 +2,8 @@
      as one types; people
      first when the words look like someone's name. The words never go in
      the address (they'd stay in the history): this tab keeps the last
-     ones, so coming back (Back, from a result) shows the same results.
+     ones, for the profile searching, so coming back (Back, from a result)
+     shows the same results.
      The search icon, from another page, starts a new one, empty. -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -10,6 +11,7 @@
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { t } from '../lib/i18n.svelte';
+  import { session } from '../lib/session.svelte';
   import Card from '../components/Card.svelte';
 
   const saved = 'overfin-web-search';
@@ -21,13 +23,19 @@
   let timer: ReturnType<typeof setTimeout> | undefined;
   let asked = 0; // only the latest search's answer is shown
 
+  // The words are kept with the profile they're the search of: another
+  // profile on this tab doesn't see them.
+  const profile = () => session.me?.activeProfile?.id ?? '';
+
   async function run(q: string) {
     try {
-      sessionStorage.setItem(saved, q);
+      sessionStorage.setItem(saved, JSON.stringify({ profile: profile(), q }));
     } catch {
       // private browsing: nothing kept
     }
     if (q.trim().length < 2) {
+      asked++; // a search still on its way is no longer wanted
+      searching = false;
       results = null;
       return;
     }
@@ -53,7 +61,8 @@
 
   onMount(() => {
     try {
-      query = sessionStorage.getItem(saved) ?? '';
+      const kept = JSON.parse(sessionStorage.getItem(saved) ?? 'null');
+      query = kept?.profile === profile() && typeof kept.q === 'string' ? kept.q : '';
     } catch {
       query = '';
     }

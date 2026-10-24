@@ -46,7 +46,13 @@
       else phase = { kind: 'blocked', title: '', message: explain(err) };
       return;
     }
-    const [libraries, profiles] = await Promise.all([overfin.libraries().catch(() => []), overfin.profiles()]);
+    let libraries, profiles;
+    try {
+      [libraries, profiles] = await Promise.all([overfin.libraries().catch(() => []), overfin.profiles()]);
+    } catch (err) {
+      phase = { kind: 'blocked', title: '', message: explain(err) };
+      return;
+    }
     session.libraries = libraries;
     [session.discovery, session.requests] = await Promise.all([offersDiscovery(), offersRequests()]);
     session.kidsNeedLimits = profiles.some((p) => p.ceilingsNeeded) && !!session.me.activeProfile?.owner;
