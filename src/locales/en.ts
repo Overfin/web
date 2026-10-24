@@ -92,6 +92,7 @@ export default {
   'item.favoriteRemove': 'Remove from favorites',
   'item.markWatched': 'Mark as watched',
   'item.markUnwatched': 'Mark as not watched',
+  'item.favoriteCount': 'Favorite of {n} people here',
   'item.favoriteAdd': 'Add to favorites',
   'item.favoriteOn': 'In your favorites',
   'item.resumeFrom': 'Resume from {time}',
