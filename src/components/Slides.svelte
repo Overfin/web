@@ -15,9 +15,12 @@
   import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
 
-  let { trending, latest, random, acclaimed }: {
+  // missing: trending titles no library has may be shown too, to be
+  // requested from their page.
+  let { trending, latest, random, acclaimed, missing = false }: {
     trending: { movie: TitleSummary[]; series: TitleSummary[] };
     latest: TitleSummary[]; random: TitleSummary[]; acclaimed: TitleSummary[];
+    missing?: boolean;
   } = $props();
 
   // How many slides, and how many candidates for them: some have no
@@ -53,7 +56,7 @@
   /** ids picks the titles: up to four trending, two newly added, two of
    * the best rated, then random ones, in a random order. */
   function ids(): string[] {
-    const inLibrary = (list: TitleSummary[]) => list.filter((title) => title.availability !== 'missing');
+    const inLibrary = (list: TitleSummary[]) => (missing ? list : list.filter((title) => title.availability !== 'missing'));
     const picks = new Set<string>();
     const take = (list: TitleSummary[], n: number) => {
       for (const title of list) {
@@ -95,7 +98,7 @@
 
   $effect(() => {
     const item = slides[index];
-    if (!item || item.kind !== 'series' || item.id in episodes) return;
+    if (!item || item.kind !== 'series' || item.availability === 'missing' || item.id in episodes) return;
     episodes[item.id] = null;
     overfin.upNext(item.id).then((up) => {
       episodes[item.id] = { id: up.title.id, positionMs: up.positionMs };
@@ -170,7 +173,9 @@
           </div>
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
           <div class="actions">
-            {#if item.playable}
+            {#if item.availability === 'missing'}
+              <a class="button primary" href="/title/{item.id}">{t('home.moreInfo')}</a>
+            {:else if item.playable}
               <button class="primary" onclick={() => play(item.id, position)}>
                 {position ? t('home.resume') : t('item.play')}
               </button>

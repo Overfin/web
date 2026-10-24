@@ -1,7 +1,7 @@
 <!-- Home: a slideshow of featured titles, what to continue (next episodes
-     included), the watchlist, what's trending
-     among the library's titles, and what's new in each library (films and
-     series only). -->
+     included), the watchlist, what's trending (among the library's titles,
+     or all of them when the operator says so), and what's new in each
+     library (films and series only). -->
 <script lang="ts" module>
   // The slideshow's random picks: new each time the site opens, the same
   // while browsing it.
@@ -19,6 +19,10 @@
   import Skeleton from '../components/Skeleton.svelte';
   import Slides from '../components/Slides.svelte';
 
+  // Titles no library has, among what's trending and in the slideshow,
+  // when the operator wants them there.
+  const availability = $derived(session.me?.home?.missingTitles ? 'all' : 'library');
+
   // Every row in one request (the server answers each as it would alone).
   async function load() {
     const trending = session.discovery ? (['movie', 'series'] as const) : [];
@@ -26,7 +30,7 @@
       ['/titles/continue', { limit: 20 }],
       '/me/watchlist',
       ...trending.map((kind): [string, Record<string, string | number>] =>
-        ['/discover', { list: 'trending', mediaKind: kind, availability: 'library', limit: 20 }]),
+        ['/discover', { list: 'trending', mediaKind: kind, availability, limit: 20 }]),
       ...session.libraries.map((library): [string, Record<string, string | number>] =>
         ['/titles/latest', { library: library.id, limit: 16 }]),
       // For the slideshow: the library at random, and its best rated.
@@ -61,7 +65,7 @@
   {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed}
+  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed} missing={availability === 'all'}
     latest={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
@@ -71,9 +75,9 @@
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
   <Row title={t('home.watchlist')} items={home.watchlist} />
   {#if session.discovery}
-    <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" availability="library" flags={false}
+    <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" {availability} flags={availability === 'all'}
       items={home.trending.movie} />
-    <DiscoverRow title={t('home.trendingSeries')} list="trending" kind="series" availability="library" flags={false}
+    <DiscoverRow title={t('home.trendingSeries')} list="trending" kind="series" {availability} flags={availability === 'all'}
       items={home.trending.series} />
   {/if}
   {#each home.latest as { library, items } (library.id)}
