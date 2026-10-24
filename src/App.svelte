@@ -143,5 +143,5 @@
     {/key}
   </main>
 {/if}
-{#if route.parts[0] !== 'play'}<SiteFooter />{/if}
+{#if route.parts[0] !== 'play'}<SiteFooter tmdb={route.parts.length === 0} />{/if}
 <Dialog />

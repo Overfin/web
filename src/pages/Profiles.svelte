@@ -93,7 +93,7 @@
           </div>
         </button>
       {/each}
-      {#if session.me?.activeProfile?.owner}
+      {#if session.me?.activeProfile?.owner && !(session.me.limits?.maxProfiles > 0 && list.length >= session.me.limits.maxProfiles)}
         <button class="profile" onclick={startAdding}><div class="avatar">+</div>{t('profiles.add')}</button>
       {/if}
     </div>
