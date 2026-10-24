@@ -8,6 +8,7 @@
   import { confirm, notice } from '../lib/dialog.svelte';
   import { i18n, t } from '../lib/i18n.svelte';
   import { session, setPicked } from '../lib/session.svelte';
+  import TastesForm from '../components/TastesForm.svelte';
 
   let message = $state('');
   const profile = $derived(session.me?.activeProfile);
@@ -151,6 +152,13 @@
         </select>
         <button class="primary" disabled={language === session.me?.language} onclick={saveLanguage}>{t('account.languageSave')}</button>
       </div>
+    </div>
+  {/if}
+  {#if profile?.owner && session.me?.tastes?.asked}
+    <div class="panel">
+      <h2>{t('account.tastesTitle')}</h2>
+      <p class="muted">{t('account.tastesText')}</p>
+      <TastesForm done={() => notice(t('tastes.saved'))} />
     </div>
   {/if}
   {#if profile}

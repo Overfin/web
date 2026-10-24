@@ -24,11 +24,13 @@
   import Search from './pages/Search.svelte';
   import Setup from './pages/Setup.svelte';
   import TitlePage from './pages/TitlePage.svelte';
+  import TastesForm from './components/TastesForm.svelte';
 
   type Phase =
     | { kind: 'loading' }
     | { kind: 'setup'; claim?: 'copy'; languages: { tag: string; name: string }[]; language: string }
     | { kind: 'blocked'; title: string; message: string }
+    | { kind: 'tastes' }
     | { kind: 'ready' };
   let phase = $state<Phase>({ kind: 'loading' });
 
@@ -60,6 +62,13 @@
     const where = router.route.parts[0];
     if ((!session.me.activeProfile || (profiles.length > 1 && !picked())) && where !== 'play' && where !== 'profiles') {
       go('/profiles');
+    }
+    // Once, on the owner profile: what the account likes, when the server
+    // asks.
+    const tastes = session.me.tastes;
+    if (tastes?.asked && !tastes.answered && session.me.activeProfile?.owner && where !== 'play') {
+      phase = { kind: 'tastes' };
+      return;
     }
     phase = { kind: 'ready' };
   }
@@ -102,6 +111,15 @@
   <main><Skeleton {...loadingShape(route.parts[0])} /></main>
 {:else if phase.kind === 'setup'}
   <main><Setup claim={phase.claim} languages={phase.languages} language={phase.language} done={start} /></main>
+{:else if phase.kind === 'tastes'}
+  <main>
+    <div class="center">
+      <TastesForm first done={() => {
+        if (session.me) session.me.tastes = { asked: true, answered: true };
+        phase = { kind: 'ready' };
+      }} />
+    </div>
+  </main>
 {:else if phase.kind === 'blocked'}
   <main>
     <div class="center">
