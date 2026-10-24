@@ -31,6 +31,9 @@
   let about = $state<Title | null>(null);
   // started: the first picture showed; until then, the loading screen.
   let started = $state(false);
+  // blocked: the browser wouldn't start the video by itself (after a
+  // refresh, nobody has clicked yet); a click or Space does.
+  let blocked = $state(false);
 
   // The video's state, as its events tell it.
   let paused = $state(true);
@@ -123,6 +126,15 @@
     osd = text;
     clearTimeout(osdTimer);
     osdTimer = setTimeout(() => (osd = ''), 900);
+  }
+
+  // tryStart starts a ready video the browser didn't start by itself,
+  // noting when it refuses until someone acts.
+  function tryStart() {
+    if (started || !video || !video.paused || !video.autoplay) return;
+    video.play().catch((err) => {
+      if (err?.name === 'NotAllowedError') blocked = true;
+    });
   }
 
   function togglePlay() {
@@ -519,8 +531,8 @@
   <!-- svelte-ignore a11y_media_has_caption: subtitles come from the server's tracks -->
   <video bind:this={video} autoplay playsinline
     onclick={pictureClick} ondblclick={toggleFullscreen}
-    ontimeupdate={timeUpdate} onplay={() => (paused = false)} onpause={() => (paused = true)}
-    onwaiting={() => (waiting = true)} onplaying={() => { waiting = false; started = true; }} oncanplay={() => (waiting = false)}
+    ontimeupdate={timeUpdate} onplay={() => { paused = false; blocked = false; }} onpause={() => (paused = true)}
+    onwaiting={() => (waiting = true)} onplaying={() => { waiting = false; started = true; }} oncanplay={() => { waiting = false; tryStart(); }}
     onvolumechange={() => { if (video) { volume = video.volume; muted = video.muted; } }}></video>
 
   {#if !started && !notice}
@@ -533,7 +545,13 @@
           <div class="name">{shownTitle.series?.name ?? shownTitle.name}</div>
         {/if}
         {#if facts}<div class="facts">{facts}</div>{/if}
-        <div class="spinner inline" aria-label={t('app.loading')}></div>
+        {#if blocked}
+          <button class="start" onclick={togglePlay} aria-label={t('player.play')} title={t('player.play')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+          </button>
+        {:else}
+          <div class="spinner inline" aria-label={t('app.loading')}></div>
+        {/if}
       </div>
     </div>
   {/if}
@@ -834,6 +852,12 @@
   .episode .name { font-weight: 600; font-size: .92rem; }
   .episode .hint { font-size: .8rem; color: rgba(255, 255, 255, .6); }
   .loading, .paused-screen { pointer-events: none; }
+  .loading .start {
+    pointer-events: auto; display: block; margin: 1.4rem auto 0; width: 4.5rem; height: 4.5rem; padding: 1.1rem;
+    border: none; border-radius: 50%; background: rgba(255, 255, 255, .92); color: #000; cursor: pointer;
+  }
+  .loading .start svg { width: 100%; height: 100%; fill: currentColor; display: block; }
+  .loading .start:hover, .loading .start:focus-visible { background: #fff; transform: scale(1.06); }
   .loading { position: absolute; z-index: 1; top: 0; right: 0; bottom: 0; left: 0; background: #000; display: flex; align-items: center; justify-content: center; }
   .loading .backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; filter: blur(2px); }
   .loading-title { position: relative; text-align: center; padding: 0 1.5rem; }
