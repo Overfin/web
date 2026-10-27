@@ -4,7 +4,7 @@
   import type { Profile, Ratings } from '../lib/sdk/overfin.js';
   import { explain, isError, overfin } from '../lib/client';
   import { askPin } from '../lib/dialog.svelte';
-  import { t } from '../lib/i18n.svelte';
+  import { t, tn } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
   import { refresh, session, setPicked } from '../lib/session.svelte';
   import CeilingPicker from '../components/CeilingPicker.svelte';
@@ -103,6 +103,11 @@
       {/if}
     </div>
     {#if message}<p class="center error">{message}</p>{/if}
+    <!-- With a stream reserved for each profile: how it works, and that an
+         unused profile keeps one. -->
+    {#if session.me?.limits?.reservedStreams}
+      <p class="center muted">{tn('profiles.reserved', session.me.limits.sharedStreams)}</p>
+    {/if}
     <!-- Managing needs a profile: shown once one is active. -->
     {#if session.me?.activeProfile}
       <p class="center">

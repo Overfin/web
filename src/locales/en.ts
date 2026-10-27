@@ -214,6 +214,8 @@ export default {
   'access.invitation': 'Invitation needed',
 
   'profiles.who': "Who's watching?",
+  'profiles.reserved.one': 'Each profile keeps a stream of its own, and {count} more is shared by all. An unused profile keeps its own: delete it to free it.',
+  'profiles.reserved.other': 'Each profile keeps a stream of its own, and {count} more are shared by all. An unused profile keeps its own: delete it to free it.',
   'profiles.add': 'Add profile',
   'profiles.manage': 'Manage profiles',
   'profiles.mine': 'My profile',
