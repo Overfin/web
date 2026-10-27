@@ -44,7 +44,7 @@
   const askable = $derived(session.requests && !item.playable && !series && item.availability !== 'available' && !request
     && item.kind !== 'other');
   async function requestIt() {
-    asked = await ask(item.id);
+    asked = await ask(item);
   }
   const flag = $derived(request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
