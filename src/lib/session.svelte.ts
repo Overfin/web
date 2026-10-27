@@ -7,15 +7,17 @@ export const session = $state<{ me: Me | null; libraries: Library[]; discovery: 
   me: null, libraries: [], discovery: false, requests: false, kidsNeedLimits: false,
 });
 
-/** offersDiscovery asks the server whether it offers discovery (it does once
- * Seerr is connected). */
+/** offersDiscovery says whether the server offers discovery (with TMDB or
+ * Seerr): /me says so; a server before 0.5 is asked. */
 export async function offersDiscovery(): Promise<boolean> {
+  if (session.me?.offers) return session.me.offers.discovery;
   return overfin.discover('trending', 'movie', { limit: 1 }).then(() => true, () => false);
 }
 
-/** offersRequests asks the server whether it takes requests (it does once
- * Seerr is connected). */
+/** offersRequests says whether the server takes requests (with Seerr): /me
+ * says so; a server before 0.5 is asked. */
 export async function offersRequests(): Promise<boolean> {
+  if (session.me?.offers) return session.me.offers.requests;
   return overfin.requests().then(() => true, () => false);
 }
 

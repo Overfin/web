@@ -141,7 +141,11 @@
           {#if me.owner && !p.owner}
             <div class="panel-foot">
               <button class="danger" onclick={async () => {
-                if (await confirm(t('manage.deleteConfirm', { name: p.name }), true)) act(p, () => overfin.deleteProfile(p.id));
+                if (await confirm(t('manage.deleteConfirm', { name: p.name }), true)) {
+                  // The streams shared among profiles change with their number.
+                  await act(p, () => overfin.deleteProfile(p.id));
+                  session.me = await overfin.me().catch(() => session.me);
+                }
               }}>{t('manage.deleteProfile')}</button>
             </div>
           {/if}

@@ -65,6 +65,8 @@
       await overfin.createProfile(kids ? { name, kind: 'kids', movieCeiling: movie, seriesCeiling: series } : { name });
       adding = false;
       reload++;
+      // The streams shared among profiles change with their number.
+      session.me = await overfin.me().catch(() => session.me);
     } catch (err) {
       message = explain(err);
     }
