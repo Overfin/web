@@ -14,6 +14,13 @@
   --title-shadow: 0 2px 12px rgba(0, 0, 0, .6);
 }
 :root[data-theme="light"] { --title-shadow: 0 1px 10px rgba(255, 255, 255, .7); }
+/* Under logos drawn over pictures: light pages fade them into white, so a
+   white logo needs a dark edge there. */
+:root { --logo-shadow: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
+:root[data-theme="light"] { --logo-shadow: drop-shadow(0 0 1px rgba(0, 0, 0, .6)) drop-shadow(0 1px 8px rgba(0, 0, 0, .45)); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) { --logo-shadow: drop-shadow(0 0 1px rgba(0, 0, 0, .6)) drop-shadow(0 1px 8px rgba(0, 0, 0, .45)); }
+}
 @media (max-width: 600px) {
   :root { --grid-min: 6.5rem; --gap: .6rem; }
 }
@@ -364,7 +371,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slide .content { position: relative; z-index: 2; max-width: 38rem; padding: 0 var(--gutter) calc(4rem + var(--under)); }
 /* The first row sits close under the slideshow: its fade is space enough. */
 .slides + h2 { margin-top: .5rem; }
-.slide .logo { display: block; max-width: min(24rem, 70vw); max-height: 9rem; width: auto; height: auto; margin-bottom: 1rem; object-fit: contain; object-position: left bottom; filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
+.slide .logo { display: block; max-width: min(24rem, 70vw); max-height: 9rem; width: auto; height: auto; margin-bottom: 1rem; object-fit: contain; object-position: left bottom; filter: var(--logo-shadow); }
 .slide h2 { font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3rem); line-height: 1.1; margin: 0 0 .75rem; text-shadow: var(--title-shadow); }
 .slide .overview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: rgba(var(--text-rgb), .88); }
 .slides .nav {
@@ -417,7 +424,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .hero .parent a { color: var(--text); font-weight: 600; }
 .hero .parent a:hover { text-decoration: underline; }
 .hero h1.logo { margin: 0 0 .8rem; }
-.hero h1.logo img { display: block; max-width: min(26rem, 80vw); max-height: 8rem; width: auto; height: auto; filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
+.hero h1.logo img { display: block; max-width: min(26rem, 80vw); max-height: 8rem; width: auto; height: auto; filter: var(--logo-shadow); }
 .hero .tagline { font-style: italic; color: rgba(var(--text-rgb), .8); margin: 0 0 .5rem; }
 .meta .availability { color: var(--accent); }
 .seasons { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) .3rem; }
