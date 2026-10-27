@@ -5,27 +5,37 @@ Overfin by default: a single-page app in [Svelte](https://svelte.dev) and
 TypeScript, on Overfin's
 [JavaScript SDK](https://github.com/overfin/server/tree/main/sdk/js).
 
-- **Account setup**: start fresh, arrive with an invitation, or bring a
-  previous account over.
+- **Account setup**: start fresh, or bring a previous account over (when the
+  server offers it); the account's language is chosen there too.
 - **Who's watching?**: profiles, PINs, adding a profile (kids profiles with
-  a rating ceiling).
-- **Profiles and devices**: renaming, kids limits, setting, changing and
-  removing PINs, deleting profiles, signed-in devices; the site asks for a
-  PIN or a fresh login when the server wants one.
-- **Account**: downloading your data, deleting your account.
-- **Home**: continue watching, next up, the watchlist, latest per library.
+  film and series ceilings).
+- **Profiles and devices**: renaming, kids limits, libraries and hidden tags
+  per profile, setting, changing and removing PINs, each profile's look,
+  deleting profiles, signed-in devices; the site asks for a PIN or a fresh
+  login when the server wants one.
+- **Account**: how one signs in, the account's language, downloading your
+  data, bringing a history over, deleting your account.
+- **Home**: a slideshow of featured titles, continue watching (next episodes
+  included), the watchlist, what's trending (when the server offers
+  discovery), the latest per library.
 - **Discover**, when the server offers it: trending, popular and upcoming
-  films and series, everything or only what the library has or doesn't
-  have yet; a title's page with its seasons' place in the library, and Play
-  when it's there.
-- **Libraries**: sorting, a repeatable shuffle, infinite scroll.
-- **Title pages**: series, seasons, episodes, cast, the watchlist.
+  films and series the libraries don't have (to request, when the server
+  takes requests).
+- **Libraries**: sorting (the profile's last choice kept in the browser),
+  filters (genre, decade, watched), a repeatable shuffle, infinite scroll.
+- **Title pages**: films, series, seasons, episodes, cast, ratings; my list,
+  watched and favorite; requests, confirmed first, and where they are.
+- **Search** (titles and people) and **people's pages**.
+- **Requests**: the profile's, and cancelling one while it's pending.
 - **Player**: Overfin picks direct play, repackaging or transcoding from what
-  the browser declares; audio and subtitle choice, "Skip intro", progress,
-  resume, and taking playback back from another device.
-- **English and French**, following the browser until the person picks one.
+  the browser declares; audio and subtitle choice, quality, playback info,
+  previews while seeking, "Skip intro", the next episode, progress, resume,
+  taking playback back from another device, and the same keys whatever has
+  the focus (arrows seek and change the volume, Space plays and pauses).
+- **English and French**: the account's language, the browser's until it's
+  known.
 
-Every screen has a real address (`/item/…`, `/library/…?sort=name`), so a
+Every screen has a real address (`/title/…`, `/library/…?sort=name`), so a
 reload, a bookmark or a shared link comes back to it, through the login if
 need be. Overfin answers those paths with the app.
 
