@@ -106,6 +106,10 @@ with it (`public/licenses/hls.js.txt`).
 
 [MIT](LICENSE).
 
-overfin-web is developed with the help of AI (Claude, by Anthropic), like
-Overfin: commits it contributed to carry a `Co-Authored-By: Claude` trailer,
-and every change is reviewed by a human maintainer.
+Said plainly, as for Overfin: overfin-web is written by Claude (Anthropic's
+AI), its code, tests and documentation. The maintainer gives directions
+(what the site should do and look like, what to change) and uses it every
+day, but doesn't write the code or review it line by line. Commits Claude
+wrote carry a `Co-Authored-By: Claude` trailer. What checks the code is
+what runs before every push: the type check, the tests, and a build that
+must match the committed `dist/`.
