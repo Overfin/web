@@ -8,9 +8,8 @@
   import { notice } from '../lib/dialog.svelte';
   import { t } from '../lib/i18n.svelte';
 
-  // favorited: told when the favorite mark changed (true: now on).
-  let { id, played: loadedPlayed = false, favorite: loadedFavorite = false, favorited }: {
-    id: string; played?: boolean; favorite?: boolean; favorited?: (on: boolean) => void;
+  let { id, played: loadedPlayed = false, favorite: loadedFavorite = false }: {
+    id: string; played?: boolean; favorite?: boolean;
   } = $props();
 
   let onList = $state<boolean | null>(null);
@@ -44,9 +43,7 @@
   async function toggleFavorite() {
     const was = favorite;
     try {
-      const after = (await overfin.setFavorite(id, !was)).favorite;
-      marks.favorite = after;
-      if (after !== was) favorited?.(after);
+      marks.favorite = (await overfin.setFavorite(id, !was)).favorite;
     } catch (err) {
       await notice(explain(err));
     }
