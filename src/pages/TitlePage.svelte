@@ -103,7 +103,7 @@
   }
   const askable = (x: TitleSummary) => session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
   async function requestMain(x: Title) {
-    const made = await ask(x.id);
+    const made = await ask(x);
     if (made) mainRequest = made;
   }
   async function cancelMain(id: string) {
@@ -116,7 +116,7 @@
     }
   }
   async function requestPart(x: TitleSummary) {
-    if (await ask(x.id)) seasonReload++;
+    if (await ask(x)) seasonReload++;
   }
   const askLabel = (x: TitleSummary) => x.kind === 'series' ? t('request.askSeries')
     : x.kind === 'season' || x.kind === 'episode' ? t('request.askSeason', { number: x.seasonNumber ?? '?' }) : t('request.ask');
