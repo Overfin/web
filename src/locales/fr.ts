@@ -93,7 +93,6 @@ const fr: Record<keyof typeof en, string> = {
   'item.favoriteRemove': 'Retirer des favoris',
   'item.markWatched': 'Marquer comme vu',
   'item.markUnwatched': 'Marquer comme non vu',
-  'item.favoriteCount': 'Favori de {n} personnes ici',
   'item.favoriteAdd': 'Ajouter aux favoris',
   'item.favoriteOn': 'Dans vos favoris',
   'item.resumeFrom': 'Reprendre à {time}',

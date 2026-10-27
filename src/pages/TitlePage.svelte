@@ -32,9 +32,6 @@
     history.replaceState(history.state, '', `/title/${title.id}?season=${s.seasonNumber}`);
   }
 
-  // How many profiles here marked it, when the server says (two others at
-  // least): the profile's own mark moves it at once.
-  let favoriteShift = $state(0);
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
   async function toggleEpisode(e: TitleSummary) {
@@ -182,12 +179,7 @@
             {/if}
           {/if}
           <!-- My list, watched, favorite: icons that fill in when on. -->
-          <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite}
-            favorited={(on) => (favoriteShift += on ? 1 : -1)} />
-          {#if title.favoriteCount}
-            {@const n = title.favoriteCount + favoriteShift}
-            <span class="favorites" title={t('item.favoriteCount', { n: String(n) })}>{t('item.favoriteCount', { n: String(n) })}</span>
-          {/if}
+          <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite} />
         </div>
         {#if title.overview}<p class="overview">{title.overview}</p>{/if}
       </div>

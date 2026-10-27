@@ -245,9 +245,6 @@ export interface Title extends TitleSummary {
   seasons?: TitleSummary[];
   /** A season's episodes, each with what it's about. */
   episodes?: (TitleSummary & { overview?: string })[];
-  /** A film's or a series': how many profiles on the server marked it a
-   * favorite, the caller's included; absent unless two others did. */
-  favoriteCount?: number;
 }
 
 /** A person, from TMDB, and the titles they're in. */
@@ -272,8 +269,8 @@ export interface TitlePage {
 
 export interface Playback {
   id: string;
-  /** What plays. */
-  title: TitleSummary;
+  /** What plays; absent when the server has no title for the item yet. */
+  title?: TitleSummary;
   method: 'direct' | 'remux' | 'transcode' | string;
   stream: { url: string; protocol: 'file' | 'hls'; mimeType?: string };
   positionMs: number;
