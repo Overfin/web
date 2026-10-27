@@ -51,7 +51,7 @@ export default {
   'discover.upcomingMovies': 'Upcoming films',
   'discover.upcomingSeries': 'Upcoming series',
   'discover.inLibrary': 'In the library',
-  'discover.partly': 'Partly in the library',
+  'discover.partly': 'Incomplete',
   'discover.missing': 'Not in the library yet',
   'discover.openInLibrary': 'Open in the library',
   'discover.seasons': 'Seasons',
