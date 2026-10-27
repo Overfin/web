@@ -7,7 +7,7 @@
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t, tn, type Key } from '../lib/i18n.svelte';
-  import { rememberLibrary } from '../lib/lastlibrary';
+  import { lastSort, rememberLibrary, rememberSort } from '../lib/lastlibrary';
   import { go } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
   import { visible } from '../lib/visible';
@@ -31,7 +31,12 @@
   rememberLibrary(id);
   // The page is shown anew for another library or sort (App keys it on the
   // address).
-  const sort = $derived((params.get('sort') || 'name') as NonNullable<TitleQuery['sort']>);
+  // Without one in the address, the sort the profile last chose.
+  const profile = $derived(session.me?.activeProfile?.id);
+  const sort = $derived.by(() => {
+    const value = params.get('sort') || lastSort(profile) || 'name';
+    return (sorts.includes(value as typeof sorts[number]) ? value : 'name') as NonNullable<TitleQuery['sort']>;
+  });
   const seed = $derived(params.get('seed') || undefined);
   const genre = $derived(params.get('genre') || '');
   const show = $derived<Show>(shows.includes(params.get('show') as Show) ? (params.get('show') as Show) : 'all');
@@ -48,6 +53,7 @@
   function change(name: string, value: string) {
     const next = new URLSearchParams(params);
     next.delete('seed');
+    if (name === 'sort') rememberSort(profile, value);
     if (value && value !== 'all' && !(name === 'sort' && value === 'name')) next.set(name, value);
     else next.delete(name);
     const q = next.toString();
