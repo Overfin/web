@@ -62,7 +62,9 @@
 {#await load()}
   <Skeleton kind="home" />
 {:then home}
-  {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)}
+  <!-- Nothing yet: no row at all, trending ones included. -->
+  {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)
+    && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
   <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed} missing={availability === 'all'}
