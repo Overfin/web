@@ -22,3 +22,28 @@ export function librariesHref(libraries: { id: string }[]): string | undefined {
   const library = libraries.find((l) => l.id === last) ?? libraries[0];
   return library && `/library/${library.id}`;
 }
+
+// The sort each profile last chose, in this browser: a library opened
+// without one in its address is sorted that way.
+const sortKey = 'overfin-web-sort';
+
+function sorts(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(sortKey) ?? '{}') ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export function rememberSort(profile: string | undefined, sort: string): void {
+  if (!profile) return;
+  try {
+    localStorage.setItem(sortKey, JSON.stringify({ ...sorts(), [profile]: sort }));
+  } catch {
+    // Not kept: libraries open sorted by name.
+  }
+}
+
+export function lastSort(profile: string | undefined): string | undefined {
+  return profile ? sorts()[profile] : undefined;
+}
