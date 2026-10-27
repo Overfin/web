@@ -14,6 +14,7 @@
   import { score } from '../lib/score';
   import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
+  import Marks from './Marks.svelte';
 
   // missing: trending titles no library has may be shown too, to be
   // requested from their page.
@@ -179,13 +180,19 @@
               <button class="primary" onclick={() => play(item.id, position)}>
                 {position ? t('home.resume') : t('item.play')}
               </button>
-              <a class="button" href="/title/{item.id}">{t('home.moreInfo')}</a>
+              <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
+              </a>
+              {#if seen.has(i)}<Marks id={item.id} played={item.userState?.played} favorite={item.userState?.favorite} />{/if}
             {:else if episodes[item.id]}
               {@const ep = episodes[item.id]!}
               <button class="primary" onclick={() => play(ep.id, ep.positionMs)}>
                 {ep.positionMs ? t('home.resume') : t('item.play')}
               </button>
-              <a class="button" href="/title/{item.id}">{t('home.moreInfo')}</a>
+              <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
+              </a>
+              {#if seen.has(i)}<Marks id={item.id} played={item.userState?.played} favorite={item.userState?.favorite} />{/if}
             {:else}
               <a class="button primary" href="/title/{item.id}">{t('home.seeSeries')}</a>
             {/if}
