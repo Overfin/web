@@ -363,6 +363,7 @@ const fr: Record<keyof typeof en, string> = {
   'error.account-not-allowed': 'Cet identifiant ne peut pas utiliser ce site.',
   'error.stream-limit-reached': 'Trop de lectures en cours sur ce compte.',
   'error.server-busy': 'Le serveur est occupé ; réessayez dans un instant.',
+  'error.playback-ended-by-admin': 'L’administrateur du serveur a arrêté cette lecture.',
   'error.not-playable': 'Ce titre ne peut pas être lu.',
   'error.name-taken': 'Ce nom est déjà utilisé.',
   'error.profile-limit-reached': 'Ce compte a atteint son nombre maximal de profils.',
