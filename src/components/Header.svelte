@@ -1,5 +1,6 @@
 <!-- The bar on top of every screen except the profile picker, account setup
-     and the player: home, discovery and the libraries (one item, however
+     and the player: home, discovery, the operator's categories, and the
+     libraries unless the operator took them out (one item, however
      many there are), then a menu for who's watching (switching, managing
      profiles, the account, logging out). On phones the sections go to a
      second, scrolling line. -->
@@ -65,7 +66,12 @@
     {#if session.discovery}
       <a href="/discover" class:active={here[0] === 'discover'}>{t('nav.discover')}</a>
     {/if}
-    {#if session.libraries.length === 1}
+    {#each session.categories as c (c.id)}
+      <a href="/category/{c.id}" class:active={here[0] === 'category' && here[1] === c.id}>{c.name}</a>
+    {/each}
+    {#if !session.librariesShown}
+      <!-- The operator's categories alone. -->
+    {:else if session.libraries.length === 1}
       <a href="/library/{session.libraries[0].id}" class:active={here[0] === 'library'}>{session.libraries[0].name}</a>
     {:else if libraries}
       <a href={libraries} class:active={here[0] === 'library'}>{t('nav.libraries')}</a>

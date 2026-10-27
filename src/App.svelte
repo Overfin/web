@@ -4,7 +4,7 @@
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router } from './lib/router.svelte';
-  import { offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
+  import { loadCategories, offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
@@ -56,7 +56,7 @@
       return;
     }
     session.libraries = libraries;
-    [session.discovery, session.requests] = await Promise.all([offersDiscovery(), offersRequests()]);
+    [session.discovery, session.requests] = await Promise.all([offersDiscovery(), offersRequests(), loadCategories()]);
     session.kidsNeedLimits = profiles.some((p) => p.ceilingsNeeded) && !!session.me.activeProfile?.owner;
     // "Who's watching?" once per tab, when there's a choice.
     const where = router.route.parts[0];
@@ -142,6 +142,8 @@
         <Home />
       {:else if route.parts[0] === 'library' && route.parts[1]}
         <Library id={route.parts[1]} params={route.params} />
+      {:else if route.parts[0] === 'category' && route.parts[1]}
+        <Library id={route.parts[1]} params={route.params} category />
       {:else if route.parts[0] === 'discover'}
         <Discover />
       {:else if route.parts[0] === 'title' && route.parts[1]}
