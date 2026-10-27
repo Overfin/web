@@ -1,7 +1,8 @@
 <!-- Home: a slideshow of featured titles, what to continue (next episodes
      included), the watchlist, what's trending (among the library's titles,
-     or all of them when the operator says so), and what's new in each
-     library (films and series only). -->
+     or all of them when the operator says so), what's new in each of the
+     operator's home categories, and in each library while the menu shows
+     them (films and series only). -->
 <script lang="ts" module>
   // The slideshow's random picks: new each time the site opens, the same
   // while browsing it.
@@ -23,6 +24,15 @@
   // when the operator wants them there.
   const availability = $derived(session.me?.home?.missingTitles ? 'all' : 'library');
 
+  // What's new: in each home category, then in each library (while the
+  // menu shows them).
+  const sections = $derived([
+    ...session.categories.filter((c) => c.home).map((c) => ({ id: c.id, name: c.name,
+      call: ['/titles', { kind: ['movie', 'series'], category: c.id, sort: 'addedAt', order: 'desc', limit: 16 }] as [string, Record<string, string | number | string[]>] })),
+    ...(session.librariesShown ? session.libraries : []).map((l) => ({ id: l.id, name: l.name,
+      call: ['/titles/latest', { library: l.id, limit: 16 }] as [string, Record<string, string | number | string[]>] })),
+  ]);
+
   // Every row in one request (the server answers each as it would alone).
   async function load() {
     const trending = session.discovery ? (['movie', 'series'] as const) : [];
@@ -31,8 +41,7 @@
       '/me/watchlist',
       ...trending.map((kind): [string, Record<string, string | number>] =>
         ['/discover', { list: 'trending', mediaKind: kind, availability, limit: 20 }]),
-      ...session.libraries.map((library): [string, Record<string, string | number>] =>
-        ['/titles/latest', { library: library.id, limit: 16 }]),
+      ...sections.map((x) => x.call),
       // For the slideshow: the library at random, and its best rated.
       ['/titles', { kind: ['movie', 'series'], sort: 'random', seed, limit: 30 }],
       ['/titles', { kind: ['movie', 'series'], sort: 'communityRating', order: 'desc', limit: 40 }],
@@ -40,14 +49,14 @@
     // A row that failed is empty; Continue Watching failing fails the page.
     const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
     if (answers[0] instanceof Error) throw answers[0];
-    const rest = answers.slice(2 + trending.length, 2 + trending.length + session.libraries.length);
+    const rest = answers.slice(2 + trending.length, 2 + trending.length + sections.length);
     const [random, acclaimed] = answers.slice(-2).map(items);
     return {
       random, acclaimed,
       resume: items(answers[0]),
       watchlist: items(answers[1]), // the server may not offer it
       trending: trending.length ? { movie: items(answers[2]), series: items(answers[3]) } : { movie: [], series: [] },
-      latest: session.libraries.map((library, i) => ({ library, items: items(rest[i]) })),
+      latest: sections.map((section, i) => ({ section, items: items(rest[i]) })),
     };
   }
 
@@ -82,8 +91,8 @@
     <DiscoverRow title={t('home.trendingSeries')} list="trending" kind="series" {availability} flags={availability === 'all'}
       items={home.trending.series} />
   {/if}
-  {#each home.latest as { library, items } (library.id)}
-    <Row title={t('home.latest', { library: library.name })} {items} />
+  {#each home.latest as { section, items } (section.id)}
+    <Row title={t('home.latest', { library: section.name })} {items} />
   {/each}
 {:catch error}
   <PageError {error} />

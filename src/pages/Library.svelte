@@ -1,7 +1,7 @@
-<!-- A library: its titles, sorted and filtered (genre, decade, what the
-     profile watched) as the person chooses, loaded page by page as they
-     scroll. Choices live in the address, a shuffle's seed too, so a reload
-     shows the same page. -->
+<!-- A library, or one of the operator's categories: its titles, sorted
+     and filtered (genre, decade, what the profile watched) as the person
+     chooses, loaded page by page as they scroll. Choices live in the
+     address, a shuffle's seed too, so a reload shows the same page. -->
 <script lang="ts">
   import { tick } from 'svelte';
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
@@ -15,7 +15,7 @@
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
-  let { id, params }: { id: string; params: URLSearchParams } = $props();
+  let { id, params, category = false }: { id: string; params: URLSearchParams; category?: boolean } = $props();
 
   const sorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'lastPlayed', 'random'] as const;
   // What the profile did with the titles, as a filter.
@@ -26,9 +26,12 @@
   // Which titles a library lists, by its kind: films or series.
   const kinds: Record<string, 'movie' | 'series'> = { movies: 'movie', shows: 'series' };
 
-  const library = $derived(session.libraries.find((l) => l.id === id));
+  // What's listed: a library, or a category (films and series alike).
+  const library = $derived(category ? session.categories.find((c) => c.id === id) : session.libraries.find((l) => l.id === id));
+  const siblings = $derived(category ? session.categories : session.libraries);
+  const base = $derived(`/${category ? 'category' : 'library'}/${id}`);
   // svelte-ignore state_referenced_locally
-  rememberLibrary(id);
+  if (!category) rememberLibrary(id);
   // The page is shown anew for another library or sort (App keys it on the
   // address).
   // Without one in the address, the sort the profile last chose.
@@ -46,7 +49,7 @@
 
   let genres = $state<Genre[]>([]);
   $effect(() => {
-    overfin.genres(id).then((all) => (genres = all), () => {});
+    (category ? overfin.genres(undefined, id) : overfin.genres(id)).then((all) => (genres = all), () => {});
   });
 
   /** change goes to this library with one choice changed (a new shuffle). */
@@ -57,7 +60,7 @@
     if (value && value !== 'all' && !(name === 'sort' && value === 'name')) next.set(name, value);
     else next.delete(name);
     const q = next.toString();
-    go(`/library/${id}${q ? '?' + q : ''}`);
+    go(`${base}${q ? '?' + q : ''}`);
   }
 
   let items = $state<TitleSummary[]>([]);
@@ -70,10 +73,10 @@
 
   function query(): TitleQuery {
     return {
-      library: id,
+      ...(category ? { category: id, kind: ['movie', 'series'] as ('movie' | 'series')[] }
+        : { library: id, kind: library && 'kind' in library ? kinds[library.kind] : undefined }),
       sort,
       limit: 60,
-      kind: library ? kinds[library.kind] : undefined,
       order: ['addedAt', 'premiereDate', 'communityRating', 'lastPlayed'].includes(sort) ? 'desc' : undefined,
       seed: sort === 'random' ? seed : undefined,
       genre: genre || undefined,
@@ -98,7 +101,7 @@
       if (page.seed && !seed) {
         const next = new URLSearchParams(params);
         next.set('seed', page.seed);
-        history.replaceState(history.state, '', `/library/${id}?${next}`);
+        history.replaceState(history.state, '', `${base}?${next}`);
       }
       if (!page.nextCursor) finished = true;
     } catch (err) {
@@ -116,10 +119,11 @@
 {#if !library}
   <PageError notFound />
 {:else}
-  <!-- With several libraries, their names on top: this one marked. -->
-  {#if session.libraries.length > 1}
+  <!-- With several libraries, their names on top: this one marked. A
+       category's are in the menu already. -->
+  {#if !category && siblings.length > 1}
     <nav class="pills" aria-label={t('nav.libraries')}>
-      {#each session.libraries as l (l.id)}
+      {#each siblings as l (l.id)}
         <a href="/library/{l.id}" class:active={l.id === id} aria-current={l.id === id ? 'page' : undefined}>{l.name}</a>
       {/each}
     </nav>
@@ -154,7 +158,7 @@
       {/each}
     </select>
     {#if filtered}
-      <button class="link" type="button" onclick={() => go(sort === 'name' ? `/library/${id}` : `/library/${id}?sort=${sort}`)}>{t('library.clear')}</button>
+      <button class="link" type="button" onclick={() => go(sort === 'name' ? base : `${base}?sort=${sort}`)}>{t('library.clear')}</button>
     {/if}
     {#if total !== undefined}
       <span class="muted count">{tn('library.count', total)}</span>
