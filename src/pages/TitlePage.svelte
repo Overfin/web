@@ -13,6 +13,7 @@
   import { score } from '../lib/score';
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
+  import Marks from '../components/Marks.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -31,45 +32,9 @@
     history.replaceState(history.state, '', `/title/${title.id}?season=${s.seasonNumber}`);
   }
 
-  let onList = $state<boolean | null>(null);
-  $effect(() => {
-    onList = null;
-    overfin.onWatchlist(id).then((on) => (onList = on)).catch(() => {}); // not offered here
-  });
-  async function toggleList() {
-    const was = onList;
-    onList = !onList;
-    try {
-      await (onList ? overfin.addToWatchlist(id) : overfin.removeFromWatchlist(id));
-    } catch (err) {
-      onList = was; // as it still is
-      await notice(explain(err));
-    }
-  }
-
-  // Watched and favorite, as the profile marks them: what the server says
-  // back replaces what the page loaded. A failure is said, and changes
-  // nothing.
-  let marks = $state<{ played?: boolean; favorite?: boolean }>({});
-  async function togglePlayed(now: boolean) {
-    try {
-      marks.played = (await overfin.setPlayed(id, !now)).played;
-    } catch (err) {
-      await notice(explain(err));
-    }
-  }
   // How many profiles here marked it, when the server says (two others at
   // least): the profile's own mark moves it at once.
   let favoriteShift = $state(0);
-  async function toggleFavorite(now: boolean) {
-    try {
-      const after = (await overfin.setFavorite(id, !now)).favorite;
-      if (after !== now) favoriteShift += after ? 1 : -1;
-      marks.favorite = after;
-    } catch (err) {
-      await notice(explain(err));
-    }
-  }
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
   async function toggleEpisode(e: TitleSummary) {
@@ -138,8 +103,6 @@
   {@const seasonID = seasonOf(title)}
   {@const request = mainRequest === undefined ? title.request : mainRequest}
   {@const position = title.userState?.positionMs ?? 0}
-  {@const played = marks.played ?? title.userState?.played ?? false}
-  {@const favorite = marks.favorite ?? title.userState?.favorite ?? false}
   {@const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined)}
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
   <div class="hero" class:art={!!backdrop}>
@@ -219,21 +182,8 @@
             {/if}
           {/if}
           <!-- My list, watched, favorite: icons that fill in when on. -->
-          {#if onList !== null}
-            {@const label = onList ? t('item.listRemove') : t('item.listAdd')}
-            <button class="toggle" class:on={onList} aria-pressed={onList} aria-label={label} title={label} onclick={toggleList}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2-6.5 4.2v-16a1 1 0 0 1 1-1z" /></svg>
-            </button>
-          {/if}
-          <button class="toggle" class:on={played} aria-pressed={played} aria-label={played ? t('item.markUnwatched') : t('item.markWatched')}
-            title={played ? t('item.markUnwatched') : t('item.markWatched')} onclick={() => togglePlayed(played)}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path class="mark" d="M7.8 12.3l2.8 2.8 5.6-5.8" /></svg>
-          </button>
-          <button class="toggle heart" class:on={favorite} aria-pressed={favorite}
-            aria-label={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')} title={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')}
-            onclick={() => toggleFavorite(favorite)}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
-          </button>
+          <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite}
+            favorited={(on) => (favoriteShift += on ? 1 : -1)} />
           {#if title.favoriteCount}
             {@const n = title.favoriteCount + favoriteShift}
             <span class="favorites" title={t('item.favoriteCount', { n: String(n) })}>{t('item.favoriteCount', { n: String(n) })}</span>
