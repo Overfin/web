@@ -52,7 +52,7 @@ const fr: Record<keyof typeof en, string> = {
   'discover.upcomingMovies': 'Films à venir',
   'discover.upcomingSeries': 'Séries à venir',
   'discover.inLibrary': 'Dans la bibliothèque',
-  'discover.partly': 'En partie dans la bibliothèque',
+  'discover.partly': 'Incomplet',
   'discover.missing': 'Pas encore dans la bibliothèque',
   'discover.openInLibrary': 'Ouvrir dans la bibliothèque',
   'discover.seasons': 'Saisons',
