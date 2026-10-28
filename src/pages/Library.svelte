@@ -68,11 +68,15 @@
   // shows at once when it's opened again (pagecache).
   type Kept = { items: TitleSummary[]; total?: number; finished: boolean; pages?: AsyncGenerator<TitlePage> };
   // The sort it was read in is part of it: without one in the address,
-  // it's the one the profile last chose, which may have changed since.
+  // it's the one the profile last chose, which may have changed since. A
+  // shuffle is kept with its seed: one without is a new shuffle.
+  // svelte-ignore state_referenced_locally
+  let shuffle = $state(seed ?? '');
   const listKey = $derived.by(() => {
     const p = new URLSearchParams(params);
     p.delete('seed');
     p.set('sort', sort);
+    if (sort === 'random') p.set('seed', shuffle);
     return `${profile}:${base}?${p}`;
   });
   // svelte-ignore state_referenced_locally
@@ -119,6 +123,7 @@
       if (page.seed && !seed) {
         const next = new URLSearchParams(params);
         next.set('seed', page.seed);
+        shuffle = page.seed;
         history.replaceState(history.state, '', `${base}?${next}`);
       }
       if (!page.nextCursor) finished = true;
