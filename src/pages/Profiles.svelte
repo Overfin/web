@@ -1,13 +1,13 @@
 <!-- "Who's watching?": choosing a profile (with its PIN, if it has one),
      and, for the owner, adding one. -->
 <script lang="ts">
-  import type { Profile, Ratings } from '../lib/sdk/overfin.js';
+  import type { Profile } from '../lib/sdk/overfin.js';
   import { explain, isError, overfin } from '../lib/client';
   import { askPin } from '../lib/dialog.svelte';
   import { t, tn } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
   import { refresh, session, setPicked } from '../lib/session.svelte';
-  import CeilingPicker from '../components/CeilingPicker.svelte';
+  import AgePicker from '../components/AgePicker.svelte';
   import PageError from '../components/PageError.svelte';
 
   let message = $state('');
@@ -44,15 +44,11 @@
   let adding = $state(false);
   let name = $state('');
   let kids = $state(false);
-  let movie = $state('');
-  let series = $state('');
-  let ratings = $state<Ratings>({ country: '', movie: [], series: [] });
+  let age = $state(8);
 
   async function startAdding() {
     message = '';
-    ratings = await overfin.ratings();
-    movie = ratings.movie[0]?.name ?? '';
-    series = ratings.series[0]?.name ?? '';
+    age = 8;
     name = '';
     kids = false;
     adding = true;
@@ -62,7 +58,7 @@
     event.preventDefault();
     message = '';
     try {
-      await overfin.createProfile(kids ? { name, kind: 'kids', movieCeiling: movie, seriesCeiling: series } : { name });
+      await overfin.createProfile(kids ? { name, kind: 'kids', maxAge: age } : { name });
       adding = false;
       reload++;
       // The streams shared among profiles change with their number.
@@ -79,7 +75,7 @@
     <form class="stack panel" onsubmit={add}>
       <label>{t('manage.name')} <input bind:value={name} maxlength="32" required /></label>
       <label><input type="checkbox" bind:checked={kids} /> {t('manage.kidsProfile')}</label>
-      {#if kids}<CeilingPicker {ratings} bind:movie bind:series />{/if}
+      {#if kids}<AgePicker bind:age />{/if}
       <button class="primary" type="submit">{t('common.create')}</button>
       <button type="button" onclick={() => (adding = false)}>{t('common.cancel')}</button>
     </form>
