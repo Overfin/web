@@ -3,8 +3,10 @@
      libraries unless the operator took them out (one item, however
      many there are), then a menu for who's watching (switching, managing
      profiles, the account, logging out). On phones the sections go to a
-     second, scrolling line. -->
+     second, scrolling line: its ends fade where more is there, and the
+     open section is scrolled into view. -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import { overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
   import { librariesHref } from '../lib/lastlibrary';
@@ -18,6 +20,30 @@
   const libraries = $derived((void router.route, librariesHref(session.libraries)));
 
   let open = $state(false);
+  let sections = $state<HTMLElement>();
+  // Whether the sections' line has more to either side (phones).
+  let moreLeft = $state(false);
+  let moreRight = $state(false);
+
+  function edges() {
+    if (!sections) return;
+    moreLeft = sections.scrollLeft > 1;
+    moreRight = sections.scrollLeft + sections.clientWidth < sections.scrollWidth - 1;
+  }
+
+  // The open section in view, as the address or the sections change.
+  $effect(() => {
+    void router.route;
+    void session.categories;
+    void session.libraries;
+    tick().then(() => {
+      const active = sections?.querySelector<HTMLElement>('a.active');
+      if (sections && active && sections.scrollWidth > sections.clientWidth) {
+        sections.scrollLeft = active.offsetLeft - sections.offsetLeft - (sections.clientWidth - active.offsetWidth) / 2;
+      }
+      edges();
+    });
+  });
   let menu: HTMLDivElement;
   let toggle: HTMLButtonElement;
 
@@ -61,11 +87,11 @@
   }
 </script>
 
-<svelte:window onclick={outside} onkeydown={keydown} />
+<svelte:window onclick={outside} onkeydown={keydown} onresize={edges} />
 
 <header>
   <Brand />
-  <nav>
+  <nav bind:this={sections} class:more-left={moreLeft} class:more-right={moreRight} onscroll={edges}>
     <a href="/" class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
     <a href="/list" class:active={here[0] === 'list'} aria-current={here[0] === 'list' ? 'page' : undefined}>{t('nav.list')}</a>
     {#if session.discovery}

@@ -153,6 +153,14 @@ header nav a.active {
 @media (max-width: 720px) {
   header { grid-template-columns: 1fr auto; grid-template-areas: "brand menu" "nav nav"; gap: 0 1rem; padding-top: .4rem; }
   header nav { gap: 1.1rem; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) .2rem; }
+  /* More sections past an edge: that edge fades out (Header.svelte says
+     which). */
+  header nav.more-right { -webkit-mask-image: linear-gradient(to left, transparent, #000 3rem); mask-image: linear-gradient(to left, transparent, #000 3rem); }
+  header nav.more-left { -webkit-mask-image: linear-gradient(to right, transparent, #000 3rem); mask-image: linear-gradient(to right, transparent, #000 3rem); }
+  header nav.more-left.more-right {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+  }
   .menu .name { display: none; }
 }
 
