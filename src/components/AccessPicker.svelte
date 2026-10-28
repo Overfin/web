@@ -19,10 +19,10 @@
 
 <fieldset class="access">
   {#if categories.length}
-    <label><input type="checkbox" bind:checked={allCategories} /> {t('access.allCategories')}</label>
+    <label class="check"><input type="checkbox" bind:checked={allCategories} /> {t('access.allCategories')}</label>
     {#if !allCategories}
       {#each categories as c (c.id)}
-        <label class="sub">
+        <label class="check sub">
           <input type="checkbox" checked={chosenCategories.includes(c.id)}
             onchange={(e) => (chosenCategories = toggle(chosenCategories, c.id, e.currentTarget.checked))} />
           {c.name}
@@ -30,10 +30,10 @@
       {/each}
     {/if}
   {/if}
-  <label><input type="checkbox" bind:checked={all} /> {t('access.allLibraries')}</label>
+  <label class="check"><input type="checkbox" bind:checked={all} /> {t('access.allLibraries')}</label>
   {#if !all}
     {#each libraries as lib (lib.id)}
-      <label class="sub">
+      <label class="check sub">
         <input type="checkbox" checked={chosen.includes(lib.id)}
           onchange={(e) => (chosen = toggle(chosen, lib.id, e.currentTarget.checked))} />
         {lib.name}
@@ -43,7 +43,7 @@
   <details>
     <summary>{t('access.hiddenTags')}{hidden.length ? ` (${hidden.length})` : ''}</summary>
     {#each tags as tag (tag)}
-      <label class="sub">
+      <label class="check sub">
         <input type="checkbox" checked={hidden.some((h) => h.toLowerCase() === tag.toLowerCase())}
           onchange={(e) => (hidden = e.currentTarget.checked
             ? [...hidden, tag]
@@ -57,9 +57,8 @@
 </fieldset>
 
 <style>
-  .access { border: none; padding: 0; margin: 0; display: grid; gap: .3rem; }
+  .access { border: none; padding: 0; margin: 0; display: grid; }
   .sub { margin-left: 1.5rem; }
   details { margin-top: .3rem; }
-  details > :not(summary) { display: block; }
   summary { cursor: pointer; }
 </style>

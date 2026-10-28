@@ -113,7 +113,7 @@
           {#if p.kind !== 'kids' && (me.owner || p.id === me.id)}
             <section class="field">
               <h3>{t('manage.preferences')}</h3>
-              <label>
+              <label class="check">
                 <input type="checkbox" checked={!!p.kidsTitles}
                   onchange={(e) => setChildrensContent(p, e.currentTarget)} />
                 {t('manage.childrensContent')}
@@ -129,7 +129,7 @@
             <section class="field">
             <h3>{t('manage.limits')}</h3>
             <div class="toolbar">
-              <label><input type="checkbox" bind:checked={f.kids} /> {t('manage.kidsProfile')}</label>
+              <label class="check"><input type="checkbox" bind:checked={f.kids} /> {t('manage.kidsProfile')}</label>
               {#if f.kids}<AgePicker bind:age={f.age} />{/if}
             </div>
             <AccessPicker libraries={session.libraries} {tags}

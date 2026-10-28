@@ -916,6 +916,11 @@
   .notice { position: absolute; z-index: 4; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); text-align: center; padding: 2rem; }
   .notice .actions button + button { margin-left: .6rem; }
   @media (max-width: 40rem) {
+    /* Phones: 2.5rem buttons that never shrink, close together, so a full
+       row (a series' episode, all its buttons) still fits. */
+    .controls { padding-left: .5rem; padding-right: .5rem; }
+    .icon { flex: none; width: 2.5rem; height: 2.5rem; padding: .5rem; }
+    .buttons > * + * { margin-left: 0; }
     .volume input { display: none; }
     .top .title { font-size: .95rem; }
   }

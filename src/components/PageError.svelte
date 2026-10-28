@@ -20,5 +20,5 @@
   {:else if !isError(error, 'profile-required')}
     <p class="error">{explain(error)}</p>
   {/if}
-  <a href="/">{t('common.backHome')}</a>
+  <a class="button" href="/">{t('common.backHome')}</a>
 </div>
