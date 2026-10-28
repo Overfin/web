@@ -5,6 +5,7 @@
   import type { MediaRequest } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { confirm, notice } from '../lib/dialog.svelte';
+  import { homeChanged } from '../lib/homecache';
   import { t, type Key } from '../lib/i18n.svelte';
   import { loaded } from '../lib/loaded';
   import PageError from '../components/PageError.svelte';
@@ -15,6 +16,7 @@
     if (!(await confirm(t('request.cancelConfirm')))) return;
     try {
       await overfin.cancelRequest(r.id);
+      homeChanged();
       cancelled = [...cancelled, r.id];
     } catch (err) {
       await notice(explain(err));

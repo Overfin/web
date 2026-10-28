@@ -84,6 +84,7 @@
     if (!(await confirm(t('request.cancelConfirm')))) return;
     try {
       await overfin.cancelRequest(id);
+      homeChanged();
       mainRequest = null;
     } catch {
       mainRequest = undefined;
