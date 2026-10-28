@@ -9,25 +9,27 @@ import { pagesChanged } from './pagecache';
 const fresh = 5 * 60_000;
 
 let kept: { profile: string; at: number; data: unknown } | null = null;
-let changed = false;
+let changedAt = 0;
 
 /** keptHome returns the rows kept for the profile, and whether they should
  * be read again; null when there are none. */
 export function keptHome<T>(profile: string): { data: T; old: boolean } | null {
   if (!kept || kept.profile !== profile) return null;
-  return { data: kept.data as T, old: changed || Date.now() - kept.at > fresh };
+  return { data: kept.data as T, old: kept.at < changedAt || Date.now() - kept.at > fresh };
 }
 
-/** keepHome keeps the rows just read. */
-export function keepHome(profile: string, data: unknown) {
-  kept = { profile, at: Date.now(), data };
-  changed = false;
+/** keepHome keeps the rows just read, as of when they were asked for (at):
+ * a change while they were on their way leaves them old. */
+export function keepHome(profile: string, data: unknown, at = Date.now()) {
+  kept = { profile, at, data };
 }
 
 /** homeChanged says something the home page shows changed: it's read again
  * the next time it's shown. */
 export function homeChanged() {
-  changed = true;
+  // A tick later than anything asked for until now, even within the same
+  // millisecond.
+  changedAt = Date.now() + 1;
   pagesChanged();
 }
 

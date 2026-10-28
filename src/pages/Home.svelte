@@ -75,11 +75,12 @@
   let slides = $state<HomeData | null>(kept?.data ?? null);
   let error = $state<unknown>();
   async function read() {
+    const asked = Date.now();
     try {
       const data = await load();
       home = data;
       slides ??= data;
-      keepHome(profile, data);
+      keepHome(profile, data, asked);
     } catch (err) {
       if (!home) error = err;
     }
