@@ -195,6 +195,8 @@ export default {
   'manage.deleteProfile': 'Delete profile',
   'manage.deleteConfirm': 'Delete the profile "{name}" and its watch history?',
   'manage.devices': 'Signed-in devices',
+  'manage.moreDevices.one': 'Show {count} more',
+  'manage.moreDevices.other': 'Show {count} more',
   'manage.unknownDevice': 'Unknown device',
   'manage.thisOne': 'this one',
   'manage.signOut': 'Sign out',

@@ -57,7 +57,7 @@ export function has(key: string): key is Key {
 }
 
 /** tn picks the singular or plural form: base + ".one" or ".other". */
-export function tn(base: 'library.count' | 'discover.episodes' | 'profiles.reserved', count: number): string {
+export function tn(base: 'library.count' | 'discover.episodes' | 'profiles.reserved' | 'manage.moreDevices', count: number): string {
   const form = new Intl.PluralRules(current).select(count) === 'one' ? 'one' : 'other';
   return t(`${base}.${form}`, { count: count.toLocaleString(current) });
 }

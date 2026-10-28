@@ -196,6 +196,8 @@ const fr: Record<keyof typeof en, string> = {
   'manage.deleteProfile': 'Supprimer le profil',
   'manage.deleteConfirm': 'Supprimer le profil « {name} » et son historique de visionnage ?',
   'manage.devices': 'Appareils connectés',
+  'manage.moreDevices.one': 'Voir {count} autre appareil',
+  'manage.moreDevices.other': 'Voir les {count} autres',
   'manage.unknownDevice': 'Appareil inconnu',
   'manage.thisOne': 'celui-ci',
   'manage.signOut': 'Déconnecter',
