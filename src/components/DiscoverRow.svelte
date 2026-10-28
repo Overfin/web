@@ -3,7 +3,7 @@
      others, and only if it has titles. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
-  import { overfin } from '../lib/client';
+  import { discoverRow } from '../lib/warm';
   import Card from './Card.svelte';
   import ScrollRow from './ScrollRow.svelte';
 
@@ -19,7 +19,7 @@
 
   async function load(): Promise<TitleSummary[]> {
     try {
-      const { items } = given ? { items: given } : await overfin.discover(list, kind, { availability, limit: 20 });
+      const { items } = given ? { items: given } : await discoverRow(list, kind, availability);
       found(items.length > 0);
       return items;
     } catch (err) {

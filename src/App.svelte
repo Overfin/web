@@ -1,6 +1,7 @@
 <!-- The whole site: who's here first (account setup, no access, or "Who's
      watching?"), then the screen the address names. -->
 <script lang="ts">
+  import { warmLater } from './lib/warm';
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router, takeScroll } from './lib/router.svelte';
@@ -111,6 +112,13 @@
       stop();
       for (const move of moves) window.removeEventListener(move, stop);
     };
+  });
+
+  // The main pages read ahead a few seconds after a page opens, unless it
+  // says sooner that it has what it shows (warm).
+  $effect(() => {
+    void key;
+    if (phase.kind === 'ready') warmLater();
   });
 
   // The active profile's look, once it's known; the player is always dark.

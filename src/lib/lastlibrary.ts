@@ -11,16 +11,21 @@ export function rememberLibrary(id: string): void {
   }
 }
 
-// librariesHref is where the Libraries item leads.
-export function librariesHref(libraries: { id: string }[]): string | undefined {
+// lastLibraryId is the library the Libraries item opens.
+export function lastLibraryId(libraries: { id: string }[]): string | undefined {
   let last: string | null = null;
   try {
     last = localStorage.getItem(key);
   } catch {
     // none kept
   }
-  const library = libraries.find((l) => l.id === last) ?? libraries[0];
-  return library && `/library/${library.id}`;
+  return (libraries.find((l) => l.id === last) ?? libraries[0])?.id;
+}
+
+// librariesHref is where the Libraries item leads.
+export function librariesHref(libraries: { id: string }[]): string | undefined {
+  const id = lastLibraryId(libraries);
+  return id && `/library/${id}`;
 }
 
 // The sort each profile last chose, in this browser: a library opened

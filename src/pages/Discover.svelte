@@ -4,16 +4,10 @@
   import { t } from '../lib/i18n.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Skeleton from '../components/Skeleton.svelte';
+  import { discoverRows, landed } from '../lib/warm';
 
 
-  const rows = [
-    { list: 'trending', kind: 'movie', key: 'discover.trendingMovies' },
-    { list: 'trending', kind: 'series', key: 'discover.trendingSeries' },
-    { list: 'popular', kind: 'movie', key: 'discover.popularMovies' },
-    { list: 'popular', kind: 'series', key: 'discover.popularSeries' },
-    { list: 'upcoming', kind: 'movie', key: 'discover.upcomingMovies' },
-    { list: 'upcoming', kind: 'series', key: 'discover.upcomingSeries' },
-  ] as const;
+  const rows = discoverRows;
 
   // How many rows answered, and whether any had titles: "nothing here"
   // only once they all have.
@@ -22,6 +16,7 @@
   function found(has: boolean) {
     answered++;
     any ||= has;
+    if (answered === rows.length) landed();
   }
 </script>
 
