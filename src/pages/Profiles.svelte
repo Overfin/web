@@ -109,7 +109,7 @@
     <!-- Managing needs a profile: shown once one is active. -->
     {#if session.me?.activeProfile}
       <p class="center">
-        <a href="/manage">{session.me.activeProfile.owner ? t('profiles.manage') : t('profiles.mine')}</a>
+        <a class="button" href="/manage">{session.me.activeProfile.owner ? t('profiles.manage') : t('profiles.mine')}</a>
       </p>
     {/if}
   {:catch error}

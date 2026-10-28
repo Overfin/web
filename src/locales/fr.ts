@@ -220,8 +220,8 @@ const fr: Record<keyof typeof en, string> = {
   'access.invitation': 'Invitation requise',
 
   'profiles.who': 'Qui regarde ?',
-  'profiles.reserved.one': 'Chaque profil garde une lecture pour lui seul, et {count} autre se partage entre tous. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
-  'profiles.reserved.other': 'Chaque profil garde une lecture pour lui seul, et {count} autres se partagent entre tous. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
+  'profiles.reserved.one': 'Chaque profil a sa propre lecture, plus {count} partagée entre tous les profils. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
+  'profiles.reserved.other': 'Chaque profil a sa propre lecture, plus {count} partagées entre tous les profils. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
   'profiles.add': 'Ajouter un profil',
   'profiles.manage': 'Gérer les profils',
   'profiles.mine': 'Mon profil',
