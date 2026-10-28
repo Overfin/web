@@ -8,16 +8,17 @@
      keys move it too. -->
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { backdropOf } from '../lib/backdrop.svelte';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { ageText, duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
   import { keepSlides, keptSlides } from '../lib/homecache';
-  import { loaded } from '../lib/loaded';
   import { score } from '../lib/score';
   import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
   import { pickSlides } from '../lib/slides';
+  import ButtonIcon from './ButtonIcon.svelte';
   import Marks from './Marks.svelte';
 
   // missing: trending titles no library has may be shown too, to be
@@ -44,6 +45,13 @@
   let hovered = $state(false);
   let focused = $state(false);
   let hidden = $state(false);
+  // Scrolled out of view.
+  let away = $state(false);
+  function inView(node: HTMLElement, report: (on: boolean) => void) {
+    const observer = new IntersectionObserver((entries) => report(entries[0]?.isIntersecting ?? true));
+    observer.observe(node);
+    return { destroy: () => observer.disconnect() };
+  }
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   $effect(() => {
@@ -85,7 +93,7 @@
   });
 
   $effect(() => {
-    if (still || hovered || focused || hidden || slides.length < 2) return;
+    if (still || hovered || focused || hidden || away || slides.length < 2) return;
     const timer = setTimeout(() => show(index + 1), every);
     return () => clearTimeout(timer);
   });
@@ -121,7 +129,11 @@
 {:else if slides.length}
   <!-- Keys reach it from its own buttons and links: the arrows move it. -->
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+  <!-- The current slide's backdrop is the page's (lib/backdrop); out of
+       view, the slideshow holds still, and so does the backdrop. -->
   <section class="slides" aria-roledescription="carousel" aria-label={t('home.featured')}
+    use:backdropOf={slides[index]?.images?.backdrops?.[0] ? overfin.imageUrl(slides[index].images!.backdrops![0], 'large') : undefined}
+    use:inView={(on) => (away = !on)}
     onmouseenter={() => (hovered = true)} onmouseleave={() => (hovered = false)}
     onfocusin={() => (focused = true)} onfocusout={() => (focused = false)}
     onpointerdown={swipeStart} onpointerup={swipeEnd} onkeydown={keydown}>
@@ -129,9 +141,6 @@
       {@const position = item.userState?.positionMs ?? 0}
       <div class="slide" class:current={i === index} aria-roledescription="slide" aria-hidden={i !== index} inert={i !== index}
         aria-label={t('home.slide', { n: i + 1, total: slides.length })}>
-        {#if seen.has(i)}
-          <img class="backdrop" src={overfin.imageUrl(item.images!.backdrops![0], 'large')} alt="" use:loaded />
-        {/if}
         <div class="content">
           {#if item.images?.logo}
             <img class="logo" src={overfin.imageUrl(item.images.logo, 'medium')} alt={item.name} use:weigh />
@@ -153,12 +162,12 @@
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
           <div class="actions">
             {#if item.availability === 'missing'}
-              <a class="button primary" href="/title/{item.id}">{t('home.moreInfo')}</a>
+              <a class="button primary" href="/title/{item.id}"><ButtonIcon name="info" />{t('home.moreInfo')}</a>
             {:else if item.playable}
               <!-- Where the profile left off as the server says it: a kept
                    slideshow's titles may be from before a playback. -->
               <button class="primary" onclick={() => play(item.id)}>
-                {position ? t('home.resume') : t('item.play')}
+                <ButtonIcon name="play" />{position ? t('home.resume') : t('item.play')}
               </button>
               <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
@@ -167,14 +176,14 @@
             {:else if episodes[item.id]}
               {@const ep = episodes[item.id]!}
               <button class="primary" onclick={() => play(ep.id, ep.positionMs)}>
-                {ep.positionMs ? t('home.resume') : t('item.play')}
+                <ButtonIcon name="play" />{ep.positionMs ? t('home.resume') : t('item.play')}
               </button>
               <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
               </a>
               {#if seen.has(i)}<Marks id={item.id} played={item.userState?.played} favorite={item.userState?.favorite} />{/if}
             {:else}
-              <a class="button primary" href="/title/{item.id}">{t('home.seeSeries')}</a>
+              <a class="button primary" href="/title/{item.id}"><ButtonIcon name="info" />{t('home.seeSeries')}</a>
             {/if}
           </div>
         </div>

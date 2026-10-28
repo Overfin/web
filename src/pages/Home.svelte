@@ -1,5 +1,5 @@
 <!-- Home: a slideshow of featured titles, what to continue (next episodes
-     included), the watchlist, what's trending (among the library's titles,
+     included), what's trending (among the library's titles,
      or all of them when the operator says so), what's new in each of the
      operator's home categories, and in each library while the menu shows
      them (films and series only). -->
@@ -56,18 +56,19 @@
 
 {#if home && slides}
   <!-- Nothing yet: no row at all, trending ones included. -->
-  {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)
+  {@const empty = !home.resume.length && home.latest.every((l) => !l.items.length)
     && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
   <Slides {...slideSources(slides, availability === 'all')} {profile} />
+  <!-- The rows scroll up over the slideshow's backdrop. -->
+  <div class="sheet">
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
   <!-- Started titles and next episodes together; any can be taken out
        (a series' until it's watched again). -->
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
-  <Row title={t('home.watchlist')} items={home.watchlist} />
   <Row title={t('home.recommended')} items={home.recommended} />
   <Row title={t('home.recentForYou')} items={home.recent} />
   {#if session.discovery}
@@ -79,6 +80,7 @@
   {#each home.latest as { section, items } (section.id)}
     <Row title={t('home.latest', { library: section.name })} {items} />
   {/each}
+  </div>
 {:else if error}
   <PageError {error} />
 {:else}

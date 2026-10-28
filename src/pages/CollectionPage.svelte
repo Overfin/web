@@ -5,6 +5,7 @@
   import type { Collection } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
+  import { backdropOf } from '../lib/backdrop.svelte';
   import { t } from '../lib/i18n.svelte';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
@@ -24,10 +25,7 @@
   <Skeleton kind="title" />
 {:else}
   {@const backdrop = collection.images?.backdrops?.[0]}
-  <div class="hero" class:art={!!backdrop}>
-    {#if backdrop}
-      <img class="backdrop" src={overfin.imageUrl(backdrop, 'large')} alt="" use:loaded />
-    {/if}
+  <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? overfin.imageUrl(backdrop, 'large') : undefined}>
     <div class="info">
       {#if collection.images?.primary}
         <div class="poster">
@@ -43,10 +41,12 @@
       </div>
     </div>
   </div>
-  <h2>{t('collection.films')}</h2>
-  <div class="grid">
-    {#each collection.items ?? [] as item (item.id)}
-      <Card {item} />
-    {/each}
+  <div class="sheet">
+    <h2>{t('collection.films')}</h2>
+    <div class="grid">
+      {#each collection.items ?? [] as item (item.id)}
+        <Card {item} />
+      {/each}
+    </div>
   </div>
 {/if}
