@@ -102,6 +102,7 @@ export default {
   'item.watchlistAdd': '+ Watchlist',
   'item.seasons': 'Seasons',
   'item.episodes': 'Episodes',
+  'item.similar': 'Similar titles',
   'item.cast': 'Cast',
   'item.castAll': 'See the whole cast ({count})',
   'item.castLess': 'Show less',
