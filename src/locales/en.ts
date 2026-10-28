@@ -6,6 +6,9 @@ export default {
   'app.language': 'Language',
 
   'nav.home': 'Home',
+  'nav.list': 'My list',
+  'list.title': 'My list',
+  'list.empty': 'Your list is empty. Add titles to it from their page.',
   'nav.profiles': 'Profiles',
   'nav.account': 'Account',
   'nav.logout': 'Log out',

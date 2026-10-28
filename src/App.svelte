@@ -17,6 +17,7 @@
   import Home from './pages/Home.svelte';
   import Library from './pages/Library.svelte';
   import Manage from './pages/Manage.svelte';
+  import MyList from './pages/MyList.svelte';
   import Player from './pages/Player.svelte';
   import PersonPage from './pages/PersonPage.svelte';
   import Profiles from './pages/Profiles.svelte';
@@ -83,7 +84,7 @@
   function loadingShape(where: string | undefined): { kind: 'home' | 'title' | 'grid' | 'rows'; heading?: boolean } {
     if (!where) return { kind: 'home' };
     if (where === 'title' || where === 'person') return { kind: 'title' };
-    if (where === 'library') return { kind: 'grid', heading: true };
+    if (where === 'library' || where === 'list') return { kind: 'grid', heading: true };
     return { kind: 'rows', heading: true };
   }
 
@@ -148,6 +149,8 @@
         <Library id={route.parts[1]} params={route.params} />
       {:else if route.parts[0] === 'category' && route.parts[1]}
         <Library id={route.parts[1]} params={route.params} category />
+      {:else if route.parts[0] === 'list'}
+        <MyList />
       {:else if route.parts[0] === 'discover'}
         <Discover />
       {:else if route.parts[0] === 'title' && route.parts[1]}

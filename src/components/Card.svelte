@@ -14,8 +14,8 @@
   import { session } from '../lib/session.svelte';
   import { prefetchTitle } from '../lib/titlecache';
 
-  let { item, wide = false, flags = true, note = '', remove }: {
-    item: TitleSummary; wide?: boolean; flags?: boolean; note?: string; remove?: () => void;
+  let { item, wide = false, flags = true, note = '', remove, removeLabel }: {
+    item: TitleSummary; wide?: boolean; flags?: boolean; note?: string; remove?: () => void; removeLabel?: string;
   } = $props();
 
   const image = $derived(wide ? (item.images?.thumb ?? item.images?.backdrops?.[0] ?? item.images?.primary) : item.images?.primary);
@@ -93,7 +93,8 @@
     </button>
   {/if}
   {#if remove}
-    <button class="remove" type="button" title={t('home.removeFromContinue')} aria-label={t('home.removeFromContinue')}
+    <button class="remove" type="button" title={removeLabel ?? t('home.removeFromContinue')}
+      aria-label={removeLabel ?? t('home.removeFromContinue')}
       onclick={remove}>✕</button>
   {/if}
 </div>
