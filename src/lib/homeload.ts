@@ -37,7 +37,6 @@ export async function loadHome() {
   const trending = session.discovery ? (['movie', 'series'] as const) : [];
   const answers = await overfin.batch([
     ['/titles/continue', { limit: 20 }],
-    '/me/watchlist',
     ...trending.map((kind): Call => ['/discover', { list: 'trending', mediaKind: kind, availability, limit: 20 }]),
     ...latest.map((x) => x.call),
     // What fits the profile: among everything, and among the newest.
@@ -50,13 +49,12 @@ export async function loadHome() {
   // A row that failed is empty; Continue Watching failing fails the page.
   const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
   if (answers[0] instanceof Error) throw answers[0];
-  const rest = answers.slice(2 + trending.length, 2 + trending.length + latest.length);
+  const rest = answers.slice(1 + trending.length, 1 + trending.length + latest.length);
   const [recommended, recent, random, acclaimed] = answers.slice(-4).map(items);
   return {
     random, acclaimed, recommended, recent,
     resume: items(answers[0]),
-    watchlist: items(answers[1]), // the server may not offer it
-    trending: trending.length ? { movie: items(answers[2]), series: items(answers[3]) } : { movie: [], series: [] },
+    trending: trending.length ? { movie: items(answers[1]), series: items(answers[2]) } : { movie: [], series: [] },
     latest: latest.map((section, i) => ({ section, items: items(rest[i]) })),
   };
 }

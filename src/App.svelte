@@ -10,6 +10,7 @@
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
   import SiteFooter from './components/SiteFooter.svelte';
+  import PageBackdrop from './components/PageBackdrop.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
   import Skeleton from './components/Skeleton.svelte';
@@ -159,6 +160,7 @@
     </div>
   </main>
 {:else}
+  <PageBackdrop />
   {#if !bare}<Header />{/if}
   <main>
     <!-- A kids profile without limits shows nothing: its owner is asked to
