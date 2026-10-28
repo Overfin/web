@@ -77,8 +77,8 @@ export interface Me {
   /** What the server offers that depends on its setup: discovery (TMDB or
    * Seerr), requests (Seerr). Absent before 0.5. */
   offers?: { discovery: boolean; requests: boolean };
-  /** The control panel's address: for admins, when it's reachable at the
-   * site's address. */
+  /** The control panel's path on the site ("/admin/"), only for an admin
+   * who can open it there; absent otherwise. Since 0.6. */
   panel?: string;
 }
 
@@ -211,8 +211,8 @@ export interface TitleSummary {
   durationMs?: number;
   /** Its rating in the server's ratings country (its series', for a season or an episode). */
   certification?: string;
-  /** The age it's for, from its ratings (its series', for a season or an
-   * episode): 0 for all ages. Absent when unknown, and before 0.6. */
+  /** Its age, as the server works it out from its ratings in any country
+   * (its series', for a season or an episode); absent when unknown. Since 0.6. */
   age?: number;
   /** Users' scores (a film's or a series'), by source: TMDB's for now. */
   ratings?: { source: string; value: number; votes: number }[];
