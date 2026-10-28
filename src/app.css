@@ -82,6 +82,14 @@ input, select {
 }
 input:hover, select:hover { border-color: var(--border-strong); }
 input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3), 0 0 0 3px rgba(var(--accent-rgb), .22); }
+/* Checkboxes and radios aren't text fields: the browser's own, in the
+   accent colour. */
+input[type=checkbox], input[type=radio], input[type=checkbox]:hover, input[type=radio]:hover {
+  min-height: 0; width: 1.05rem; height: 1.05rem; margin: 0 .1rem 0 0; padding: 0; vertical-align: middle;
+  border: 0; box-shadow: none; background: none; accent-color: var(--accent);
+}
+input[type=checkbox]:focus, input[type=radio]:focus { box-shadow: none; }
+input[type=checkbox]:focus-visible, input[type=radio]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .muted { color: var(--muted); }
 .error { color: var(--danger); }
 main > .notice {
@@ -330,6 +338,8 @@ h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spaci
 .setup h2 { margin: 0 0 .5rem; }
 button.block { width: 100%; }
 form.stack label { display: grid; gap: .3rem; }
+/* A checkbox's label: the box, then its words, on one line. */
+form.stack label.check { display: flex; align-items: center; gap: .45rem; }
 .divider { display: flex; align-items: center; gap: .8rem; color: var(--muted); margin: 1.2rem 0; font-size: .85rem; }
 .divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
 a.button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 650; padding-inline: 1.4em; }

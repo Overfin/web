@@ -74,7 +74,7 @@
     <h1>{t('profiles.new')}</h1>
     <form class="stack panel" onsubmit={add}>
       <label>{t('manage.name')} <input bind:value={name} maxlength="32" required /></label>
-      <label><input type="checkbox" bind:checked={kids} /> {t('manage.kidsProfile')}</label>
+      <label class="check"><input type="checkbox" bind:checked={kids} /> {t('manage.kidsProfile')}</label>
       {#if kids}<AgePicker bind:age />{/if}
       <button class="primary" type="submit">{t('common.create')}</button>
       <button type="button" onclick={() => (adding = false)}>{t('common.cancel')}</button>
