@@ -3,6 +3,7 @@
 import type { TitleSummary } from './sdk/overfin.js';
 import { explain, overfin } from './client';
 import { confirm, notice } from './dialog.svelte';
+import { homeChanged } from './homecache';
 import { t } from './i18n.svelte';
 
 /** question says what asking for x requests: a film, a whole series, or a
@@ -27,6 +28,7 @@ export async function ask(x: TitleSummary): Promise<TitleSummary['request'] | nu
   if (!(await confirm(question(x)))) return null;
   try {
     const made = await overfin.requestTitle(x.id);
+    homeChanged(); // pages kept in the tab say it's asked for
     return { id: made.id, status: made.status };
   } catch (err) {
     await notice(explain(err));
