@@ -1,6 +1,6 @@
 <!-- Profiles and devices. The owner manages every profile (names, kids
-     limits, libraries and hidden tags, PINs, deleting) and every device;
-     another profile only its own PIN and devices. -->
+     limits, libraries and hidden tags, PINs, deleting, adding one) and
+     every device; another profile only its own PIN and devices. -->
 <script lang="ts">
   import type { Profile } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -9,9 +9,10 @@
   import { homeChanged } from '../lib/homecache';
   import { i18n, t } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
-  import { loadCategories, session } from '../lib/session.svelte';
+  import { loadCategories, mayAddProfile, session } from '../lib/session.svelte';
   import AccessPicker from '../components/AccessPicker.svelte';
   import AgePicker from '../components/AgePicker.svelte';
+  import NewProfile from '../components/NewProfile.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -26,6 +27,7 @@
   }
   const forms = $state<Record<string, Form>>({});
   let devicesMessage = $state('');
+  let adding = $state(false);
 
   let reload = $state(0);
   async function load() {
@@ -181,6 +183,21 @@
           {#if f.message}<p class="error">{f.message}</p>{/if}
         </div>
       {/each}
+
+      <!-- Adding a profile, for the owner, while the account may have
+           more (as on "Who's watching?"). -->
+      {#if mayAddProfile(profiles.length)}
+        {#if adding}
+          <div class="panel">
+            <h2>{t('profiles.new')}</h2>
+            <NewProfile created={() => { adding = false; reload++; }} cancel={() => (adding = false)} />
+          </div>
+        {:else}
+          <div class="toolbar">
+            <button type="button" onclick={() => (adding = true)}>{t('profiles.add')}</button>
+          </div>
+        {/if}
+      {/if}
 
       <!-- Devices signed in: the owner sees all of the account's, others
            their own. -->
