@@ -1,8 +1,9 @@
 <!-- The bar on top of every screen except the profile picker, account setup
-     and the player: home, the profile's list, discovery, the operator's categories, and the
+     and the player: home, discovery, the operator's categories, and the
      libraries unless the operator took them out (one item, however
-     many there are), then a menu for who's watching (switching, managing
-     profiles, the account, the control panel for admins, logging out).
+     many there are), then a menu for who's watching (the profile's list,
+     switching, managing profiles, the account, the control panel for
+     admins, logging out).
      On phones the sections go to a second, scrolling line: its ends fade
      where more is there, and the open section is scrolled into view. -->
 <script lang="ts">
@@ -105,7 +106,6 @@
   <Brand />
   <nav bind:this={sections} class:more-left={moreLeft} class:more-right={moreRight} onscroll={edges}>
     <a href="/" class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
-    <a href="/list" class:active={here[0] === 'list'} aria-current={here[0] === 'list' ? 'page' : undefined}>{t('nav.list')}</a>
     {#if session.discovery}
       <a href="/discover" class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
     {/if}
@@ -133,6 +133,7 @@
     </button>
     {#if open}
       <div class="dropdown">
+        <a href="/list">{t('nav.list')}</a>
         <a href="/profiles">{t('nav.switchProfile')}</a>
         {#if session.requests}<a href="/requests">{t('request.mine')}</a>{/if}
         <a href="/manage">{t('nav.profiles')}</a>
