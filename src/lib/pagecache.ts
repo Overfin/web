@@ -1,8 +1,10 @@
 // Pages' answers, kept for the open tab so going back, or opening a title
 // whose card was hovered, shows at once. A kept answer is used as it is
 // for a few minutes; older, it's shown at once and read again in the
-// background for next time. A playback or a mark makes every answer old
-// (pagesChanged). Each profile its own; nothing is kept beyond the tab.
+// background for next time. After a playback or a mark (pagesChanged),
+// kept answers are read again before they show: a title page coming back
+// from the player says where it stopped. Each profile its own; nothing is
+// kept beyond the tab.
 
 /** fresh is how long a kept answer is used as it is. */
 const fresh = 5 * 60_000;
@@ -18,8 +20,8 @@ interface Entry {
 const entries = new Map<string, Entry>();
 let changedAt = 0;
 
-function keep(key: string, value: Promise<unknown>) {
-  const entry: Entry = { at: Date.now(), value, done: false };
+function keep(key: string, value: Promise<unknown>, at = Date.now()) {
+  const entry: Entry = { at, value, done: false };
   entries.delete(key);
   entries.set(key, entry);
   value.then(() => (entry.done = true), () => entries.get(key) === entry && entries.delete(key));
@@ -27,16 +29,17 @@ function keep(key: string, value: Promise<unknown>) {
 }
 
 /** cached answers read() for key: kept when fresh; kept and read again in
- * the background when old; read now otherwise. */
+ * the background when old; read now when something changed since, or when
+ * there's none. */
 export function cached<T>(key: string, read: () => Promise<T>): Promise<T> {
   const entry = entries.get(key);
-  if (entry) {
+  if (entry && !(entry.done && entry.at < changedAt)) {
     entries.delete(key);
     entries.set(key, entry); // the most recently used
-    const old = Date.now() - entry.at > fresh || entry.at < changedAt;
-    if (!old || !entry.done) return entry.value as Promise<T>;
-    const again = read();
-    again.then((value) => keep(key, Promise.resolve(value)), () => {});
+    if (!entry.done || Date.now() - entry.at <= fresh) return entry.value as Promise<T>;
+    // Kept as of when it was asked: a change meanwhile makes it old.
+    const at = Date.now();
+    read().then((value) => keep(key, Promise.resolve(value), at), () => {});
     return entry.value as Promise<T>;
   }
   const value = read();
