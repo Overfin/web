@@ -78,7 +78,7 @@
   fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: .55rem; }
   legend { font-weight: 600; margin-bottom: .45rem; padding: 0; }
   .choices { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; }
-  .choice { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+  .choice { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.5rem; cursor: pointer; }
   /* Radios and checkboxes, not text fields. */
   .choice input {
     min-height: 0; width: 1.05rem; height: 1.05rem; margin: 0; padding: 0;
