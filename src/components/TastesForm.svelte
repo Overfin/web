@@ -1,5 +1,5 @@
 <!-- What the account likes, for what the server keeps and gets: series,
-     films or both, genres, kids' content. Asked once (first: with a way to
+     films or both, genres. Asked once (first: with a way to
      skip, which still counts as asked), and changeable on the account page.
      Nobody else sees the answers. -->
 <script lang="ts">
@@ -12,7 +12,6 @@
   let page = $state<TastesPage | null>(null);
   let prefer = $state<'' | 'series' | 'movies' | 'both'>('');
   let genres = $state<number[]>([]);
-  let kids = $state(false);
   let message = $state('');
   let busy = $state(false);
 
@@ -20,7 +19,6 @@
     page = p;
     prefer = p.prefer ?? '';
     genres = [...p.genres];
-    kids = p.kids;
   }, (err) => (message = explain(err)));
 
   function toggle(id: number) {
@@ -31,7 +29,7 @@
     message = '';
     busy = true;
     try {
-      await overfin.setTastes(nothing ? {} : { prefer: prefer || undefined, genres, kids });
+      await overfin.setTastes(nothing ? {} : { prefer: prefer || undefined, genres });
       done(!nothing);
     } catch (err) {
       message = explain(err);
@@ -65,14 +63,6 @@
         </div>
       {:else}
         <p class="muted">{t('tastes.noGenres')}</p>
-      {/if}
-    </fieldset>
-    <fieldset>
-      <legend>{t('tastes.kids')}</legend>
-      {#if page.kidsProfile}
-        <p class="muted">{t('tastes.kidsProfile')}</p>
-      {:else}
-        <label class="choice"><input type="checkbox" bind:checked={kids} /> {t('tastes.kidsWanted')}</label>
       {/if}
     </fieldset>
     <div class="actions">

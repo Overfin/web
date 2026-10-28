@@ -93,6 +93,20 @@
             </section>
           {/if}
 
+          <!-- "Contenu pour enfants": a profile's own preference (not a kids
+               profile's, which always has it), changed by it or the owner. -->
+          {#if p.kind !== 'kids' && (me.owner || p.id === me.id)}
+            <section class="field">
+              <h3>{t('manage.preferences')}</h3>
+              <label>
+                <input type="checkbox" checked={!!p.kidsTitles}
+                  onchange={(e) => act(p, () => overfin.updateProfile(p.id, { kidsTitles: e.currentTarget.checked ? true : null }))} />
+                {t('manage.childrensContent')}
+              </label>
+              <p class="muted">{t('manage.childrensContentHint')}</p>
+            </section>
+          {/if}
+
           <!-- Limits: kids (with an age) or standard, the
                libraries and the hidden tags. Changing them needs the owner's
                PIN, if the owner has one. -->
