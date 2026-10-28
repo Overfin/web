@@ -27,6 +27,7 @@
     onList = !onList;
     try {
       await (onList ? overfin.addToWatchlist(id) : overfin.removeFromWatchlist(id));
+      homeChanged(); // again: a home read meanwhile had it as it was
     } catch (err) {
       onList = was; // as it still is
       await notice(explain(err));
