@@ -138,6 +138,10 @@
     await tick();
     if (!finished && sentinel && sentinel.getBoundingClientRect().top < innerHeight * 2) more();
   }
+  // The first page as the page opens: the end of the list may be out of
+  // reach under a tall placeholder (two columns on a phone).
+  // svelte-ignore state_referenced_locally
+  if (!items.length && !finished) more();
 </script>
 
 {#if !library}
