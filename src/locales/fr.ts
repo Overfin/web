@@ -51,6 +51,13 @@ const fr: Record<keyof typeof en, string> = {
 
   'nav.discover': 'Découvrir',
   'nav.libraries': 'Bibliothèques',
+  'nav.collections': 'Collections',
+  'collections.title': 'Collections',
+  'collections.count': '{have} sur {films}',
+  'collections.empty': 'Aucune collection pour l’instant.',
+  'collection.films': 'Les films',
+  'title.partOf': 'Fait partie de',
+  'item.upcoming': 'Prochainement',
   'app.poweredBy': 'Propulsé par',
   'discover.title': 'Découvrir',
   'discover.trendingMovies': 'Films tendance',

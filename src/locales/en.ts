@@ -50,6 +50,13 @@ export default {
 
   'nav.discover': 'Discover',
   'nav.libraries': 'Libraries',
+  'nav.collections': 'Collections',
+  'collections.title': 'Collections',
+  'collections.count': '{have} of {films}',
+  'collections.empty': 'No collections yet.',
+  'collection.films': 'The films',
+  'title.partOf': 'Part of',
+  'item.upcoming': 'Coming soon',
   'app.poweredBy': 'Powered by',
   'discover.title': 'Discover',
   'discover.trendingMovies': 'Trending films',

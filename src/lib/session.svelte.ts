@@ -1,21 +1,28 @@
 // Who's here: the account, its active profile, and the libraries that
 // profile sees (each profile its own, kids limits included).
-import type { Category, Library, Me } from './sdk/overfin.js';
+import type { Category, Collection, Library, Me } from './sdk/overfin.js';
 import { overfin } from './client';
 
 export const session = $state<{
   me: Me | null; libraries: Library[]; categories: Category[]; librariesShown: boolean;
-  discovery: boolean; requests: boolean; kidsNeedLimits: boolean;
+  collections: Collection[]; discovery: boolean; requests: boolean; kidsNeedLimits: boolean;
 }>({
-  me: null, libraries: [], categories: [], librariesShown: true, discovery: false, requests: false, kidsNeedLimits: false,
+  me: null, libraries: [], categories: [], librariesShown: true, collections: [], discovery: false, requests: false,
+  kidsNeedLimits: false,
 });
 
-/** loadCategories reads the operator's categories, and whether the menu
- * shows the libraries (a server before 0.6 has none, and shows them). */
+/** loadCategories reads what the menu shows: the operator's categories,
+ * whether the libraries show (a server before 0.6 has no categories, and
+ * shows them), and the collections the profile has films of (none before
+ * 0.7: the menu leaves them out). */
 export async function loadCategories() {
-  const c = await overfin.categories().catch(() => ({ items: [], libraries: true }));
+  const [c, collections] = await Promise.all([
+    overfin.categories().catch(() => ({ items: [], libraries: true })),
+    overfin.collections().catch(() => []),
+  ]);
   session.categories = c.items;
   session.librariesShown = c.libraries || !c.items.length;
+  session.collections = collections;
 }
 
 /** offersDiscovery says whether the server offers discovery (with TMDB or

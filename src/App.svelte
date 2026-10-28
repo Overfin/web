@@ -19,6 +19,8 @@
   import Library from './pages/Library.svelte';
   import Manage from './pages/Manage.svelte';
   import MyList from './pages/MyList.svelte';
+  import Collections from './pages/Collections.svelte';
+  import CollectionPage from './pages/CollectionPage.svelte';
   import Player from './pages/Player.svelte';
   import PersonPage from './pages/PersonPage.svelte';
   import Profiles from './pages/Profiles.svelte';
@@ -84,8 +86,8 @@
   // loadingShape is the placeholder that looks like the page at a path.
   function loadingShape(where: string | undefined): { kind: 'home' | 'title' | 'grid' | 'rows'; heading?: boolean } {
     if (!where) return { kind: 'home' };
-    if (where === 'title' || where === 'person') return { kind: 'title' };
-    if (where === 'library' || where === 'list') return { kind: 'grid', heading: true };
+    if (where === 'title' || where === 'person' || where === 'collection') return { kind: 'title' };
+    if (where === 'library' || where === 'list' || where === 'collections') return { kind: 'grid', heading: true };
     return { kind: 'rows', heading: true };
   }
 
@@ -177,6 +179,10 @@
         <MyList />
       {:else if route.parts[0] === 'discover'}
         <Discover />
+      {:else if route.parts[0] === 'collections'}
+        <Collections />
+      {:else if route.parts[0] === 'collection' && route.parts[1]}
+        <CollectionPage id={route.parts[1]} />
       {:else if route.parts[0] === 'title' && route.parts[1]}
         <TitlePage id={route.parts[1]} params={route.params} />
       {:else if route.parts[0] === 'play' && route.parts[1]}
