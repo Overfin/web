@@ -29,6 +29,8 @@ export default {
 
   'time.hoursMinutes': '{h} h {m} min',
   'time.minutes': '{m} min',
+  'age.all': 'All ages',
+  'age.from': '{age}+',
 
   'home.continue': 'Continue watching',
   'home.recommended': 'Recommended for you',

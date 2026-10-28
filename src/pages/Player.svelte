@@ -12,7 +12,7 @@
   import { onDestroy, onMount, untrack } from 'svelte';
   import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
-  import { clock, duration } from '../lib/format';
+  import { ageText, clock, duration } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
   import { canGoBack, replace } from '../lib/router.svelte';
@@ -77,7 +77,7 @@
     if (it.kind === 'episode') {
       return [t('item.seasonEpisodeShort', { season: it.seasonNumber ?? '?', episode: it.episodeNumber ?? '?' }), it.name].join(' · ');
     }
-    return [it.year, it.durationMs ? duration(it.durationMs) : '', it.certification].filter(Boolean).join(' · ');
+    return [it.year, it.durationMs ? duration(it.durationMs) : '', ageText(it.age)].filter(Boolean).join(' · ');
   });
   // The pause screen comes after a second paused, so a quick pause doesn't
   // flash it.

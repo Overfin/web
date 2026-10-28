@@ -30,6 +30,8 @@ const fr: Record<keyof typeof en, string> = {
 
   'time.hoursMinutes': '{h} h {m} min',
   'time.minutes': '{m} min',
+  'age.all': 'Tous publics',
+  'age.from': '{age}+',
 
   'home.continue': 'Reprendre',
   'home.recommended': 'Recommandé pour vous',

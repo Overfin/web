@@ -10,7 +10,7 @@
   import { untrack } from 'svelte';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
-  import { duration } from '../lib/format';
+  import { ageText, duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
   import { keepSlides, keptSlides } from '../lib/homecache';
   import { loaded } from '../lib/loaded';
@@ -181,7 +181,7 @@
           {/if}
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
-            {#if item.certification}<span class="certification">{item.certification}</span>{/if}
+            {#if ageText(item.age)}<span class="age">{ageText(item.age)}</span>{/if}
             {#if score(item)}{@const s = score(item)!}
               <span class="score" title={t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}

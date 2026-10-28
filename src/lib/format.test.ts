@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clock, duration } from './format';
+import { ageText, clock, duration } from './format';
 import { i18n, t, tn, type Key } from './i18n.svelte';
 
 describe('format', () => {
@@ -12,6 +12,15 @@ describe('format', () => {
     i18n.set('en');
     expect(duration(42 * 60_000)).toBe('42 min');
     expect(duration(102 * 60_000)).toBe('1 h 42 min');
+  });
+  it('shows ages, not ratings', () => {
+    i18n.set('fr');
+    expect(ageText(0)).toBe('Tous publics');
+    expect(ageText(12)).toBe('12+');
+    expect(ageText(undefined)).toBe('');
+    i18n.set('en');
+    expect(ageText(0)).toBe('All ages');
+    expect(ageText(16)).toBe('16+');
   });
 });
 

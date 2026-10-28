@@ -1,5 +1,11 @@
-// Times, as people read them.
+// Times and ages, as people read them.
 import { t } from './i18n.svelte';
+
+/** ageText is the age a title is for: "All ages", "12+"; nothing when unknown. */
+export function ageText(years?: number): string {
+  if (typeof years !== 'number' || !Number.isFinite(years) || years < 0) return '';
+  return years === 0 ? t('age.all') : t('age.from', { age: years });
+}
 
 /** duration is a length: "1 h 42 min". */
 export function duration(ms: number): string {
