@@ -7,24 +7,30 @@ TypeScript, on Overfin's
 
 - **Account setup**: start fresh, or bring a previous account over (when the
   server offers it); the account's language is chosen there too.
-- **Who's watching?**: profiles, PINs, adding a profile (kids profiles with
-  film and series ceilings).
-- **Profiles and devices**: renaming, kids limits, libraries and hidden tags
-  per profile, setting, changing and removing PINs, each profile's look,
-  deleting profiles, signed-in devices; the site asks for a PIN or a fresh
-  login when the server wants one.
+- **Who's watching?**: profiles, PINs, adding a profile (a kids profile
+  with an age, films and series alike).
+- **Profiles and devices**: renaming, a kids profile's age, the categories,
+  libraries and hidden tags per profile, "Content for children" in a
+  profile's recommendations, setting, changing and removing PINs, each
+  profile's look, deleting profiles, signed-in devices; the site asks for a
+  PIN or a fresh login when the server wants one.
 - **Account**: how one signs in, the account's language, downloading your
   data, bringing a history over, deleting your account.
 - **Home**: a slideshow of featured titles, continue watching (next episodes
-  included), the watchlist, what's trending (when the server offers
-  discovery), the latest per library.
+  included), the profile's list, recommendations for the profile (all, and
+  among the newest), what's trending (when the server offers discovery),
+  the latest per home category and per library.
+- **Categories**: those the operator made, each in the menu with its page;
+  the libraries leave the menu when the operator says so.
+- **My list**: a page of the profile's list.
 - **Discover**, when the server offers it: trending, popular and upcoming
   films and series the libraries don't have (to request, when the server
   takes requests).
 - **Libraries**: sorting (the profile's last choice kept in the browser),
   filters (genre, decade, watched), a repeatable shuffle, infinite scroll.
-- **Title pages**: films, series, seasons, episodes, cast, ratings; my list,
-  watched and favorite; requests, confirmed first, and where they are.
+- **Title pages**: films, series, seasons, episodes, cast, ratings, similar
+  titles; my list, watched and favorite; requests, confirmed first, and
+  where they are.
 - **Search** (titles and people) and **people's pages**.
 - **Requests**: the profile's, and cancelling one while it's pending.
 - **Player**: Overfin picks direct play, repackaging or transcoding from what
