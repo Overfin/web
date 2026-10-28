@@ -6,6 +6,7 @@
   import { overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
   import { confirm } from '../lib/dialog.svelte';
+  import { homeChanged } from '../lib/homecache';
   import { i18n, t } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
@@ -49,9 +50,19 @@
     return load();
   });
 
-  async function act(p: Profile, action: (pin?: string) => Promise<unknown>, pinLabel?: string) {
+  // A profile changed: what its pages kept in this tab is read again (its
+  // limits and preferences change what they show).
+  async function act(p: Profile, action: (pin?: string) => Promise<unknown>, pinLabel?: string): Promise<boolean> {
     const f = forms[p.id];
-    if (await confirmed(action, (m) => (f.message = m), pinLabel)) reload++;
+    if (!(await confirmed(action, (m) => (f.message = m), pinLabel))) return false;
+    homeChanged();
+    reload++;
+    return true;
+  }
+  // "Contenu pour enfants" on or off; the box as it was when that fails.
+  async function setChildrensContent(p: Profile, box: HTMLInputElement) {
+    const on = box.checked;
+    if (!(await act(p, () => overfin.updateProfile(p.id, { kidsTitles: on ? true : null })))) box.checked = !on;
   }
 
   $effect(() => {
@@ -100,7 +111,7 @@
               <h3>{t('manage.preferences')}</h3>
               <label>
                 <input type="checkbox" checked={!!p.kidsTitles}
-                  onchange={(e) => act(p, () => overfin.updateProfile(p.id, { kidsTitles: e.currentTarget.checked ? true : null }))} />
+                  onchange={(e) => setChildrensContent(p, e.currentTarget)} />
                 {t('manage.childrensContent')}
               </label>
               <p class="muted">{t('manage.childrensContentHint')}</p>
