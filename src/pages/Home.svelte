@@ -9,6 +9,7 @@
   import { homeChanged, keepHome, keptHome } from '../lib/homecache';
   import { homeAvailability, loadHome, type HomeData } from '../lib/homeload';
   import { session } from '../lib/session.svelte';
+  import { slideSources } from '../lib/slides';
   import { landed } from '../lib/warm';
   import PageError from '../components/PageError.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
@@ -59,8 +60,7 @@
     && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides trending={slides.trending} random={slides.random} acclaimed={slides.acclaimed} recommended={slides.recommended} missing={availability === 'all'} {profile}
-    latest={slides.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
+  <Slides {...slideSources(slides, availability === 'all')} {profile} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
