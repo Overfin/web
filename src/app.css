@@ -411,8 +411,9 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
   .slides { --under: 5rem; height: calc(72vh + var(--under)); min-height: calc(30rem + var(--under)); }
   .slide::before { background: linear-gradient(to top, var(--bg) 25%, rgba(var(--bg-rgb), .6) 60%, rgba(var(--bg-rgb), .15) 100%); }
   .slide .content { padding-bottom: calc(3.2rem + var(--under)); }
-  /* Two small buttons side by side, centered: not a full-width Play. */
-  .slide .actions { justify-content: center; }
+  /* Small buttons side by side, from the text's edge: not a full-width
+     Play. */
+  .slide .actions { justify-content: flex-start; }
   .slide .actions button, .slide .actions button.primary, .slide .actions .button { flex: 0 0 auto; }
   .slide .logo { max-height: 6rem; }
   .slide .overview { -webkit-line-clamp: 2; }
