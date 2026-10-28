@@ -9,6 +9,7 @@
   import { homeChanged } from '../lib/homecache';
   import { i18n, t } from '../lib/i18n.svelte';
   import { session, setPicked } from '../lib/session.svelte';
+  import Modal from '../components/Modal.svelte';
   import TastesForm from '../components/TastesForm.svelte';
 
   let message = $state('');
@@ -57,6 +58,7 @@
   // Bringing the history of a previous account into this profile, when the
   // server offers it (once per account; never to kids profiles).
   let bring = $state(false);
+  let bringing = $state(false);
   let username = $state('');
   let password = $state('');
   overfin.historyCopy().then((h) => (bring = h.available), () => {});
@@ -69,6 +71,7 @@
       homeChanged();
       password = '';
       bring = false;
+      bringing = false;
       await notice(t('account.brought'));
     } catch (err) {
       message = explain(err);
@@ -128,21 +131,26 @@
         <p class="muted">
           {t('account.signinPassword', { email: signin.email })}
         </p>
-        {#if editing}
-          <form class="password" onsubmit={savePassword}>
-            <input type="password" autocomplete="new-password" minlength="10" maxlength="256" required
-              aria-label={t('account.newPassword')} placeholder={t('account.newPassword')} bind:value={newPassword} />
-            <button class="primary" type="submit">{t('account.savePassword')}</button>
-            <button type="button" onclick={() => (editing = false)}>{t('common.cancel')}</button>
-          </form>
-        {/if}
       </div>
-      {#if !editing}
-        <div class="actions">
-          <button onclick={() => (editing = true)}>{t('account.changePassword')}</button>
-        </div>
-      {/if}
+      <div class="actions">
+        <button onclick={() => { message = ''; editing = true; }}>{t('account.changePassword')}</button>
+      </div>
     </div>
+    <!-- A new password, in a window. -->
+    {#if editing}
+      <Modal title={t('account.changePassword')} close={() => (editing = false)}>
+        <form class="stack" onsubmit={savePassword}>
+          <!-- svelte-ignore a11y_autofocus -->
+          <input type="password" autocomplete="new-password" minlength="10" maxlength="256" required autofocus
+            aria-label={t('account.newPassword')} placeholder={t('account.newPassword')} bind:value={newPassword} />
+          {#if message}<p class="error">{message}</p>{/if}
+          <div class="actions">
+            <button type="button" onclick={() => (editing = false)}>{t('common.cancel')}</button>
+            <button class="primary" type="submit">{t('account.savePassword')}</button>
+          </div>
+        </form>
+      </Modal>
+    {/if}
   {/if}
   {#if profile?.owner && (session.me?.languages.length ?? 0) > 1}
     <div class="panel setting">
@@ -195,15 +203,28 @@
     </div>
   {/if}
   {#if bring}
-    <div class="panel">
-      <h2>{t('account.bringTitle')}</h2>
-      <p class="muted">{t('account.bringText')}</p>
-      <form class="password" onsubmit={copyHistory}>
-        <input bind:value={username} name="username" autocomplete="username" required aria-label={t('setup.username')} placeholder={t('setup.username')} />
-        <input bind:value={password} name="password" type="password" autocomplete="current-password" required aria-label={t('setup.password')} placeholder={t('setup.password')} />
-        <button class="primary" type="submit">{t('account.bring')}</button>
-      </form>
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.bringTitle')}</h2>
+        <p class="muted">{t('account.bringText')}</p>
+      </div>
+      <button onclick={() => { message = ''; bringing = true; }}>{t('account.bring')}</button>
     </div>
+    <!-- The previous account's login, in a window. -->
+    {#if bringing}
+      <Modal title={t('account.bringTitle')} close={() => (bringing = false)}>
+        <form class="stack" onsubmit={copyHistory}>
+          <p class="muted">{t('account.bringText')}</p>
+          <input bind:value={username} name="username" autocomplete="username" required aria-label={t('setup.username')} placeholder={t('setup.username')} />
+          <input bind:value={password} name="password" type="password" autocomplete="current-password" required aria-label={t('setup.password')} placeholder={t('setup.password')} />
+          {#if message}<p class="error">{message}</p>{/if}
+          <div class="actions">
+            <button type="button" onclick={() => (bringing = false)}>{t('common.cancel')}</button>
+            <button class="primary" type="submit">{t('account.bring')}</button>
+          </div>
+        </form>
+      </Modal>
+    {/if}
   {/if}
   {#if profile?.owner}
     <div class="panel setting danger-zone">
@@ -218,7 +239,5 @@
 </div>
 
 <style>
-  .password { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .9rem; }
-  .password input { flex: 1 1 16rem; min-width: 0; }
   .actions { display: flex; flex-wrap: wrap; gap: .6rem; flex: none; }
 </style>
