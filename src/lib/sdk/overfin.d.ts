@@ -211,6 +211,9 @@ export interface TitleSummary {
   durationMs?: number;
   /** Its rating in the server's ratings country (its series', for a season or an episode). */
   certification?: string;
+  /** The age it's for, from its ratings (its series', for a season or an
+   * episode): 0 for all ages. Absent when unknown, and before 0.6. */
+  age?: number;
   /** Users' scores (a film's or a series'), by source: TMDB's for now. */
   ratings?: { source: string; value: number; votes: number }[];
   availability: 'available' | 'partiallyAvailable' | 'missing';

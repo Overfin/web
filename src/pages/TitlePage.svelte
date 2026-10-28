@@ -8,7 +8,7 @@
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
-  import { clock, duration } from '../lib/format';
+  import { ageText, clock, duration } from '../lib/format';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { confirm, notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
@@ -148,7 +148,7 @@
         <div class="meta">
           {#if title.airDate}<span>{new Date(title.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
           {:else if title.year}<span>{title.year}</span>{/if}
-          {#if title.certification}<span class="certification">{title.certification}</span>{/if}
+          {#if ageText(title.age)}<span class="age">{ageText(title.age)}</span>{/if}
           {#if score(title)}{@const s = score(title)!}
             <span class="score" title={t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}
