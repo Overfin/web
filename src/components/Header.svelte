@@ -1,5 +1,5 @@
 <!-- The bar on top of every screen except the profile picker, account setup
-     and the player: home, discovery, the operator's categories, and the
+     and the player: home, the profile's list, discovery, the operator's categories, and the
      libraries unless the operator took them out (one item, however
      many there are), then a menu for who's watching (switching, managing
      profiles, the account, logging out). On phones the sections go to a
@@ -63,6 +63,7 @@
   <Brand />
   <nav>
     <a href="/" class:active={here.length === 0}>{t('nav.home')}</a>
+    <a href="/list" class:active={here[0] === 'list'}>{t('nav.list')}</a>
     {#if session.discovery}
       <a href="/discover" class:active={here[0] === 'discover'}>{t('nav.discover')}</a>
     {/if}

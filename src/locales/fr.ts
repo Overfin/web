@@ -7,6 +7,9 @@ const fr: Record<keyof typeof en, string> = {
   'app.language': 'Langue',
 
   'nav.home': 'Accueil',
+  'nav.list': 'Ma liste',
+  'list.title': 'Ma liste',
+  'list.empty': 'Votre liste est vide. Ajoutez-y des titres depuis leur page.',
   'nav.profiles': 'Profils',
   'nav.account': 'Compte',
   'nav.logout': 'Se déconnecter',
