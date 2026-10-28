@@ -1,6 +1,7 @@
 <!-- The home page's slideshow: a mix of the library's titles, each with its
-     backdrop, logo, details and what to do: some trending, some newly
-     added, some of the best rated, and the rest at random, all within
+     backdrop, logo, details and what to do: most among those that fit the
+     profile best, some trending, some newly added, some of the best rated,
+     and the rest at random, all within
      what the profile may see. It moves on every few seconds, and holds still while
      the pointer or the keyboard is on it, while the tab is hidden, and when
      the system asks for less motion. Arrows, dots, swipes and the arrow
@@ -18,9 +19,9 @@
 
   // missing: trending titles no library has may be shown too, to be
   // requested from their page.
-  let { trending, latest, random, acclaimed, missing = false }: {
+  let { trending, latest, random, acclaimed, recommended = [], missing = false }: {
     trending: { movie: TitleSummary[]; series: TitleSummary[] };
-    latest: TitleSummary[]; random: TitleSummary[]; acclaimed: TitleSummary[];
+    latest: TitleSummary[]; random: TitleSummary[]; acclaimed: TitleSummary[]; recommended?: TitleSummary[];
     missing?: boolean;
   } = $props();
 
@@ -54,8 +55,9 @@
     return out;
   }
 
-  /** ids picks the titles: up to four trending, two newly added, two of
-   * the best rated, then random ones, in a random order. */
+  /** ids picks the titles: up to five among those that fit the profile
+   * best, then trending, newly added and best rated ones, then random
+   * ones, in a random order. */
   function ids(): string[] {
     const inLibrary = (list: TitleSummary[]) => (missing ? list : list.filter((title) => title.availability !== 'missing'));
     const picks = new Set<string>();
@@ -68,9 +70,10 @@
         }
       }
     };
-    take(shuffled(inLibrary([...trending.movie.slice(0, 12), ...trending.series.slice(0, 12)])), 5);
-    take(shuffled(latest.slice(0, 12)), 3);
-    take(shuffled(acclaimed), 3);
+    take(shuffled(recommended.slice(0, 12)), 5);
+    take(shuffled(inLibrary([...trending.movie.slice(0, 12), ...trending.series.slice(0, 12)])), 3);
+    take(shuffled(latest.slice(0, 12)), 2);
+    take(shuffled(acclaimed), 2);
     take(random, candidates);
     return shuffled([...picks]);
   }
