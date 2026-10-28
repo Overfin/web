@@ -2,9 +2,9 @@
      and the player: home, the profile's list, discovery, the operator's categories, and the
      libraries unless the operator took them out (one item, however
      many there are), then a menu for who's watching (switching, managing
-     profiles, the account, logging out). On phones the sections go to a
-     second, scrolling line: its ends fade where more is there, and the
-     open section is scrolled into view. -->
+     profiles, the account, the control panel for admins, logging out).
+     On phones the sections go to a second, scrolling line: its ends fade
+     where more is there, and the open section is scrolled into view. -->
 <script lang="ts">
   import { tick } from 'svelte';
   import { overfin } from '../lib/client';
@@ -18,6 +18,18 @@
   const name = $derived(session.me?.activeProfile?.name ?? t('nav.chooseProfile'));
   // Where Libraries leads: read again as the address changes.
   const libraries = $derived((void router.route, librariesHref(session.libraries)));
+
+  // The control panel, for admins, when the server gives its address (a
+  // web address only).
+  const panel = $derived.by(() => {
+    const url = session.me?.panel;
+    if (!url) return '';
+    try {
+      return ['http:', 'https:'].includes(new URL(url, location.href).protocol) ? url : '';
+    } catch {
+      return '';
+    }
+  });
 
   let open = $state(false);
   let sections = $state<HTMLElement>();
@@ -125,6 +137,9 @@
         {#if session.requests}<a href="/requests">{t('request.mine')}</a>{/if}
         <a href="/manage">{t('nav.profiles')}</a>
         <a href="/account">{t('nav.account')}</a>
+        <!-- Not one of the site's pages: target="_self" has the browser
+             open it, in this tab. -->
+        {#if panel}<a href={panel} target="_self">{t('nav.panel')}</a>{/if}
         <button type="button" onclick={logout}>{t('nav.logout')}</button>
       </div>
     {/if}
