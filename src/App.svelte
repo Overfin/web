@@ -89,12 +89,27 @@
   }
 
   // A new page shows from the top; Back and Forward, where it was left
-  // (once it's drawn: a kept page is drawn at once).
+  // (once it's drawn: a kept page is drawn at once, one read again grows
+  // as it loads, for a few seconds at most, unless the person scrolls).
   $effect(() => {
     void key;
     const y = takeScroll();
     window.scrollTo(0, 0);
-    if (y) requestAnimationFrame(() => window.scrollTo(0, y));
+    if (!y) return;
+    const until = Date.now() + 3000;
+    let frame = 0;
+    const stop = () => cancelAnimationFrame(frame);
+    const step = () => {
+      window.scrollTo(0, y);
+      if (Math.abs(window.scrollY - y) > 1 && Date.now() < until) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    const moves = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    for (const move of moves) window.addEventListener(move, stop, { passive: true, once: true });
+    return () => {
+      stop();
+      for (const move of moves) window.removeEventListener(move, stop);
+    };
   });
 
   // The active profile's look, once it's known; the player is always dark.
