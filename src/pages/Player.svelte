@@ -8,6 +8,7 @@
      plays or pauses; a double-click is full screen. The controls hide
      after 3 s without moving, and stay while paused. -->
 <script lang="ts">
+  import { homeChanged } from '../lib/homecache';
   import { onDestroy, onMount, untrack } from 'svelte';
   import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
@@ -504,6 +505,7 @@
   // Leaving the screen, or the page, ends the playback.
   let left = false;
   function close() {
+    homeChanged(); // where it stopped shows in Continue Watching
     const p = player;
     player = null;
     p?.close();

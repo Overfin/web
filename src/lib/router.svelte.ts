@@ -16,9 +16,30 @@ function parse(): Route {
 }
 
 let current = $state<Route>(parse());
+// The app puts pages back where they were itself (the browser's own
+// restoring would come before the page is drawn).
+history.scrollRestoration = 'manual';
+// Where the page was scrolled, kept with each history entry, for Back and
+// Forward to come back to it.
+let scrollBack: number | null = null;
 window.addEventListener('popstate', () => {
+  scrollBack = typeof history.state?.y === 'number' ? history.state.y : null;
   current = parse();
 });
+
+/** takeScroll is where to scroll the page just shown: where it was left,
+ * after Back or Forward; null for the top. */
+export function takeScroll(): number | null {
+  const y = scrollBack;
+  scrollBack = null;
+  return y;
+}
+
+/** keepScroll keeps where the current page is scrolled, in its history
+ * entry. */
+function keepScroll() {
+  history.replaceState({ ...history.state, y: window.scrollY }, '');
+}
 
 export const router = {
   get route(): Route {
@@ -35,6 +56,7 @@ function depth(): number {
 /** go shows another screen, adding it to the history. */
 export function go(path: string) {
   if (path === location.pathname + location.search) return;
+  keepScroll();
   history.pushState({ depth: depth() + 1 }, '', path);
   current = parse();
 }

@@ -4,6 +4,7 @@
      once the server says whether the title is on it (and not at all where
      there's no watchlist). -->
 <script lang="ts">
+  import { homeChanged } from '../lib/homecache';
   import { explain, overfin } from '../lib/client';
   import { notice } from '../lib/dialog.svelte';
   import { t } from '../lib/i18n.svelte';
@@ -21,6 +22,7 @@
     overfin.onWatchlist(id).then((on) => (onList = on)).catch(() => {}); // not offered here
   });
   async function toggleList() {
+    homeChanged();
     const was = onList;
     onList = !onList;
     try {
@@ -34,6 +36,7 @@
   const played = $derived(marks.played ?? loadedPlayed);
   const favorite = $derived(marks.favorite ?? loadedFavorite);
   async function togglePlayed() {
+    homeChanged();
     try {
       marks.played = (await overfin.setPlayed(id, !played)).played;
     } catch (err) {
@@ -41,6 +44,7 @@
     }
   }
   async function toggleFavorite() {
+    homeChanged();
     const was = favorite;
     try {
       marks.favorite = (await overfin.setFavorite(id, !was)).favorite;

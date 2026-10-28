@@ -3,7 +3,7 @@
 <script lang="ts">
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
-  import { go, router } from './lib/router.svelte';
+  import { go, router, takeScroll } from './lib/router.svelte';
   import { loadCategories, offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
@@ -87,9 +87,13 @@
     return { kind: 'rows', heading: true };
   }
 
+  // A new page shows from the top; Back and Forward, where it was left
+  // (once it's drawn: a kept page is drawn at once).
   $effect(() => {
     void key;
+    const y = takeScroll();
     window.scrollTo(0, 0);
+    if (y) requestAnimationFrame(() => window.scrollTo(0, y));
   });
 
   // The active profile's look, once it's known; the player is always dark.

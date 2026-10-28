@@ -13,6 +13,7 @@
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
+  import { homeChanged, keepHome, keptHome } from '../lib/homecache';
   import { session } from '../lib/session.svelte';
   import PageError from '../components/PageError.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
@@ -63,24 +64,45 @@
     };
   }
 
+  // What was read last for this profile, in this tab, shows at once; it's
+  // read again in the background once a few minutes old, or after a
+  // playback or a mark (homecache). The slideshow keeps its picks
+  // meanwhile.
+  type HomeData = Awaited<ReturnType<typeof load>>;
+  const profile = session.me?.activeProfile?.id ?? '';
+  const kept = keptHome<HomeData>(profile);
+  let home = $state<HomeData | null>(kept?.data ?? null);
+  let slides = $state<HomeData | null>(kept?.data ?? null);
+  let error = $state<unknown>();
+  async function read() {
+    try {
+      const data = await load();
+      home = data;
+      slides ??= data;
+      keepHome(profile, data);
+    } catch (err) {
+      if (!home) error = err;
+    }
+  }
+  if (!kept || kept.old) read();
+
   // Titles taken out of Continue Watching here, hidden at once.
   let removed = $state<string[]>([]);
   async function forget(item: { id: string }) {
+    homeChanged();
     removed = [...removed, item.id];
     await overfin.forgetProgress(item.id).catch(() => (removed = removed.filter((id) => id !== item.id)));
   }
 </script>
 
-{#await load()}
-  <Skeleton kind="home" />
-{:then home}
+{#if home && slides}
   <!-- Nothing yet: no row at all, trending ones included. -->
   {@const empty = !home.resume.length && !home.watchlist.length && home.latest.every((l) => !l.items.length)
     && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed} recommended={home.recommended} missing={availability === 'all'}
-    latest={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
+  <Slides trending={slides.trending} random={slides.random} acclaimed={slides.acclaimed} recommended={slides.recommended} missing={availability === 'all'} {profile}
+    latest={slides.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
   {/if}
@@ -99,6 +121,8 @@
   {#each home.latest as { section, items } (section.id)}
     <Row title={t('home.latest', { library: section.name })} {items} />
   {/each}
-{:catch error}
+{:else if error}
   <PageError {error} />
-{/await}
+{:else}
+  <Skeleton kind="home" />
+{/if}
