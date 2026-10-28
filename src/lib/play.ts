@@ -5,7 +5,9 @@ import { go, replace } from './router.svelte';
 
 let chosenStart: number | undefined;
 
-export function play(itemId: string, positionMs: number) {
+/** play plays a title from positionMs; without it, where the profile left
+ * off, as the server says when it starts. */
+export function play(itemId: string, positionMs?: number) {
   chosenStart = positionMs;
   go(`/play/${itemId}`);
 }
