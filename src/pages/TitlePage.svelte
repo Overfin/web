@@ -4,6 +4,7 @@
      chosen season's episodes, those no library has too. -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
+  import { similarOf, titleOf } from '../lib/titlecache';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
@@ -26,7 +27,7 @@
   let similar = $state<TitleSummary[]>([]);
   $effect(() => {
     similar = [];
-    overfin.similar(id).then((items) => (similar = items), () => {});
+    similarOf(id).then((items) => (similar = items), () => {});
   });
 
   // The season a series shows: the one chosen here, else the one in the
@@ -105,7 +106,7 @@
   const seasonName = (s: TitleSummary) => s.seasonNumber === 0 ? t('title.specials') : s.name || t('discover.seasonNumber', { number: s.seasonNumber ?? '?' });
 </script>
 
-{#await overfin.title(id)}
+{#await titleOf(id)}
   <Skeleton kind="title" />
 {:then title}
   {@const seasonID = seasonOf(title)}
@@ -210,7 +211,7 @@
   {/if}
   {#key `${seasonID}:${seasonReload}`}
   {#await title.kind === 'season' && !seasonReload ? Promise.resolve(title) : title.kind === 'season' ? overfin.title(title.id)
-    : seasonID ? overfin.title(seasonID) : Promise.resolve(null)}
+    : seasonID ? (seasonReload ? overfin.title(seasonID) : titleOf(seasonID)) : Promise.resolve(null)}
     {#if title.kind === 'series'}<Skeleton kind="list" />{/if}
   {:then season}
   {#if season?.episodes?.length}
