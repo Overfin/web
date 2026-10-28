@@ -103,6 +103,7 @@ const fr: Record<keyof typeof en, string> = {
   'item.watchlistAdd': '+ Ma liste',
   'item.seasons': 'Saisons',
   'item.episodes': 'Épisodes',
+  'item.similar': 'Titres similaires',
   'item.cast': 'Distribution',
   'item.castAll': 'Voir toute la distribution ({count})',
   'item.castLess': 'Afficher moins',

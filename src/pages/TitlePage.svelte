@@ -14,10 +14,19 @@
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
   import Marks from '../components/Marks.svelte';
+  import Row from '../components/Row.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
   let { id, params }: { id: string; params: URLSearchParams } = $props();
+
+  // Titles like this one, below its page; none is no row (and a server
+  // before 0.6 has none).
+  let similar = $state<TitleSummary[]>([]);
+  $effect(() => {
+    similar = [];
+    overfin.similar(id).then((items) => (similar = items), () => {});
+  });
 
   // The season a series shows: the one chosen here, else the one in the
   // address, else the first (specials last). Choosing one changes the
@@ -294,6 +303,7 @@
       {/each}
     </div>
   {/if}
+  <Row title={t('item.similar')} items={similar} />
 {:catch error}
   <PageError {error} />
 {/await}
