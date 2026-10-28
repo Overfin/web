@@ -309,7 +309,10 @@ header nav.placeholder { min-height: 3.2rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .toolbar .count { margin-left: auto; }
 @media (max-width: 600px) {
-  .toolbar select { flex: 1 1 calc(50% - .8rem); min-width: 0; }
+  /* As wide as their words, growing to fill each line: a long one
+     ("Toutes les années") takes a line of its own rather than being cut. */
+  .toolbar { gap: .6rem; }
+  .toolbar select { flex: 1 1 auto; max-width: 100%; }
   .toolbar .count { margin-left: 0; }
 }
 
