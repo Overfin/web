@@ -36,7 +36,7 @@ export async function offersRequests(): Promise<boolean> {
  * limits yet (it shows nothing until they're chosen). */
 export async function kidsNeedLimits(): Promise<boolean> {
   if (!session.me?.activeProfile?.owner) return false;
-  return overfin.profiles().then((all) => all.some((p) => p.ceilingsNeeded), () => false);
+  return overfin.profiles().then((all) => all.some((p) => p.ageNeeded), () => false);
 }
 
 /** refresh reloads who's here, after a profile change. */
