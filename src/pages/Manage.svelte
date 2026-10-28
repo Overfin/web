@@ -7,7 +7,7 @@
   import { confirmed } from '../lib/confirmed';
   import { confirm } from '../lib/dialog.svelte';
   import { homeChanged } from '../lib/homecache';
-  import { i18n, t } from '../lib/i18n.svelte';
+  import { i18n, t, tn } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
   import { loadCategories, mayAddProfile, session } from '../lib/session.svelte';
   import AccessPicker from '../components/AccessPicker.svelte';
@@ -28,6 +28,9 @@
   const forms = $state<Record<string, Form>>({});
   let devicesMessage = $state('');
   let adding = $state(false);
+  // The devices shown before "Show N more".
+  const fewDevices = 5;
+  let allDevices = $state(false);
 
   let reload = $state(0);
   async function load() {
@@ -200,11 +203,11 @@
       {/if}
 
       <!-- Devices signed in: the owner sees all of the account's, others
-           their own. -->
+           their own; the first few, then the rest on demand. -->
       <div class="panel">
         <h2>{t('manage.devices')}</h2>
         <ul class="list">
-          {#each sessions as s (s.id)}
+          {#each allDevices ? sessions : sessions.slice(0, fewDevices) as s (s.id)}
             <li>
               <div>
                 <strong>{s.device || t('manage.unknownDevice')}</strong>
@@ -221,11 +224,16 @@
             </li>
           {/each}
         </ul>
-        {#if me.owner && sessions.length > 1}
-          <button onclick={async () => {
-            if (await confirmed(() => overfin.endOtherSessions(), (m) => (devicesMessage = m))) reload++;
-          }}>{t('manage.signOutOthers')}</button>
-        {/if}
+        <div class="inline">
+          {#if !allDevices && sessions.length > fewDevices}
+            <button type="button" onclick={() => (allDevices = true)}>{tn('manage.moreDevices', sessions.length - fewDevices)}</button>
+          {/if}
+          {#if me.owner && sessions.length > 1}
+            <button onclick={async () => {
+              if (await confirmed(() => overfin.endOtherSessions(), (m) => (devicesMessage = m))) reload++;
+            }}>{t('manage.signOutOthers')}</button>
+          {/if}
+        </div>
         {#if devicesMessage}<p class="error">{devicesMessage}</p>{/if}
       </div>
     {:catch error}
