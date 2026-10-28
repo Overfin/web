@@ -190,7 +190,8 @@
       case 'ArrowRight': jump(long); break;
       case 'ArrowUp': nudgeVolume(0.05); break;
       case 'ArrowDown': nudgeVolume(-0.05); break;
-      case ' ': case 'Spacebar': togglePlay(); break;
+      // Held down, Space plays or pauses once (and still does nothing else).
+      case ' ': case 'Spacebar': if (!event.repeat) togglePlay(); break;
       case 'f': case 'F': toggleFullscreen(); break;
       case 'm': case 'M': toggleMute(); break;
       case 'n': case 'N':
