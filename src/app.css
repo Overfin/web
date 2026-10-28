@@ -450,6 +450,8 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .hero h1.logo { margin: 0 0 .8rem; }
 .hero h1.logo img { display: block; max-width: min(26rem, 80vw); max-height: 8rem; width: auto; height: auto; filter: var(--logo-shadow); }
 .hero .tagline { font-style: italic; color: rgba(var(--text-rgb), .8); margin: 0 0 .5rem; }
+.hero .part-of { margin: 0 0 .8rem; color: rgba(var(--text-rgb), .8); }
+.hero .part-of a { color: var(--text); font-weight: 600; }
 /* Whether a library has it: words, not a link (nothing in the link color). */
 .meta .availability { color: var(--text); font-weight: 600; }
 .seasons { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) .3rem; }

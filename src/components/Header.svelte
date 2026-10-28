@@ -49,6 +49,7 @@
     void router.route;
     void session.categories;
     void session.libraries;
+    void session.collections;
     tick().then(() => {
       const active = sections?.querySelector<HTMLElement>('a.active');
       if (sections && active && sections.scrollWidth > sections.clientWidth) {
@@ -119,6 +120,11 @@
       <a href="/library/{session.libraries[0].id}" class:active={here[0] === 'library'}>{session.libraries[0].name}</a>
     {:else if libraries}
       <a href={libraries} class:active={here[0] === 'library'}>{t('nav.libraries')}</a>
+    {/if}
+    {#if session.collections.length}
+      <!-- Last: series of films, from TMDB. -->
+      <a href="/collections" class:active={here[0] === 'collections' || here[0] === 'collection'}
+        aria-current={here[0] === 'collections' ? 'page' : undefined}>{t('nav.collections')}</a>
     {/if}
   </nav>
   <a class="search-link" href="/search" aria-label={t('search.label')} title={t('search.label')} class:active={here[0] === 'search'}

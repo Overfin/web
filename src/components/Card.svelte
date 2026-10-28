@@ -3,7 +3,8 @@
      that can play (a series a library has too) shows a play button in its
      corner, and one no library has
      a request button (when the server takes requests); the rest of the card
-     opens the title's page. A requested title says where its request is. -->
+     opens the title's page. A requested title says where its request is.
+     One not out yet (a collection's) says so, and has neither. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -43,11 +44,12 @@
   let asked = $state<TitleSummary['request'] | null>(null);
   const request = $derived(asked ?? item.request);
   const askable = $derived(session.requests && !item.playable && !series && item.availability !== 'available' && !request
-    && item.kind !== 'other');
+    && item.kind !== 'other' && !item.upcoming);
   async function requestIt() {
     asked = await ask(item);
   }
-  const flag = $derived(request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
+  const flag = $derived(item.upcoming ? t('item.upcoming')
+    : request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 
@@ -65,8 +67,9 @@
 </script>
 
 <div class="cardbox" class:wide>
-  <a class="card" class:wide href="/title/{item.id}" onpointerenter={soon} onpointerleave={cancel}
-    ontouchstart={() => prefetchTitle(item.id)} onfocus={() => prefetchTitle(item.id)}>
+  <svelte:element this={item.upcoming ? 'div' : 'a'} class="card" class:wide href={item.upcoming ? undefined : `/title/${item.id}`}
+    onpointerenter={item.upcoming ? undefined : soon} onpointerleave={cancel} role={item.upcoming ? 'group' : undefined}
+    ontouchstart={() => !item.upcoming && prefetchTitle(item.id)} onfocus={() => !item.upcoming && prefetchTitle(item.id)}>
     <div class="poster" class:wide>
       {#if image}
         <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" use:loaded />
@@ -81,7 +84,7 @@
     </div>
     <div class="title">{item.name}</div>
     <div class="sub">{sub}</div>
-  </a>
+  </svelte:element>
   {#if item.playable || series}
     <button class="act" type="button" aria-label={t('item.play') + ' : ' + item.name}
       onclick={start}>

@@ -160,6 +160,9 @@
           {#if availabilityText(title)}<span class="availability">{availabilityText(title)}</span>{/if}
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
+        {#if title.collection}
+          <p class="part-of">{t('title.partOf')} <a href="/collection/{title.collection.id}">{title.collection.name}</a></p>
+        {/if}
         <div class="actions">
           {#if !title.playable && askable(title)}
             {#if request}
