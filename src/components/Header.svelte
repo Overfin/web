@@ -45,10 +45,14 @@
   }
 
   // The search icon, from another page, starts a new search: the words of
-  // the last one are forgotten (Back to the search keeps them; on the
-  // search page, nothing changes).
-  function newSearch() {
-    if (here[0] === 'search') return;
+  // the last one are forgotten (Back to the search keeps them, in its
+  // address; on the search page, nothing changes).
+  function newSearch(event: MouseEvent) {
+    if (here[0] === 'search') {
+      // A new tab still opens one, empty.
+      if (!(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) event.preventDefault();
+      return;
+    }
     try {
       sessionStorage.removeItem('overfin-web-search');
     } catch {
