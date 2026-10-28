@@ -150,17 +150,26 @@ header nav a.active {
 .dropdown a:hover, .dropdown button:hover { background: var(--panel-2); }
 .dropdown label { display: grid; gap: .3rem; padding: .5rem .75rem; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); margin: .3rem 0; color: var(--muted); font-size: .85rem; }
 .dropdown select { color: var(--text); font-size: 1rem; }
+/* Phones: the sections behind a button on the left, as a list dropping
+   under the header (Header.svelte), the rest on one line. */
+.sections-toggle { display: none; }
 @media (max-width: 720px) {
-  header { grid-template-columns: 1fr auto; grid-template-areas: "brand menu" "nav nav"; gap: 0 1rem; padding-top: .4rem; }
-  header nav { gap: 1.1rem; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) .2rem; }
-  /* More sections past an edge: that edge fades out (Header.svelte says
-     which). */
-  header nav.more-right { -webkit-mask-image: linear-gradient(to left, transparent, #000 3rem); mask-image: linear-gradient(to left, transparent, #000 3rem); }
-  header nav.more-left { -webkit-mask-image: linear-gradient(to right, transparent, #000 3rem); mask-image: linear-gradient(to right, transparent, #000 3rem); }
-  header nav.more-left.more-right {
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
-    mask-image: linear-gradient(to right, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+  .sections-toggle {
+    grid-area: toggle; display: grid; place-items: center; width: 2.4rem; height: 2.4rem; min-height: 0; padding: 0;
+    margin-left: -.4rem; border: none; background: none; box-shadow: none; color: var(--text);
   }
+  .sections-toggle:hover { background: rgba(var(--text-rgb), .06); }
+  .sections-toggle svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  header nav { display: none; }
+  header nav.open {
+    display: flex; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; overflow: visible;
+    padding: .4rem var(--gutter) .8rem; border-bottom: 1px solid var(--hairline); box-shadow: 0 18px 30px rgba(0, 0, 0, .35);
+    background: linear-gradient(180deg, rgba(var(--text-rgb), .03), rgba(var(--text-rgb), 0) 40%) rgba(var(--panel-rgb), .98);
+    -webkit-mask-image: none; mask-image: none;
+  }
+  header nav.open a { padding: .8rem .2rem; font-size: 1.05rem; border-bottom: 1px solid var(--hairline); }
+  header nav.open a:last-child { border-bottom: none; }
+  header nav.open a.active { background: none; color: var(--text); font-weight: 650; border-left: 3px solid var(--accent); padding-left: .7rem; }
   .menu .name { display: none; }
 }
 
@@ -534,7 +543,7 @@ header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand 
 .search-link:hover, .search-link.active { color: var(--text); background: rgba(var(--text-rgb), .06); }
 .search-link svg { width: 1.4rem; height: 1.4rem; fill: currentColor; }
 @media (max-width: 720px) {
-  header { grid-template-columns: 1fr auto auto; grid-template-areas: "brand search menu" "nav nav nav"; }
+  header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "toggle brand search menu"; gap: 0 .6rem; padding-top: 0; }
 }
 .search form { margin: .5rem 0 1rem; display: flex; justify-content: center; }
 .search > p.muted { text-align: center; }
@@ -636,3 +645,4 @@ dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1p
 .profiles-list .grow { flex: 1; min-width: 0; }
 .row-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
 .profiles-list .avatar.small { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; flex: none; }
+.page-backdrop.tall img { object-position: center top; }

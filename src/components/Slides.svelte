@@ -132,7 +132,10 @@
   <!-- The current slide's backdrop is the page's (lib/backdrop); out of
        view, the slideshow holds still, and so does the backdrop. -->
   <section class="slides" aria-roledescription="carousel" aria-label={t('home.featured')}
-    use:backdropOf={slides[index]?.images?.backdrops?.[0] ? overfin.imageUrl(slides[index].images!.backdrops![0], 'large') : undefined}
+    use:backdropOf={slides[index]?.images?.backdrops?.[0] ? {
+      wide: overfin.imageUrl(slides[index].images!.backdrops![0], 'large'),
+      tall: slides[index].images?.primary ? overfin.imageUrl(slides[index].images!.primary!, 'large') : undefined,
+    } : undefined}
     use:inView={(on) => (away = !on)}
     onmouseenter={() => (hovered = true)} onmouseleave={() => (hovered = false)}
     onfocusin={() => (focused = true)} onfocusout={() => (focused = false)}

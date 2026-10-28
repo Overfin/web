@@ -4,8 +4,8 @@
      many there are), then a menu for who's watching (the profile's list,
      switching, managing profiles, the account, the control panel for
      admins, logging out).
-     On phones the sections go to a second, scrolling line: its ends fade
-     where more is there, and the open section is scrolled into view. -->
+     On phones the sections open from a button on the left, as a list under
+     the header; it closes with a tap outside, Escape, or going somewhere. -->
 <script lang="ts">
   import { tick } from 'svelte';
   import { overfin } from '../lib/client';
@@ -60,21 +60,31 @@
   });
   let menu: HTMLDivElement;
   let toggle: HTMLButtonElement;
+  // The sections' list, on phones.
+  let sectionsOpen = $state(false);
+  let sectionsToggle = $state<HTMLButtonElement>();
 
-  // The menu closes when the address changes.
+  // The menus close when the address changes.
   $effect(() => {
     void router.route;
     open = false;
+    sectionsOpen = false;
   });
 
   function outside(event: MouseEvent) {
-    if (open && !menu.contains(event.target as Node)) open = false;
+    const target = event.target as Node;
+    if (open && !menu.contains(target)) open = false;
+    if (sectionsOpen && !sections?.contains(target) && !sectionsToggle?.contains(target)) sectionsOpen = false;
   }
 
   function keydown(event: KeyboardEvent) {
-    if (open && event.key === 'Escape') {
+    if (event.key !== 'Escape') return;
+    if (open) {
       open = false;
       toggle.focus();
+    } else if (sectionsOpen) {
+      sectionsOpen = false;
+      sectionsToggle?.focus();
     }
   }
 
@@ -104,8 +114,13 @@
 <svelte:window onclick={outside} onkeydown={keydown} onresize={edges} />
 
 <header>
+  <!-- Phones: the sections behind a button. -->
+  <button class="sections-toggle" type="button" bind:this={sectionsToggle} aria-expanded={sectionsOpen} aria-controls="sections"
+    aria-label={t('nav.sections')} title={t('nav.sections')} onclick={() => (sectionsOpen = !sectionsOpen)}>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d={sectionsOpen ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16'} /></svg>
+  </button>
   <Brand />
-  <nav bind:this={sections} class:more-left={moreLeft} class:more-right={moreRight} onscroll={edges}>
+  <nav id="sections" bind:this={sections} class:open={sectionsOpen} class:more-left={moreLeft} class:more-right={moreRight} onscroll={edges}>
     <a href="/" class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
     {#if session.discovery}
       <a href="/discover" class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
