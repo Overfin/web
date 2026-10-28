@@ -22,7 +22,16 @@ history.scrollRestoration = 'manual';
 // Where the page was scrolled, kept with each history entry, for Back and
 // Forward to come back to it.
 let scrollBack: number | null = null;
+// Kept as the page is scrolled too, once it stops (a moment after, so as
+// not to rewrite the history entry all the time): Back, then Forward, comes
+// back to where it was.
+let scrolled: ReturnType<typeof setTimeout> | undefined;
+window.addEventListener('scroll', () => {
+  clearTimeout(scrolled);
+  scrolled = setTimeout(keepScroll, 300);
+}, { passive: true });
 window.addEventListener('popstate', () => {
+  clearTimeout(scrolled);
   scrollBack = typeof history.state?.y === 'number' ? history.state.y : null;
   current = parse();
 });
@@ -56,6 +65,7 @@ function depth(): number {
 /** go shows another screen, adding it to the history. */
 export function go(path: string) {
   if (path === location.pathname + location.search) return;
+  clearTimeout(scrolled);
   keepScroll();
   history.pushState({ depth: depth() + 1 }, '', path);
   current = parse();
@@ -63,6 +73,7 @@ export function go(path: string) {
 
 /** replace changes the address without a new history entry. */
 export function replace(path: string) {
+  clearTimeout(scrolled);
   history.replaceState({ depth: depth() }, '', path);
   current = parse();
 }
