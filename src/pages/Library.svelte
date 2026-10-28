@@ -6,6 +6,7 @@
   import { tick } from 'svelte';
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
+  import { keepList, keptList } from '../lib/pagecache';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { lastSort, rememberLibrary, rememberSort } from '../lib/lastlibrary';
   import { go } from '../lib/router.svelte';
@@ -63,13 +64,26 @@
     go(`${base}${q ? '?' + q : ''}`);
   }
 
-  let items = $state<TitleSummary[]>([]);
-  let total = $state<number>();
-  let finished = $state(false);
+  // What was read of this list in this tab, as far as it was scrolled,
+  // shows at once when it's opened again (pagecache).
+  type Kept = { items: TitleSummary[]; total?: number; finished: boolean; pages?: AsyncGenerator<TitlePage> };
+  const listKey = $derived.by(() => {
+    const p = new URLSearchParams(params);
+    p.delete('seed');
+    return `${profile}:${base}?${p}`;
+  });
+  // svelte-ignore state_referenced_locally
+  const kept = keptList<Kept>(listKey);
+  let items = $state<TitleSummary[]>(kept?.items ?? []);
+  let total = $state<number | undefined>(kept?.total);
+  let finished = $state(kept?.finished ?? false);
   let error = $state<unknown>();
   let sentinel = $state<HTMLElement>();
   let loading = false;
-  let pages: AsyncGenerator<TitlePage> | undefined;
+  let pages: AsyncGenerator<TitlePage> | undefined = kept?.pages;
+  function keepIt() {
+    keepList(listKey, { items: $state.snapshot(items), total, finished, pages });
+  }
 
   function query(): TitleQuery {
     return {
@@ -94,6 +108,7 @@
       const { value: page, done } = await pages.next();
       if (done) {
         finished = true;
+        keepIt();
         return;
       }
       items.push(...page.items);
@@ -104,6 +119,7 @@
         history.replaceState(history.state, '', `${base}?${next}`);
       }
       if (!page.nextCursor) finished = true;
+      keepIt();
     } catch (err) {
       error = err;
       finished = true;

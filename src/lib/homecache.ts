@@ -3,6 +3,8 @@
 // a few minutes old, or after something they show changed (a playback, a
 // mark). Each profile its own; nothing is kept beyond the tab.
 
+import { pagesChanged } from './pagecache';
+
 /** fresh is how long kept rows are shown without reading them again. */
 const fresh = 5 * 60_000;
 
@@ -26,6 +28,7 @@ export function keepHome(profile: string, data: unknown) {
  * the next time it's shown. */
 export function homeChanged() {
   changed = true;
+  pagesChanged();
 }
 
 // The slideshow, kept the same way: its titles and the one it was on, so

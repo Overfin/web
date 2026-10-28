@@ -12,6 +12,7 @@
   import { play } from '../lib/play';
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
+  import { prefetchTitle } from '../lib/titlecache';
 
   let { item, wide = false, flags = true, note = '', remove }: {
     item: TitleSummary; wide?: boolean; flags?: boolean; note?: string; remove?: () => void;
@@ -49,10 +50,21 @@
   const flag = $derived(request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
+
+  // Its page read ahead: once the pointer rests on it a moment, or a finger
+  // touches it, so opening it shows at once.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  function soon() {
+    timer = setTimeout(() => prefetchTitle(item.id), 120);
+  }
+  function cancel() {
+    clearTimeout(timer);
+  }
 </script>
 
 <div class="cardbox" class:wide>
-  <a class="card" class:wide href="/title/{item.id}">
+  <a class="card" class:wide href="/title/{item.id}" onpointerenter={soon} onpointerleave={cancel}
+    ontouchstart={() => prefetchTitle(item.id)} onfocus={() => prefetchTitle(item.id)}>
     <div class="poster" class:wide>
       {#if image}
         <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" use:loaded />
