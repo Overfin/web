@@ -9,23 +9,22 @@
   import { keepList, keptList } from '../lib/pagecache';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { lastSort, rememberLibrary, rememberSort } from '../lib/lastlibrary';
+  import { listKey as keyOf, listQuery, listSort, listSorts, type ListKept } from '../lib/lists';
   import { go } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
   import { visible } from '../lib/visible';
+  import { landed } from '../lib/warm';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
   let { id, params, category = false }: { id: string; params: URLSearchParams; category?: boolean } = $props();
 
-  const sorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'lastPlayed', 'random'] as const;
   // What the profile did with the titles, as a filter.
   const shows = ['all', 'unwatched', 'watched', 'inProgress', 'favorites'] as const;
   type Show = (typeof shows)[number];
   const thisDecade = Math.floor(new Date().getFullYear() / 10) * 10;
   const decades = Array.from({ length: 8 }, (_, i) => thisDecade - 10 * i);
-  // Which titles a library lists, by its kind: films or series.
-  const kinds: Record<string, 'movie' | 'series'> = { movies: 'movie', shows: 'series' };
 
   // What's listed: a library, or a category (films and series alike).
   const library = $derived(category ? session.categories.find((c) => c.id === id) : session.libraries.find((l) => l.id === id));
@@ -39,7 +38,7 @@
   const profile = $derived(session.me?.activeProfile?.id);
   const sort = $derived.by(() => {
     const value = params.get('sort') || lastSort(profile) || 'name';
-    return (sorts.includes(value as typeof sorts[number]) ? value : 'name') as NonNullable<TitleQuery['sort']>;
+    return listSort(value);
   });
   const seed = $derived(params.get('seed') || undefined);
   const genre = $derived(params.get('genre') || '');
@@ -66,21 +65,11 @@
 
   // What was read of this list in this tab, as far as it was scrolled,
   // shows at once when it's opened again (pagecache).
-  type Kept = { items: TitleSummary[]; total?: number; finished: boolean; pages?: AsyncGenerator<TitlePage> };
-  // The sort it was read in is part of it: without one in the address,
-  // it's the one the profile last chose, which may have changed since. A
-  // shuffle is kept with its seed: one without is a new shuffle.
   // svelte-ignore state_referenced_locally
   let shuffle = $state(seed ?? '');
-  const listKey = $derived.by(() => {
-    const p = new URLSearchParams(params);
-    p.delete('seed');
-    p.set('sort', sort);
-    if (sort === 'random') p.set('seed', shuffle);
-    return `${profile}:${base}?${p}`;
-  });
+  const listKey = $derived(keyOf(profile, base, params, sort, shuffle));
   // svelte-ignore state_referenced_locally
-  const kept = keptList<Kept>(listKey);
+  const kept = keptList<ListKept>(listKey);
   let items = $state<TitleSummary[]>(kept?.items ?? []);
   let total = $state<number | undefined>(kept?.total);
   let finished = $state(kept?.finished ?? false);
@@ -93,18 +82,11 @@
   }
 
   function query(): TitleQuery {
-    return {
-      ...(category ? { category: id, kind: ['movie', 'series'] as ('movie' | 'series')[] }
-        : { library: id, kind: library && 'kind' in library ? kinds[library.kind] : undefined }),
-      sort,
-      limit: 60,
-      order: ['addedAt', 'premiereDate', 'communityRating', 'lastPlayed'].includes(sort) ? 'desc' : undefined,
-      seed: sort === 'random' ? seed : undefined,
-      genre: genre || undefined,
+    return listQuery(id, category, library && 'kind' in library ? library.kind : undefined, {
+      sort, seed, genre, show,
       ...(decade === 'older' ? { yearTo: decades[decades.length - 1] - 1 }
         : decade ? { yearFrom: +decade, yearTo: +decade + 9 } : {}),
-      ...{ all: {}, unwatched: { played: false }, watched: { played: true }, inProgress: { inProgress: true }, favorites: { favorite: true } }[show],
-    };
+    });
   }
 
   async function more() {
@@ -141,7 +123,8 @@
   // The first page as the page opens: the end of the list may be out of
   // reach under a tall placeholder (two columns on a phone).
   // svelte-ignore state_referenced_locally
-  if (!items.length && !finished) more();
+  if (!items.length && !finished) more().then(landed);
+  else landed();
 </script>
 
 {#if !library}
@@ -161,7 +144,7 @@
   {/if}
   <div class="toolbar">
     <select aria-label={t('library.sort')} value={sort} onchange={(event) => change('sort', event.currentTarget.value)}>
-      {#each sorts as value (value)}
+      {#each listSorts as value (value)}
         <option {value}>{t(`library.sort.${value}` as Key)}</option>
       {/each}
     </select>
