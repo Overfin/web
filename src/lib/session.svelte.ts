@@ -39,6 +39,15 @@ export async function kidsNeedLimits(): Promise<boolean> {
   return overfin.profiles().then((all) => all.some((p) => p.ageNeeded), () => false);
 }
 
+/** mayAddProfile says whether the active profile may add one to the
+ * account's count of profiles: the owner, under the template's limit (0
+ * is none). */
+export function mayAddProfile(count: number): boolean {
+  const me = session.me;
+  if (!me?.activeProfile?.owner) return false;
+  return !(me.limits?.maxProfiles > 0 && count >= me.limits.maxProfiles);
+}
+
 /** refresh reloads who's here, after a profile change. */
 export async function refresh() {
   session.me = await overfin.me();

@@ -6,8 +6,8 @@
   import { askPin } from '../lib/dialog.svelte';
   import { t, tn } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
-  import { refresh, session, setPicked } from '../lib/session.svelte';
-  import AgePicker from '../components/AgePicker.svelte';
+  import { mayAddProfile, refresh, session, setPicked } from '../lib/session.svelte';
+  import NewProfile from '../components/NewProfile.svelte';
   import PageError from '../components/PageError.svelte';
 
   let message = $state('');
@@ -42,44 +42,19 @@
 
   // Adding a profile, for the owner.
   let adding = $state(false);
-  let name = $state('');
-  let kids = $state(false);
-  let age = $state(8);
 
-  async function startAdding() {
+  function startAdding() {
     message = '';
-    age = 8;
-    name = '';
-    kids = false;
     adding = true;
-  }
-
-  async function add(event: SubmitEvent) {
-    event.preventDefault();
-    message = '';
-    try {
-      await overfin.createProfile(kids ? { name, kind: 'kids', maxAge: age } : { name });
-      adding = false;
-      reload++;
-      // The streams shared among profiles change with their number.
-      session.me = await overfin.me().catch(() => session.me);
-    } catch (err) {
-      message = explain(err);
-    }
   }
 </script>
 
 {#if adding}
   <div class="center">
     <h1>{t('profiles.new')}</h1>
-    <form class="stack panel" onsubmit={add}>
-      <label>{t('manage.name')} <input bind:value={name} maxlength="32" required /></label>
-      <label class="check"><input type="checkbox" bind:checked={kids} /> {t('manage.kidsProfile')}</label>
-      {#if kids}<AgePicker bind:age />{/if}
-      <button class="primary" type="submit">{t('common.create')}</button>
-      <button type="button" onclick={() => (adding = false)}>{t('common.cancel')}</button>
-    </form>
-    {#if message}<p class="error">{message}</p>{/if}
+    <div class="panel">
+      <NewProfile created={() => { adding = false; reload++; }} cancel={() => (adding = false)} />
+    </div>
   </div>
 {:else}
   <h1 class="center">{t('profiles.who')}</h1>
@@ -96,7 +71,7 @@
           </div>
         </button>
       {/each}
-      {#if session.me?.activeProfile?.owner && !(session.me.limits?.maxProfiles > 0 && list.length >= session.me.limits.maxProfiles)}
+      {#if mayAddProfile(list.length)}
         <button class="profile" onclick={startAdding}><div class="avatar">+</div>{t('profiles.add')}</button>
       {/if}
     </div>
