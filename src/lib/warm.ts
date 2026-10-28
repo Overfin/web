@@ -2,18 +2,21 @@
 // shows (or a few seconds after, at most), the menu's other pages are read
 // one after another, in the menu's order (home first), and kept for the
 // tab like pages already seen (homecache, pagecache), so opening one shows
-// it at once. Once per profile in a tab; never while a video plays, nor
-// when the browser asks to save data. The libraries only while the menu
-// shows them.
+// it at once; last, the home page's slideshow is picked, if it wasn't, and
+// its pictures loaded. Once per profile in a tab; never while a video
+// plays, nor when the browser asks to save data. The libraries only while
+// the menu shows them.
 
 import { overfin } from './client';
-import { keepHome, keptHome } from './homecache';
-import { loadHome } from './homeload';
+import { keepHome, keepSlides, keptHome, keptSlides } from './homecache';
+import { homeAvailability, loadHome, type HomeData } from './homeload';
 import { lastLibraryId, lastSort } from './lastlibrary';
 import { listKey, listQuery, listSort } from './lists';
 import { cached, keepList, keptList } from './pagecache';
 import { router } from './router.svelte';
 import { session } from './session.svelte';
+import { pickSlides, preloadSlides, slideSources } from './slides';
+import type { Title } from './sdk/overfin.js';
 
 type DiscoverList = 'trending' | 'popular' | 'upcoming';
 type Kind = 'movie' | 'series';
@@ -54,6 +57,18 @@ async function warmHome(profile: string) {
   keepHome(profile, await loadHome(), asked);
 }
 
+// The slideshow's pictures, its slides picked first if they weren't.
+async function warmSlides(profile: string) {
+  let slides = keptSlides<Title>(profile)?.titles;
+  if (!slides) {
+    const home = keptHome<HomeData>(profile)?.data;
+    if (!home) return;
+    slides = await pickSlides(slideSources(home, homeAvailability() === 'all'));
+    if (!keptSlides(profile)) keepSlides(profile, slides, 0);
+  }
+  await preloadSlides(slides, () => session.me?.activeProfile?.id === profile && router.route.parts[0] !== 'play');
+}
+
 function saveData(): boolean {
   return !!(navigator as { connection?: { saveData?: boolean } }).connection?.saveData;
 }
@@ -90,6 +105,7 @@ async function warm() {
     const library = session.libraries.find((l) => l.id === id);
     if (library) steps.push(() => warmList(profile, library.id, false, library.kind));
   }
+  steps.push(() => warmSlides(profile));
   for (const step of steps) {
     // Another profile, or a video started: the rest waits.
     if (session.me?.activeProfile?.id !== profile) return;

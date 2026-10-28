@@ -17,6 +17,7 @@
   import { score } from '../lib/score';
   import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
+  import { pickSlides } from '../lib/slides';
   import Marks from './Marks.svelte';
 
   // missing: trending titles no library has may be shown too, to be
@@ -29,10 +30,6 @@
     missing?: boolean;
   } = $props();
 
-  // How many slides, and how many candidates for them: some have no
-  // backdrop and are left out.
-  const count = 10;
-  const candidates = 16;
   const every = 8000;
 
   let slides = $state<Title[]>([]);
@@ -49,39 +46,6 @@
   let hidden = $state(false);
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // shuffled is a copy of list in random order.
-  function shuffled<T>(list: T[]): T[] {
-    const out = [...list];
-    for (let i = out.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [out[i], out[j]] = [out[j], out[i]];
-    }
-    return out;
-  }
-
-  /** ids picks the titles: up to five among those that fit the profile
-   * best, then trending, newly added and best rated ones, then random
-   * ones, in a random order. */
-  function ids(): string[] {
-    const inLibrary = (list: TitleSummary[]) => (missing ? list : list.filter((title) => title.availability !== 'missing'));
-    const picks = new Set<string>();
-    const take = (list: TitleSummary[], n: number) => {
-      for (const title of list) {
-        if (picks.size >= candidates || n <= 0) return;
-        if (!picks.has(title.id)) {
-          picks.add(title.id);
-          n--;
-        }
-      }
-    };
-    take(shuffled(recommended.slice(0, 12)), 5);
-    take(shuffled(inLibrary([...trending.movie.slice(0, 12), ...trending.series.slice(0, 12)])), 3);
-    take(shuffled(latest.slice(0, 12)), 2);
-    take(shuffled(acclaimed), 2);
-    take(random, candidates);
-    return shuffled([...picks]);
-  }
-
   $effect(() => {
     // Shown before in this tab: as it was left.
     const kept = keptSlides<Title>(profile);
@@ -93,15 +57,10 @@
       });
       return;
     }
-    const chosen = ids();
-    if (!chosen.length) {
-      pending = false;
-      return;
-    }
-    // Each title's page, for its overview and genres, in one request; those
-    // that fail are left out.
-    overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
-      slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]).slice(0, count);
+    // Each title's page, for its overview and genres; those that fail are
+    // left out (slides).
+    pickSlides({ trending, latest, random, acclaimed, recommended, missing }).then((picked) => {
+      slides = picked;
       keepSlides(profile, slides, 0);
       pending = false;
       // The mix is new each time: it starts at its first slide.
