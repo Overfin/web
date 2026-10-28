@@ -616,3 +616,23 @@ html.has-backdrop .slide::before { content: none; }
 @media (max-width: 600px) {
   .page-backdrop::after { background: linear-gradient(to top, rgba(var(--bg-rgb), .95) 20%, rgba(var(--bg-rgb), .55) 55%, rgba(var(--bg-rgb), .15) 100%); }
 }
+
+/* A window for a form (components/Modal): wider than a question's, its
+   own scroll, the page's fields as they are elsewhere. */
+dialog.modal { width: min(34rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100vh - 2rem); overflow: auto; }
+dialog.modal.wide { width: min(48rem, calc(100vw - 2rem)); }
+dialog.modal input[type=checkbox], dialog.modal input[type=radio] { width: auto; }
+dialog.modal .modal-head { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+dialog.modal .modal-head h2 { flex: 1; margin: 0; font-size: 1.25rem; }
+dialog.modal .close { font-size: 1.5rem; line-height: 1; padding: 0 .3rem; }
+dialog.modal .actions { margin-top: 1.2rem; }
+dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1px solid var(--hairline); }
+
+/* A page's title with its main action beside it (Add a profile). */
+.page-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: space-between; margin-bottom: 1rem; }
+.page-head h1 { margin: 0; }
+/* A list's rows with their Edit and Delete buttons. */
+.profiles-list li { display: flex; align-items: center; gap: .9rem; }
+.profiles-list .grow { flex: 1; min-width: 0; }
+.row-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
+.profiles-list .avatar.small { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; flex: none; }

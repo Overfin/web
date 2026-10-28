@@ -7,6 +7,7 @@
   import { t, tn } from '../lib/i18n.svelte';
   import { go } from '../lib/router.svelte';
   import { mayAddProfile, refresh, session, setPicked } from '../lib/session.svelte';
+  import Modal from '../components/Modal.svelte';
   import NewProfile from '../components/NewProfile.svelte';
   import PageError from '../components/PageError.svelte';
 
@@ -49,15 +50,13 @@
   }
 </script>
 
+<!-- A new profile, in a window over the profiles. -->
 {#if adding}
-  <div class="center">
-    <h1>{t('profiles.new')}</h1>
-    <div class="panel">
-      <NewProfile created={() => { adding = false; reload++; }} cancel={() => (adding = false)} />
-    </div>
-  </div>
-{:else}
-  <h1 class="center">{t('profiles.who')}</h1>
+  <Modal title={t('profiles.new')} close={() => (adding = false)}>
+    <NewProfile created={() => { adding = false; reload++; }} cancel={() => (adding = false)} />
+  </Modal>
+{/if}
+<h1 class="center">{t('profiles.who')}</h1>
   {#await profiles}
     <p class="center muted">{t('app.loading')}</p>
   {:then list}
@@ -90,4 +89,4 @@
   {:catch error}
     <PageError {error} />
   {/await}
-{/if}
+
