@@ -196,7 +196,9 @@
             {#if item.availability === 'missing'}
               <a class="button primary" href="/title/{item.id}">{t('home.moreInfo')}</a>
             {:else if item.playable}
-              <button class="primary" onclick={() => play(item.id, position)}>
+              <!-- Where the profile left off as the server says it: a kept
+                   slideshow's titles may be from before a playback. -->
+              <button class="primary" onclick={() => play(item.id)}>
                 {position ? t('home.resume') : t('item.play')}
               </button>
               <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
