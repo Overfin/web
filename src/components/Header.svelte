@@ -62,13 +62,14 @@
 <header>
   <Brand />
   <nav>
-    <a href="/" class:active={here.length === 0}>{t('nav.home')}</a>
-    <a href="/list" class:active={here[0] === 'list'}>{t('nav.list')}</a>
+    <a href="/" class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
+    <a href="/list" class:active={here[0] === 'list'} aria-current={here[0] === 'list' ? 'page' : undefined}>{t('nav.list')}</a>
     {#if session.discovery}
-      <a href="/discover" class:active={here[0] === 'discover'}>{t('nav.discover')}</a>
+      <a href="/discover" class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
     {/if}
     {#each session.categories as c (c.id)}
-      <a href="/category/{c.id}" class:active={here[0] === 'category' && here[1] === c.id}>{c.name}</a>
+      <a href="/category/{c.id}" class:active={here[0] === 'category' && here[1] === c.id}
+        aria-current={here[0] === 'category' && here[1] === c.id ? 'page' : undefined}>{c.name}</a>
     {/each}
     {#if !session.librariesShown}
       <!-- The operator's categories alone. -->

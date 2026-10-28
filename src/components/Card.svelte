@@ -60,6 +60,8 @@
   function cancel() {
     clearTimeout(timer);
   }
+  // Nothing read ahead once the card is gone.
+  $effect(() => cancel);
 </script>
 
 <div class="cardbox" class:wide>
@@ -75,7 +77,7 @@
         <div class="progress" style:width="{progress}%"></div>
       {/if}
       {#if flag}<span class="flag">{flag}</span>{/if}
-      {#if item.userState?.played}<span class="seen" aria-label={t('title.watched')}>✓</span>{/if}
+      {#if item.userState?.played}<span class="seen" role="img" aria-label={t('title.watched')}>✓</span>{/if}
     </div>
     <div class="title">{item.name}</div>
     <div class="sub">{sub}</div>

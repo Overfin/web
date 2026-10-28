@@ -22,6 +22,8 @@
   let error = $state('');
   let timer: ReturnType<typeof setTimeout> | undefined;
   let asked = 0; // only the latest search's answer is shown
+  // No search once the page is left.
+  $effect(() => () => clearTimeout(timer));
 
   // The words are kept with the profile they're the search of: another
   // profile on this tab doesn't see them.
