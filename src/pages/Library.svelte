@@ -67,9 +67,12 @@
   // What was read of this list in this tab, as far as it was scrolled,
   // shows at once when it's opened again (pagecache).
   type Kept = { items: TitleSummary[]; total?: number; finished: boolean; pages?: AsyncGenerator<TitlePage> };
+  // The sort it was read in is part of it: without one in the address,
+  // it's the one the profile last chose, which may have changed since.
   const listKey = $derived.by(() => {
     const p = new URLSearchParams(params);
     p.delete('seed');
+    p.set('sort', sort);
     return `${profile}:${base}?${p}`;
   });
   // svelte-ignore state_referenced_locally
