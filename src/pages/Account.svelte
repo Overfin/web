@@ -6,6 +6,7 @@
   import { explain, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
   import { confirm, notice } from '../lib/dialog.svelte';
+  import { homeChanged } from '../lib/homecache';
   import { i18n, t } from '../lib/i18n.svelte';
   import { session, setPicked } from '../lib/session.svelte';
   import TastesForm from '../components/TastesForm.svelte';
@@ -30,6 +31,7 @@
     try {
       session.me = await overfin.setLanguage(language);
       i18n.follow(session.me.language);
+      homeChanged(); // titles kept in the tab are in the old language
       await notice(t('account.languageSaved'));
     } catch (err) {
       message = explain(err);
@@ -64,6 +66,7 @@
     message = '';
     try {
       await overfin.copyHistory(username, password);
+      homeChanged();
       password = '';
       bring = false;
       await notice(t('account.brought'));
@@ -98,6 +101,7 @@
     if (!(await confirm(t('account.clearConfirm'), true))) return;
     try {
       await overfin.clearHistory();
+      homeChanged();
       await notice(t('account.cleared'));
     } catch (err) {
       message = explain(err);
