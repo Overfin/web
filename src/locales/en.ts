@@ -15,6 +15,7 @@ export default {
   'nav.chooseProfile': 'Choose a profile',
   'nav.switchProfile': 'Switch profile',
   'nav.menu': 'Profile menu',
+  'nav.panel': 'Control panel',
 
   'common.back': 'Back',
   'common.backHome': 'Back home',

@@ -16,6 +16,7 @@ const fr: Record<keyof typeof en, string> = {
   'nav.chooseProfile': 'Choisir un profil',
   'nav.switchProfile': 'Changer de profil',
   'nav.menu': 'Menu du profil',
+  'nav.panel': 'Panneau de contrôle',
 
   'common.back': 'Retour',
   'common.backHome': 'Retour à l’accueil',
