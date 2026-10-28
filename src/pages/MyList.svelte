@@ -22,6 +22,7 @@
     homeChanged();
     try {
       await overfin.removeFromWatchlist(item.id);
+      homeChanged(); // again: a home read meanwhile had it still
     } catch (err) {
       items.splice(at, 0, item);
       await notice(explain(err));

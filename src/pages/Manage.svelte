@@ -9,7 +9,7 @@
   import { homeChanged } from '../lib/homecache';
   import { i18n, t } from '../lib/i18n.svelte';
   import { replace } from '../lib/router.svelte';
-  import { session } from '../lib/session.svelte';
+  import { loadCategories, session } from '../lib/session.svelte';
   import AccessPicker from '../components/AccessPicker.svelte';
   import AgePicker from '../components/AgePicker.svelte';
   import PageError from '../components/PageError.svelte';
@@ -57,6 +57,8 @@
     if (!(await confirmed(action, (m) => (f.message = m), pinLabel))) return false;
     homeChanged();
     reload++;
+    // The menu's categories, when this profile's own changed.
+    if (p.id === session.me?.activeProfile?.id) loadCategories();
     return true;
   }
   // "Contenu pour enfants" on or off; the box as it was when that fails.

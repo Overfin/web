@@ -104,7 +104,8 @@
       if (Math.abs(window.scrollY - y) > 1 && Date.now() < until) frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
-    const moves = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    // mousedown too: grabbing the scrollbar is no pointerdown in some browsers.
+    const moves = ['wheel', 'touchstart', 'keydown', 'pointerdown', 'mousedown'] as const;
     for (const move of moves) window.addEventListener(move, stop, { passive: true, once: true });
     return () => {
       stop();
