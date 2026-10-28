@@ -134,7 +134,7 @@
   <section class="slides" aria-roledescription="carousel" aria-label={t('home.featured')}
     use:backdropOf={slides[index]?.images?.backdrops?.[0] ? {
       wide: overfin.imageUrl(slides[index].images!.backdrops![0], 'large'),
-      tall: slides[index].images?.primary ? overfin.imageUrl(slides[index].images!.primary!, 'large') : undefined,
+      tall: slides[index].images?.textless ? overfin.imageUrl(slides[index].images!.textless!, 'large') : undefined,
     } : undefined}
     use:inView={(on) => (away = !on)}
     onmouseenter={() => (hovered = true)} onmouseleave={() => (hovered = false)}

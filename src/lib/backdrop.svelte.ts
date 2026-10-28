@@ -2,13 +2,14 @@
 // collection pages, the home page's slideshow), under the header; the
 // page's own top is see-through, the rest scrolls over it on a translucent
 // sheet. PageBackdrop shows it. On a screen taller than wide (a phone), the
-// title's poster when it has one: a wide backdrop cut to a tall screen
-// loses whatever isn't in its middle.
+// title's text-free poster when it has one: a wide backdrop cut to a tall
+// screen loses whatever isn't in its middle, and a poster's own text would
+// show through.
 
 export interface Backdrop {
   /** wide is the backdrop's address. */
   wide?: string;
-  /** tall is the poster's, for screens taller than wide. */
+  /** tall is the text-free poster's, for screens taller than wide. */
   tall?: string;
 }
 
