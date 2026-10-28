@@ -1,15 +1,18 @@
 <!-- Search: titles, those in a library apart from the others, and people,
      as one types; people
-     first when the words look like someone's name. The words never go in
-     the address (they'd stay in the history): this tab keeps the last
-     ones, for the profile searching, so coming back (Back, from a result)
-     shows the same results.
+     first when the words look like someone's name. The words are in the
+     address (/search?q=…), changed as one types without a new history
+     entry, so Back from a result, a reload or a link shows the same
+     search. This tab keeps them too, for the profile searching: /search
+     alone opens with them. The address wins.
      The search icon, from another page, starts a new one, empty. -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
+  import { router } from '../lib/router.svelte';
+  import { searchPath, searchWords } from '../lib/searchwords';
   import { t } from '../lib/i18n.svelte';
   import { session } from '../lib/session.svelte';
   import Card from '../components/Card.svelte';
@@ -35,6 +38,9 @@
     } catch {
       // private browsing: nothing kept
     }
+    // The address follows, in place: one history entry however much one
+    // types (the page isn't drawn again for it).
+    history.replaceState(history.state, '', searchPath(q));
     if (q.trim().length < 2) {
       asked++; // a search still on its way is no longer wanted
       searching = false;
@@ -62,12 +68,13 @@
   }
 
   onMount(() => {
+    let kept: unknown = null;
     try {
-      const kept = JSON.parse(sessionStorage.getItem(saved) ?? 'null');
-      query = kept?.profile === profile() && typeof kept.q === 'string' ? kept.q : '';
+      kept = JSON.parse(sessionStorage.getItem(saved) ?? 'null');
     } catch {
-      query = '';
+      // nothing kept
     }
+    query = searchWords(router.route.params, kept, profile());
     if (query) run(query);
     input?.focus();
   });
