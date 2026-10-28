@@ -50,6 +50,7 @@ const fr: Record<keyof typeof en, string> = {
 
   'nav.discover': 'Découvrir',
   'nav.libraries': 'Bibliothèques',
+  'nav.sections': 'Rubriques',
   'nav.collections': 'Collections',
   'collections.title': 'Collections',
   'collections.count': '{have} sur {films}',

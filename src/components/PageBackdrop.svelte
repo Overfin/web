@@ -1,19 +1,34 @@
 <!-- The page's backdrop (lib/backdrop): fixed behind everything, darkened
-     toward the text, cross-fading from one picture to the next. The page
-     says it has one, for the header and the sheet its content sits on. -->
+     toward the text, cross-fading from one picture to the next; the
+     poster, when there's one, on a screen taller than wide. The page says
+     it has one, for the header and the sheet its content sits on. -->
 <script lang="ts">
   import { fade } from 'svelte/transition';
   import { pageBackdrop } from '../lib/backdrop.svelte';
 
+  const portrait = typeof matchMedia === 'function' ? matchMedia('(max-aspect-ratio: 1/1)') : null;
+  let tall = $state(portrait?.matches ?? false);
   $effect(() => {
-    document.documentElement.classList.toggle('has-backdrop', !!pageBackdrop.url);
+    const changed = () => (tall = portrait?.matches ?? false);
+    portrait?.addEventListener('change', changed);
+    return () => portrait?.removeEventListener('change', changed);
+  });
+
+  const url = $derived.by(() => {
+    const b = pageBackdrop.current;
+    if (!b) return null;
+    return (tall ? b.tall || b.wide : b.wide || b.tall) ?? null;
+  });
+
+  $effect(() => {
+    document.documentElement.classList.toggle('has-backdrop', !!url);
   });
 </script>
 
-{#if pageBackdrop.url}
-  <div class="page-backdrop" aria-hidden="true">
-    {#key pageBackdrop.url}
-      <img src={pageBackdrop.url} alt="" transition:fade={{ duration: 600 }} />
+{#if url}
+  <div class="page-backdrop" class:tall={url === pageBackdrop.current?.tall} aria-hidden="true">
+    {#key url}
+      <img src={url} alt="" transition:fade={{ duration: 600 }} />
     {/key}
   </div>
 {/if}

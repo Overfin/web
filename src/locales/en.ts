@@ -49,6 +49,7 @@ export default {
 
   'nav.discover': 'Discover',
   'nav.libraries': 'Libraries',
+  'nav.sections': 'Sections',
   'nav.collections': 'Collections',
   'collections.title': 'Collections',
   'collections.count': '{have} of {films}',

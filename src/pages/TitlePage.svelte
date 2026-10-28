@@ -129,7 +129,7 @@
   {@const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined)}
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
-  <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? overfin.imageUrl(backdrop, 'large') : undefined}>
+  <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large'), tall: poster ? overfin.imageUrl(poster, 'large') : undefined } : undefined}>
     <div class="info">
       {#if poster}
         <div class="poster">
