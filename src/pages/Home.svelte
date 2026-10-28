@@ -42,6 +42,9 @@
       ...trending.map((kind): [string, Record<string, string | number>] =>
         ['/discover', { list: 'trending', mediaKind: kind, availability, limit: 20 }]),
       ...sections.map((x) => x.call),
+      // What fits the profile: among everything, and among the newest.
+      ['/titles/recommended', { scope: 'all', limit: 20 }],
+      ['/titles/recommended', { scope: 'recent', limit: 20 }],
       // For the slideshow: the library at random, and its best rated.
       ['/titles', { kind: ['movie', 'series'], sort: 'random', seed, limit: 30 }],
       ['/titles', { kind: ['movie', 'series'], sort: 'communityRating', order: 'desc', limit: 40 }],
@@ -50,9 +53,9 @@
     const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
     if (answers[0] instanceof Error) throw answers[0];
     const rest = answers.slice(2 + trending.length, 2 + trending.length + sections.length);
-    const [random, acclaimed] = answers.slice(-2).map(items);
+    const [recommended, recent, random, acclaimed] = answers.slice(-4).map(items);
     return {
-      random, acclaimed,
+      random, acclaimed, recommended, recent,
       resume: items(answers[0]),
       watchlist: items(answers[1]), // the server may not offer it
       trending: trending.length ? { movie: items(answers[2]), series: items(answers[3]) } : { movie: [], series: [] },
@@ -76,7 +79,7 @@
     && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed} missing={availability === 'all'}
+  <Slides trending={home.trending} random={home.random} acclaimed={home.acclaimed} recommended={home.recommended} missing={availability === 'all'}
     latest={home.latest.flatMap((l) => l.items.map((item, i) => ({ item, i }))).sort((a, b) => a.i - b.i).map((x) => x.item)} />
   {#if empty}
     <p class="muted">{t('common.nothingYet')}</p>
@@ -85,6 +88,8 @@
        (a series' until it's watched again). -->
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
   <Row title={t('home.watchlist')} items={home.watchlist} />
+  <Row title={t('home.recommended')} items={home.recommended} />
+  <Row title={t('home.recentForYou')} items={home.recent} />
   {#if session.discovery}
     <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" {availability} flags={availability === 'all'}
       items={home.trending.movie} />

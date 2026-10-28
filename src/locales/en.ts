@@ -27,6 +27,8 @@ export default {
   'time.minutes': '{m} min',
 
   'home.continue': 'Continue watching',
+  'home.recommended': 'Recommended for you',
+  'home.recentForYou': 'New for you',
   'home.watchlist': 'My watchlist',
   'home.latest': 'Latest in {library}',
   'home.removeFromContinue': 'Remove from Continue watching',

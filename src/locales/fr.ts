@@ -28,6 +28,8 @@ const fr: Record<keyof typeof en, string> = {
   'time.minutes': '{m} min',
 
   'home.continue': 'Reprendre',
+  'home.recommended': 'Recommandé pour vous',
+  'home.recentForYou': 'Ajouts récents pour vous',
   'home.watchlist': 'Ma liste',
   'home.latest': 'Nouveautés dans {library}',
   'home.removeFromContinue': 'Retirer de Reprendre',
