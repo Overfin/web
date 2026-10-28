@@ -7,10 +7,12 @@
      the system asks for less motion. Arrows, dots, swipes and the arrow
      keys move it too. -->
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
   import { duration } from '../lib/format';
   import { t } from '../lib/i18n.svelte';
+  import { keepSlides, keptSlides } from '../lib/homecache';
   import { loaded } from '../lib/loaded';
   import { score } from '../lib/score';
   import { weigh } from '../lib/weigh';
@@ -19,9 +21,11 @@
 
   // missing: trending titles no library has may be shown too, to be
   // requested from their page.
-  let { trending, latest, random, acclaimed, recommended = [], missing = false }: {
+  let { trending, latest, random, acclaimed, recommended = [], missing = false, profile = '' }: {
     trending: { movie: TitleSummary[]; series: TitleSummary[] };
     latest: TitleSummary[]; random: TitleSummary[]; acclaimed: TitleSummary[]; recommended?: TitleSummary[];
+    /** profile keeps the slideshow as it was left, for this tab. */
+    profile?: string;
     missing?: boolean;
   } = $props();
 
@@ -79,6 +83,16 @@
   }
 
   $effect(() => {
+    // Shown before in this tab: as it was left.
+    const kept = keptSlides<Title>(profile);
+    if (kept) {
+      untrack(() => {
+        slides = kept.titles;
+        pending = false;
+        show(kept.index);
+      });
+      return;
+    }
     const chosen = ids();
     if (!chosen.length) {
       pending = false;
@@ -88,6 +102,7 @@
     // that fail are left out.
     overfin.batch(chosen.map((id) => `/titles/${encodeURIComponent(id)}`)).then((items) => {
       slides = items.filter((it): it is Title => !(it instanceof Error) && !!it?.images?.backdrops?.[0]).slice(0, count);
+      keepSlides(profile, slides, 0);
       pending = false;
       // The mix is new each time: it starts at its first slide.
       show(0);
@@ -97,6 +112,7 @@
   function show(i: number) {
     if (!slides.length) return;
     index = (i + slides.length) % slides.length;
+    keepSlides(profile, slides, index);
     seen = new Set([...seen, index, (index + 1) % slides.length]);
   }
 

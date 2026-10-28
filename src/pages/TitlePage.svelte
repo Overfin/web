@@ -3,6 +3,7 @@
      decides whether it plays. A series shows its seasons as tabs, with the
      chosen season's episodes, those no library has too. -->
 <script lang="ts">
+  import { homeChanged } from '../lib/homecache';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
@@ -44,6 +45,7 @@
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
   async function toggleEpisode(e: TitleSummary) {
+    homeChanged();
     const now = episodeMarks[e.id] ?? e.userState?.played ?? false;
     try {
       episodeMarks[e.id] = (await overfin.setPlayed(e.id, !now)).played;
