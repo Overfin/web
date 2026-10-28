@@ -75,12 +75,13 @@ export async function pickSlides(s: SlideSources): Promise<Title[]> {
 }
 
 /** preloadSlides loads the slides' backdrops and logos ahead, one at a
- * time, as long as go says to; on a screen taller than wide, their posters
- * instead of their backdrops (PageBackdrop shows those there). */
+ * time, as long as go says to; on a screen taller than wide, their
+ * text-free posters instead, when they have one (PageBackdrop shows those
+ * there). */
 export async function preloadSlides(slides: Title[], go: () => boolean) {
   const tall = typeof matchMedia === 'function' && matchMedia('(max-aspect-ratio: 1/1)').matches;
   for (const slide of slides) {
-    const picture = tall ? (slide.images?.primary ?? slide.images?.backdrops?.[0]) : slide.images?.backdrops?.[0];
+    const picture = tall ? (slide.images?.textless ?? slide.images?.backdrops?.[0]) : slide.images?.backdrops?.[0];
     for (const [image, size] of [[picture, 'large'], [slide.images?.logo, 'medium']] as const) {
       if (!image) continue;
       if (!go()) return;
