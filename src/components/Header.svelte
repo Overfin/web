@@ -122,24 +122,24 @@
   </button>
   <Brand />
   <nav id="sections" bind:this={sections} class:open={sectionsOpen} class:more-left={moreLeft} class:more-right={moreRight} onscroll={edges}>
-    <a href="/" class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
+    <a href="/" data-text={t('nav.home')} class:active={here.length === 0} aria-current={here.length === 0 ? 'page' : undefined}>{t('nav.home')}</a>
     {#if session.discovery}
-      <a href="/discover" class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
+      <a href="/discover" data-text={t('nav.discover')} class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
     {/if}
     {#each session.categories as c (c.id)}
       {@const on = here[0] === 'category' && categoryIdOf(here[1], session.categories) === c.id}
-      <a href={categoryPath(c, session.categories)} class:active={on} aria-current={on ? 'page' : undefined}>{c.name}</a>
+      <a href={categoryPath(c, session.categories)} data-text={c.name} class:active={on} aria-current={on ? 'page' : undefined}>{c.name}</a>
     {/each}
     {#if !session.librariesShown}
       <!-- The operator's categories alone. -->
     {:else if session.libraries.length === 1}
-      <a href="/library/{session.libraries[0].id}" class:active={here[0] === 'library'}>{session.libraries[0].name}</a>
+      <a href="/library/{session.libraries[0].id}" data-text={session.libraries[0].name} class:active={here[0] === 'library'}>{session.libraries[0].name}</a>
     {:else if libraries}
-      <a href={libraries} class:active={here[0] === 'library'}>{t('nav.libraries')}</a>
+      <a href={libraries} data-text={t('nav.libraries')} class:active={here[0] === 'library'}>{t('nav.libraries')}</a>
     {/if}
     {#if session.collections.length}
       <!-- Last: series of films, from TMDB. -->
-      <a href="/collections" class:active={here[0] === 'collections' || here[0] === 'collection'}
+      <a href="/collections" data-text={t('nav.collections')} class:active={here[0] === 'collections' || here[0] === 'collection'}
         aria-current={here[0] === 'collections' ? 'page' : undefined}>{t('nav.collections')}</a>
     {/if}
   </nav>

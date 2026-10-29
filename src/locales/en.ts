@@ -233,6 +233,7 @@ export default {
   'profiles.who': "Who's watching?",
   'profiles.reserved.one': 'Each profile has a stream of its own, plus {count} shared by all profiles. An unused profile keeps its own: delete it to free it.',
   'profiles.reserved.other': 'Each profile has a stream of its own, plus {count} shared by all profiles. An unused profile keeps its own: delete it to free it.',
+  'profiles.reservedOnly': 'Each profile has a stream of its own. An unused profile keeps it: delete it to free it.',
   'profiles.add': 'Add profile',
   'profiles.manage': 'Manage profiles',
   'profiles.mine': 'My profile',
