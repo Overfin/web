@@ -224,6 +224,7 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
 .hero .poster { width: 11rem; flex: none; border-radius: var(--radius); box-shadow: var(--shadow-l); }
 .hero h1 { margin-bottom: .5rem; text-shadow: var(--title-shadow); }
 .hero .info p { max-width: 46rem; }
+.hero .overview.folded { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .meta { color: rgba(var(--text-rgb), .8); display: flex; gap: .4rem 1rem; flex-wrap: wrap; margin-bottom: .6rem; }
 .actions { display: flex; gap: .6rem; margin: 1rem 0; flex-wrap: wrap; }
 @media (max-width: 600px) {
@@ -485,6 +486,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .seasons .dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); }
 .seasons .dot.missing { background: var(--muted); }
 .season-overview { max-width: 50rem; margin-top: -.3rem; }
+.season-overview.folded { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: .3rem; }
 /* A season's episodes: cards filling the width, as many per row as fit at
    18rem or more (one on a phone), the still on top with its play (or
    request) button in the corner, as on every card. */
@@ -558,7 +560,8 @@ header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand 
 .card.person { width: calc(var(--card) * .85); text-align: center; }
 ol.episodes .about { margin: .3rem 0 0; font-size: .9rem; color: var(--muted); }
 ol.episodes .about.folded { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-ol.episodes .about-toggle { align-self: flex-start; min-height: 0; padding: .1rem 0; font-size: .85rem; }
+button.link.about-toggle { align-self: flex-start; min-height: 0; padding: .1rem 0; font-size: .85rem; }
+.season-overview + .about-toggle { margin-bottom: .8rem; }
 
 /* Rows' arrows: with a mouse only, over the row's ends, shown while the
    pointer is on the row; the row then shows no scrollbar. */

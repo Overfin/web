@@ -76,8 +76,9 @@
   const castShown = 12;
   let wholeCast = $state(false);
   let seasonReload = $state(0);
-  // Episodes' descriptions: two lines, unless unfolded; "Read more" only
-  // on those that don't fit.
+  // Long texts fold, unless unfolded: the title's overview (four lines),
+  // the season's (three) and episodes' descriptions (two); "Read more"
+  // only on those that don't fit. By key: "title", a season's or an episode's ID.
   let unfolded = $state<Record<string, boolean>>({});
   let longAbout = $state<Record<string, boolean>>({});
   function overflows(node: HTMLElement, report: (long: boolean) => void) {
@@ -215,7 +216,15 @@
             </a>
           {/if}
         </div>
-        {#if title.overview}<p class="overview">{title.overview}</p>{/if}
+        {#if title.overview}
+          <p class="overview" class:folded={!unfolded.title} use:overflows={(long) => (longAbout.title = long)}>{title.overview}</p>
+          {#if longAbout.title || unfolded.title}
+            <button class="link about-toggle" type="button" aria-expanded={!!unfolded.title}
+              onclick={() => (unfolded.title = !unfolded.title)}>
+              {unfolded.title ? t('common.readLess') : t('common.readMore')}
+            </button>
+          {/if}
+        {/if}
       </div>
     </div>
   </div>
@@ -254,7 +263,15 @@
     {:else}
       <h2>{t('item.episodes')}</h2>
     {/if}
-    {#if season.overview && title.kind === 'series' && season.overview !== title.overview}<p class="muted season-overview">{season.overview}</p>{/if}
+    {#if season.overview && title.kind === 'series' && season.overview !== title.overview}
+      <p class="muted season-overview" class:folded={!unfolded[season.id]} use:overflows={(long) => (longAbout[season.id] = long)}>{season.overview}</p>
+      {#if longAbout[season.id] || unfolded[season.id]}
+        <button class="link about-toggle" type="button" aria-expanded={!!unfolded[season.id]}
+          onclick={() => (unfolded[season.id] = !unfolded[season.id])}>
+          {unfolded[season.id] ? t('common.readLess') : t('common.readMore')}
+        </button>
+      {/if}
+    {/if}
     <ol class="episodes">
       {#each season.episodes as e (e.id)}
         {@const seen = episodeMarks[e.id] ?? e.userState?.played ?? false}
