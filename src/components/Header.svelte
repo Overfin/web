@@ -114,7 +114,7 @@
 
 <svelte:window onclick={outside} onkeydown={keydown} onresize={edges} />
 
-<header>
+<header data-theme="dark">
   <!-- Phones: the sections behind a button. -->
   <button class="sections-toggle" type="button" bind:this={sectionsToggle} aria-expanded={sectionsOpen} aria-controls="sections"
     aria-label={t('nav.sections')} title={t('nav.sections')} onclick={() => (sectionsOpen = !sectionsOpen)}>

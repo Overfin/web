@@ -1,6 +1,7 @@
 <!-- The site's brand, in the header: Overfin's banner, or the operator's
-     (its light version on light pages, when there's one; the name as text
-     without any). -->
+     (the one for dark pages, as the header is; the name as text without
+     any). The light one, when there's one, is there hidden, for an
+     operator's own stylesheet. -->
 <script lang="ts">
   import { brand } from '../lib/brand.svelte';
   import OverfinBanner from './OverfinBanner.svelte';
