@@ -9,6 +9,7 @@
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
+  import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
   import { ageText, clock, duration } from '../lib/format';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { confirm, notice } from '../lib/dialog.svelte';
@@ -42,7 +43,7 @@
   }
   function choose(title: Title, s: TitleSummary) {
     chosen = s.id;
-    history.replaceState(history.state, '', `/title/${title.id}?season=${s.seasonNumber}`);
+    history.replaceState(history.state, '', `${titlePathOf(title)}?season=${s.seasonNumber}`);
   }
 
   // An episode marked from the list.
@@ -118,6 +119,10 @@
     return '';
   }
   const seasonName = (s: TitleSummary) => s.seasonNumber === 0 ? t('title.specials') : s.name || t('discover.seasonNumber', { number: s.seasonNumber ?? '?' });
+
+  // Its address put right: the name, as the person sees it (lib/paths).
+  // svelte-ignore state_referenced_locally
+  titleOf(id).then((t) => correct(titlePathOf(t), (parts) => titleIdOf(parts) === id), () => {});
 </script>
 
 {#await titleOf(id)}
@@ -141,9 +146,9 @@
           <!-- Where it is: its series, and an episode's season. -->
           <nav class="breadcrumbs" aria-label={t('title.breadcrumbs')}>
             <ol>
-              <li><a href="/title/{title.series.id}">{title.series.name}</a></li>
+              <li><a href={titlePath(title.series.id, title.series.name)}>{title.series.name}</a></li>
               {#if title.kind === 'episode' && title.season}
-                <li><a href="/title/{title.season.id}">{title.season.name || seasonName(title)}</a></li>
+                <li><a href={titlePath(title.season.id, title.series.name)}>{title.season.name || seasonName(title)}</a></li>
                 <li aria-current="page">{t('title.episodeNumber', { number: title.episodeNumber ?? '?' })}</li>
               {:else}
                 <li aria-current="page">{seasonName(title)}</li>
@@ -205,7 +210,7 @@
           <!-- My list, watched, favorite: icons that fill in when on. -->
           <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite} />
           {#if title.collection}
-            <a class="button toggle" href="/collection/{title.collection.id}" aria-label={t('title.seeCollection')} title={t('title.seeCollection')}>
+            <a class="button toggle" href={collectionPath(title.collection.id, title.collection.name)} aria-label={t('title.seeCollection')} title={t('title.seeCollection')}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3.5" width="12" height="15" rx="1.5" /><path d="M4.5 7v12a1.5 1.5 0 0 0 1.5 1.5h10" /></svg>
             </a>
           {/if}
@@ -272,7 +277,7 @@
             {/if}
           </div>
           <div class="head">
-            <a href="/title/{e.id}"><span class="number">{e.episodeNumber}.</span> {e.name}</a>
+            <a href={titlePathOf(e)}><span class="number">{e.episodeNumber}.</span> {e.name}</a>
             <!-- Watched and favorite, as on a title's page. -->
             <div class="marks actions">
               <button class="toggle" class:on={seen} type="button" aria-pressed={seen}
@@ -323,7 +328,7 @@
     </div>
     <div class={wholeCast ? 'grid' : 'row'}>
       {#each cast as c, i (i)}
-        <svelte:element this={c.id ? 'a' : 'div'} class="card person" href={c.id ? `/person/${c.id}` : undefined}>
+        <svelte:element this={c.id ? 'a' : 'div'} class="card person" href={c.id ? personPath(c.id, c.name) : undefined}>
           <div class="poster round">
             {#if c.image}
               <img src={overfin.imageUrl(c.image, 'small')} alt="" loading="lazy" use:loaded />

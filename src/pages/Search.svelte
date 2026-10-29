@@ -11,6 +11,7 @@
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
+  import { personPath } from '../lib/paths';
   import { router } from '../lib/router.svelte';
   import { searchPath, searchWords } from '../lib/searchwords';
   import { t } from '../lib/i18n.svelte';
@@ -132,7 +133,7 @@
     <h2>{t('search.people')}</h2>
     <div class="row">
       {#each found as p (p.id)}
-        <a class="card person" href="/person/{p.id}">
+        <a class="card person" href={personPath(p.id, p.name)}>
           <div class="poster round">
             {#if p.image}
               <img src={overfin.imageUrl(p.image, 'small')} alt="" loading="lazy" use:loaded />

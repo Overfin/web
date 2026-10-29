@@ -11,6 +11,7 @@
   import { overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
   import { librariesHref } from '../lib/lastlibrary';
+  import { categoryIdOf, categoryPath } from '../lib/paths';
   import Brand from './Brand.svelte';
   import { router } from '../lib/router.svelte';
   import { session, setPicked } from '../lib/session.svelte';
@@ -126,8 +127,8 @@
       <a href="/discover" class:active={here[0] === 'discover'} aria-current={here[0] === 'discover' ? 'page' : undefined}>{t('nav.discover')}</a>
     {/if}
     {#each session.categories as c (c.id)}
-      <a href="/category/{c.id}" class:active={here[0] === 'category' && here[1] === c.id}
-        aria-current={here[0] === 'category' && here[1] === c.id ? 'page' : undefined}>{c.name}</a>
+      {@const on = here[0] === 'category' && categoryIdOf(here[1], session.categories) === c.id}
+      <a href={categoryPath(c, session.categories)} class:active={on} aria-current={on ? 'page' : undefined}>{c.name}</a>
     {/each}
     {#if !session.librariesShown}
       <!-- The operator's categories alone. -->

@@ -8,6 +8,7 @@
   import { homeChanged } from '../lib/homecache';
   import { t, type Key } from '../lib/i18n.svelte';
   import { loaded } from '../lib/loaded';
+  import { titlePathOf } from '../lib/paths';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -36,13 +37,13 @@
       <ul class="list requests">
         {#each shown as r (r.id)}
           <li>
-            <a class="thumb" href="/title/{r.title.id}">
+            <a class="thumb" href={titlePathOf(r.title)}>
               {#if r.title.images?.primary}
                 <img src={overfin.imageUrl(r.title.images.primary, 'small')} alt="" loading="lazy" use:loaded />
               {/if}
             </a>
             <div class="what">
-              <a href="/title/{r.title.id}"><strong>{r.title.name}</strong></a>
+              <a href={titlePathOf(r.title)}><strong>{r.title.name}</strong></a>
               {#if r.title.year}<span class="muted"> ({r.title.year})</span>{/if}
               <div class="muted small">
                 {#if r.seasons?.length}{t('request.seasons', { list: r.seasons.join(', ') })} · {/if}

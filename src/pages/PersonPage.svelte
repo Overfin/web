@@ -4,6 +4,7 @@
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { has, t } from '../lib/i18n.svelte';
+  import { correct, personIdOf, personPath } from '../lib/paths';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
@@ -14,9 +15,15 @@
   let showElsewhere = $state(false);
 
   const day = (d: string) => new Date(d).toLocaleDateString(undefined, { dateStyle: 'long' });
+
+  // svelte-ignore state_referenced_locally
+  const person = overfin.person(id);
+  // Its address put right, with the person's name (lib/paths).
+  // svelte-ignore state_referenced_locally
+  person.then((p) => correct(personPath(id, p.name), (parts) => personIdOf(parts[0]) === id), () => {});
 </script>
 
-{#await overfin.person(id)}
+{#await person}
   <Skeleton kind="title" />
 {:then person}
   {@const here = person.credits.filter((c) => c.title.availability !== 'missing')}

@@ -4,6 +4,7 @@
 <script lang="ts">
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
+  import { collectionPath } from '../lib/paths';
   import { t } from '../lib/i18n.svelte';
   import { session } from '../lib/session.svelte';
 
@@ -16,7 +17,7 @@
 {:else}
   <div class="grid">
     {#each session.collections as c (c.id)}
-      <a class="card" href="/collection/{c.id}">
+      <a class="card" href={collectionPath(c.id, c.name)}>
         <div class="poster">
           {#if c.images?.primary}
             <img src={overfin.imageUrl(c.images.primary, 'small')} alt="" loading="lazy" use:loaded />

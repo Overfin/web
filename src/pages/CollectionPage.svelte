@@ -6,6 +6,7 @@
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
+  import { collectionIdOf, collectionPath, correct } from '../lib/paths';
   import { t } from '../lib/i18n.svelte';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
@@ -16,7 +17,11 @@
   let collection = $state<Collection | null>(null);
   let error = $state<unknown>();
   // svelte-ignore state_referenced_locally
-  overfin.collection(id).then((c) => (collection = c), (err) => (error = err));
+  overfin.collection(id).then((c) => {
+    collection = c;
+    // Its address put right, with its name (lib/paths).
+    correct(collectionPath(id, c.name), (parts) => collectionIdOf(parts[0]) === id);
+  }, (err) => (error = err));
 </script>
 
 {#if error}

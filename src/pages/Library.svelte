@@ -12,6 +12,7 @@
   import { listKey as keyOf, listQuery, listSort, listSorts, type ListKept } from '../lib/lists';
   import { go } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
+  import { categoryIdOf, categoryPath, correct } from '../lib/paths';
   import { visible } from '../lib/visible';
   import { landed } from '../lib/warm';
   import Card from '../components/Card.svelte';
@@ -29,7 +30,15 @@
   // What's listed: a library, or a category (films and series alike).
   const library = $derived(category ? session.categories.find((c) => c.id === id) : session.libraries.find((l) => l.id === id));
   const siblings = $derived(category ? session.categories : session.libraries);
-  const base = $derived(`/${category ? 'category' : 'library'}/${id}`);
+  // A category's address is its name (lib/paths); a library's, its ID.
+  const base = $derived.by(() => {
+    const c = category ? session.categories.find((x) => x.id === id) : undefined;
+    return c ? categoryPath(c, session.categories) : `/${category ? 'category' : 'library'}/${id}`;
+  });
+  // Opened by its ID (an old address): its name instead.
+  $effect(() => {
+    if (category) correct(base, (parts) => categoryIdOf(parts[0], session.categories) === id);
+  });
   // svelte-ignore state_referenced_locally
   if (!category) rememberLibrary(id);
   // The page is shown anew for another library or sort (App keys it on the

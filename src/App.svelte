@@ -10,6 +10,7 @@
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
   import SiteFooter from './components/SiteFooter.svelte';
+  import { categoryIdOf, collectionIdOf, personIdOf, titleIdOf } from './lib/paths';
   import PageBackdrop from './components/PageBackdrop.svelte';
   import Header from './components/Header.svelte';
   import PageError from './components/PageError.svelte';
@@ -176,7 +177,7 @@
       {:else if route.parts[0] === 'library' && route.parts[1]}
         <Library id={route.parts[1]} params={route.params} />
       {:else if route.parts[0] === 'category' && route.parts[1]}
-        <Library id={route.parts[1]} params={route.params} category />
+        <Library id={categoryIdOf(route.parts[1], session.categories) ?? ''} params={route.params} category />
       {:else if route.parts[0] === 'list'}
         <MyList />
       {:else if route.parts[0] === 'discover'}
@@ -184,9 +185,10 @@
       {:else if route.parts[0] === 'collections'}
         <Collections />
       {:else if route.parts[0] === 'collection' && route.parts[1]}
-        <CollectionPage id={route.parts[1]} />
-      {:else if route.parts[0] === 'title' && route.parts[1]}
-        <TitlePage id={route.parts[1]} params={route.params} />
+        <CollectionPage id={collectionIdOf(route.parts[1]) ?? ''} />
+      {:else if route.parts[0] === 'title' && titleIdOf(route.parts.slice(1))}
+        <!-- Readable addresses (lib/paths): only the number counts. -->
+        <TitlePage id={titleIdOf(route.parts.slice(1))!} params={route.params} />
       {:else if route.parts[0] === 'play' && route.parts[1]}
         <!-- A new player for each title, as the next episode replaces one. -->
         {#key route.parts[1]}<Player id={route.parts[1]} />{/key}
@@ -195,7 +197,7 @@
       {:else if route.parts[0] === 'manage'}
         <Manage />
       {:else if route.parts[0] === 'person' && route.parts[1]}
-        <PersonPage id={route.parts[1]} />
+        <PersonPage id={personIdOf(route.parts[1]) ?? ''} />
       {:else if route.parts[0] === 'search'}
         <Search />
       {:else if route.parts[0] === 'requests'}
