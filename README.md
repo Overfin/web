@@ -65,6 +65,19 @@ npm test          # tests
 npm run build     # dist/, to commit with the sources
 ```
 
+In a real browser, against a running Overfin (an account that owns its
+profiles, with Overfin's own sign-in; `OVERFIN_ADMIN=1` checks the control
+panel too, for an admin; `CHROMIUM` is the browser to drive):
+
+```sh
+OVERFIN_URL=http://… OVERFIN_EMAIL=… OVERFIN_PASSWORD=… npm run e2e
+```
+
+They only look, or put back what they changed: the home page, the menu and
+its addresses, a category on a phone, a title and its address, the profiles
+page, collections and search, the control panel's windows. A page error or
+a browser dialog fails them.
+
 CI rebuilds the site and fails if `dist/` isn't exactly what the sources
 build. Dependencies are pinned to exact versions, and Dependabot proposes
 updates.
