@@ -156,6 +156,72 @@ test('collections and search', { skip }, async () => {
   await done(p);
 });
 
+test('player: its keys work whatever has the focus, the wheel sets the volume', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  // A film of the library: briefly played and paused at its start, the
+  // volume put back.
+  const id = await p.evaluate(async () => (await (await fetch('/api/v1/titles?kind=movie&limit=1')).json()).items?.[0]?.id);
+  if (!id) return done(p);
+  await p.goto(`${base}/play/${id}`);
+  const video = p.locator('.player video');
+  await video.waitFor({ state: 'attached' });
+  const state = () => video.evaluate((v) => ({ paused: v.paused, at: v.currentTime, volume: Math.round(v.volume * 100) }));
+  // A button of the player has the focus: Space still plays and pauses,
+  // and doesn't press it.
+  await p.locator('.player button').first().focus();
+  const start = await state();
+  await p.keyboard.press(' ');
+  await p.waitForFunction(() => !document.querySelector('.player video').paused);
+  assert.equal(path(p), `/play/${id}`, 'Space pressed the focused button');
+  await p.keyboard.press(' ');
+  await p.waitForFunction(() => document.querySelector('.player video').paused);
+  // Right: 10 seconds on; Down and the wheel: the volume.
+  await p.keyboard.press('ArrowRight');
+  await p.waitForFunction((was) => document.querySelector('.player video').currentTime >= was + 9, start.at);
+  await p.keyboard.press('ArrowDown');
+  assert.equal((await state()).volume, Math.max(0, start.volume - 5), 'Down lowers the volume');
+  await p.mouse.move(400, 300);
+  await p.mouse.wheel(0, -100);
+  await p.waitForFunction((want) => Math.round(document.querySelector('.player video').volume * 100) === want, start.volume);
+  await done(p);
+});
+
+test('phone: no page scrolls sideways', { skip }, async () => {
+  const p = await page({ width: 360, height: 740 });
+  await pick(p);
+  const film = await p.evaluate(async () => (await (await fetch('/api/v1/titles?kind=movie&limit=1')).json()).items?.[0]?.id);
+  const pages = ['/', '/discover', '/collections', '/search', '/list', '/requests', '/manage', '/account'];
+  if (film) pages.push(`/title/${film}`);
+  for (const at of pages) {
+    await p.goto(base + at, { waitUntil: 'networkidle' });
+    const wide = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    assert.ok(wide <= 0, `${at} is ${wide} px wider than the screen`);
+  }
+  await done(p);
+});
+
+test('account: a setting is saved only once changed', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  await p.goto(`${base}/account`);
+  await p.locator('main h1').waitFor();
+  // The language: offered when the server has more than one.
+  const card = p.locator('main .panel.setting', { has: p.locator('select') }).filter({ has: p.locator('button.primary') }).first();
+  if (await card.count()) {
+    const select = card.locator('select');
+    const save = card.locator('button.primary');
+    assert.ok(await save.isDisabled(), 'Save before any change');
+    const was = await select.inputValue();
+    const other = await select.locator('option').evaluateAll((os, was) => os.map((o) => o.value).find((v) => v !== was), was);
+    await select.selectOption(other);
+    assert.ok(await save.isEnabled(), 'Save once changed');
+    await select.selectOption(was);
+    assert.ok(await save.isDisabled(), 'Save once put back');
+  }
+  await done(p);
+});
+
 test('control panel: lists, forms in windows, its own confirmations', { skip: skip || (process.env.OVERFIN_ADMIN ? false : 'OVERFIN_ADMIN not set') }, async () => {
   const p = await page();
   await pick(p);
