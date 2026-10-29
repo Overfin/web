@@ -19,7 +19,10 @@
 :root { --logo-shadow: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
 :root[data-theme="light"] { --logo-shadow: drop-shadow(0 0 1px rgba(0, 0, 0, .6)) drop-shadow(0 1px 8px rgba(0, 0, 0, .45)); }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) { --logo-shadow: drop-shadow(0 0 1px rgba(0, 0, 0, .6)) drop-shadow(0 1px 8px rgba(0, 0, 0, .45)); }
+  :root:not([data-theme]) {
+    --title-shadow: 0 1px 10px rgba(255, 255, 255, .7);
+    --logo-shadow: drop-shadow(0 0 1px rgba(0, 0, 0, .6)) drop-shadow(0 1px 8px rgba(0, 0, 0, .45));
+  }
 }
 @media (max-width: 600px) {
   :root { --grid-min: 6.5rem; --gap: .6rem; }
@@ -129,7 +132,10 @@ footer.site-foot p { margin: 0; }
 .tmdb { max-width: 48rem; font-size: .65rem; line-height: 1.5; color: var(--faint); }
 .tmdb img { display: inline; height: 7px; width: auto; margin-right: .4rem; vertical-align: 0; opacity: .8; }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; border-bottom: 2px solid transparent; }
+header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; display: inline-flex; flex-direction: column; border-bottom: 2px solid transparent; }
+/* Each keeps its bold width, so the menu doesn't move when the page
+   changes. */
+header nav a::after { content: attr(data-text); font-weight: 600; height: 0; overflow: hidden; visibility: hidden; }
 header nav a:hover { color: var(--text); }
 header nav a.active {
   color: var(--text); font-weight: 600; border-bottom-color: transparent;
@@ -247,8 +253,8 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
 .profile:hover .avatar { outline: 3px solid var(--accent); }
 .badge { font-size: .7rem; color: var(--muted); }
 .center { max-width: 26rem; margin: 2.5rem auto; text-align: center; }
-.center.wide { max-width: 44rem; text-align: left; }
-.panel h2 { margin-top: 0; }
+.center.wide { max-width: 44rem; text-align: left; margin-top: 0; }
+.panel h2 { margin-top: 0; font-size: 1.05rem; }
 form.stack { display: grid; gap: .6rem; text-align: left; }
 .panel {
   background: linear-gradient(180deg, rgba(var(--text-rgb), .035), rgba(var(--text-rgb), 0) 60%) var(--panel);
@@ -528,6 +534,9 @@ ol.episodes .marks .toggle svg { width: 1.1rem; height: 1.1rem; }
 .meta .age { border: 1px solid rgba(var(--text-rgb), .45); border-radius: 3px; padding: 0 .35em; font-size: .85em; line-height: 1.5; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 2rem 0 .7rem; }
 .section-head h2 { margin: 0; }
+/* Its link may sit over a picture: as readable as the heading. */
+.section-head button.link { color: var(--text); opacity: .8; }
+.section-head button.link:hover { opacity: 1; }
 /* A person's biography: a few lines, the rest on demand. */
 .bio { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; max-width: 46rem; }
 .bio.whole { display: block; }
@@ -536,7 +545,8 @@ ol.episodes .marks .toggle svg { width: 1.1rem; height: 1.1rem; }
 .breadcrumbs li + li::before { content: "›"; margin-right: .5rem; color: var(--muted); }
 .breadcrumbs a { color: var(--text); font-weight: 600; }
 .breadcrumbs a:hover { text-decoration: underline; }
-.breadcrumbs [aria-current] { color: var(--muted); }
+/* Over the picture, like the title under them. */
+.breadcrumbs { text-shadow: var(--title-shadow); }
 /* Search: the header's button, and the page. */
 header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand nav search menu"; }
 .search-link { grid-area: search; display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: var(--radius-s); color: var(--muted); }
@@ -605,8 +615,10 @@ svg.icon { width: 1.15em; height: 1.15em; flex: none; fill: currentColor; margin
     linear-gradient(to top, rgba(var(--bg-rgb), .95) 0%, rgba(var(--bg-rgb), .35) 45%, rgba(var(--bg-rgb), 0) 70%);
 }
 html.has-backdrop main, html.has-backdrop footer.site-foot { position: relative; z-index: 1; }
+/* See-through, but enough for its text over a dark picture on a light
+   page, or a light one on a dark page. */
 html.has-backdrop header {
-  background: linear-gradient(180deg, rgba(var(--bg-rgb), .55), rgba(var(--bg-rgb), .3));
+  background: linear-gradient(180deg, rgba(var(--bg-rgb), .78), rgba(var(--bg-rgb), .62));
   backdrop-filter: blur(16px) saturate(150%); box-shadow: none;
 }
 html.has-backdrop footer.site-foot { background: rgba(var(--bg-rgb), .9); }

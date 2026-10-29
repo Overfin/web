@@ -146,30 +146,32 @@
       {@const { profiles, sessions } = loaded}
       <!-- The profiles: what each is, its Edit button (and Delete, for the
            owner's others); its form opens in a window. -->
-      <ul class="list profiles-list">
-        {#each profiles as p (p.id)}
-          <li>
-            <span class="avatar small" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
-            <div class="grow">
-              <strong>{p.name}</strong>
-              <div class="chips">
-                {#if p.owner}<span class="chip">{t('manage.owner')}</span>{/if}
-                {#if p.kind === 'kids'}
-                  <span class="chip">{p.ageNeeded ? t('manage.kidsNoLimits') : t('manage.kidsLimits', { age: p.maxAge ?? 0 })}</span>
-                {/if}
-                {#if p.hasPin}<span class="chip">{t('manage.pin')}</span>{/if}
+      <div class="panel">
+        <ul class="list profiles-list">
+          {#each profiles as p (p.id)}
+            <li>
+              <span class="avatar small" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
+              <div class="grow">
+                <strong>{p.name}</strong>
+                <div class="chips">
+                  {#if p.owner}<span class="chip">{t('manage.owner')}</span>{/if}
+                  {#if p.kind === 'kids'}
+                    <span class="chip">{p.ageNeeded ? t('manage.kidsNoLimits') : t('manage.kidsLimits', { age: p.maxAge ?? 0 })}</span>
+                  {/if}
+                  {#if p.hasPin}<span class="chip">{t('manage.pin')}</span>{/if}
+                </div>
+                {#if p.ageNeeded && me.owner}<p class="error small">{t('manage.limitsMissing')}</p>{/if}
               </div>
-              {#if p.ageNeeded && me.owner}<p class="error small">{t('manage.limitsMissing')}</p>{/if}
-            </div>
-            <div class="row-actions">
-              <button type="button" onclick={() => edit(p)}>{t('manage.edit')}</button>
-              {#if me.owner && !p.owner}
-                <button type="button" class="danger" onclick={() => remove(p)}>{t('manage.deleteProfile')}</button>
-              {/if}
-            </div>
-          </li>
-        {/each}
-      </ul>
+              <div class="row-actions">
+                <button type="button" onclick={() => edit(p)}>{t('manage.edit')}</button>
+                {#if me.owner && !p.owner}
+                  <button type="button" class="danger" onclick={() => remove(p)}>{t('manage.deleteProfile')}</button>
+                {/if}
+              </div>
+            </li>
+          {/each}
+        </ul>
+      </div>
       {#if listMessage}<p class="error">{listMessage}</p>{/if}
       <!-- Devices signed in: the owner sees all of the account's, others
            their own; the first few, then the rest on demand. -->

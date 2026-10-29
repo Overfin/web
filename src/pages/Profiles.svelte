@@ -78,7 +78,7 @@
     <!-- With a stream reserved for each profile: how it works, and that an
          unused profile keeps one. -->
     {#if session.me?.limits?.reservedStreams}
-      <p class="center muted">{tn('profiles.reserved', session.me.limits.sharedStreams)}</p>
+      <p class="center muted">{session.me.limits.sharedStreams ? tn('profiles.reserved', session.me.limits.sharedStreams) : t('profiles.reservedOnly')}</p>
     {/if}
     <!-- Managing needs a profile: shown once one is active. -->
     {#if session.me?.activeProfile}

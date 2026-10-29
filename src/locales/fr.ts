@@ -234,6 +234,7 @@ const fr: Record<keyof typeof en, string> = {
   'profiles.who': 'Qui regarde ?',
   'profiles.reserved.one': 'Chaque profil a sa propre lecture, plus {count} partagée entre tous les profils. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
   'profiles.reserved.other': 'Chaque profil a sa propre lecture, plus {count} partagées entre tous les profils. Un profil inutilisé garde la sienne : supprimez-le pour la libérer.',
+  'profiles.reservedOnly': 'Chaque profil a sa propre lecture. Un profil inutilisé la garde : supprimez-le pour la libérer.',
   'profiles.add': 'Ajouter un profil',
   'profiles.manage': 'Gérer les profils',
   'profiles.mine': 'Mon profil',
