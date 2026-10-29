@@ -102,27 +102,23 @@ main > .notice {
 main > .notice a { color: var(--accent); }
 
 /* The header: brand, sections, then the profile menu. On phones the
-   sections take a second line that scrolls sideways. */
+   sections take a second line that scrolls sideways. Dark on every page
+   (data-theme="dark", theme.css), its menus too. */
 header {
   position: sticky; top: 0; z-index: 5;
   display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand nav menu";
-  align-items: center; gap: 1.5rem; min-height: var(--header-h); padding: 0 var(--gutter);
+  align-items: center; gap: 1.5rem; min-height: var(--header-h); padding: 0 var(--gutter); color: var(--text);
   background: linear-gradient(180deg, rgba(var(--bg-rgb), .94), rgba(var(--bg-rgb), .82)); backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
 }
 .brand { grid-area: brand; display: inline-flex; align-items: center; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
 /* Overfin's banner, or the operator's: as tall as the logo, never too
-   wide. With a banner for light pages, each shows on its own. */
+   wide. The header is dark, so the banner for dark pages shows; the one
+   for light pages is there for an operator's own stylesheet. */
 .brand svg, .brand img { display: block; height: 1.9rem; width: auto; max-width: 12rem; object-fit: contain; object-position: left; }
 .brand img.light { display: none; }
 /* Its place, kept while the brand isn't known yet. */
 .brand .pending { display: block; height: 1.9rem; width: 7rem; }
-:root[data-theme="light"] .brand img.light { display: block; }
-:root[data-theme="light"] .brand img.dark { display: none; }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) .brand img.light { display: block; }
-  :root:not([data-theme]) .brand img.dark { display: none; }
-}
 /* The bottom of every page: "Powered by Overfin" (with the operator's
    brand), then TMDB's attribution, small, last. */
 footer.site-foot { display: grid; justify-items: center; gap: .6rem; padding: 1.5rem var(--gutter) 1.5rem; text-align: center; }
@@ -170,7 +166,7 @@ header nav a.active {
   header nav.open {
     display: flex; flex-direction: column; gap: 0; position: absolute; top: 100%; left: 0; right: 0; overflow: visible;
     padding: .4rem var(--gutter) .8rem; border-bottom: 1px solid var(--hairline); box-shadow: 0 18px 30px rgba(0, 0, 0, .35);
-    background: linear-gradient(180deg, rgba(var(--text-rgb), .03), rgba(var(--text-rgb), 0) 40%) rgba(var(--panel-rgb), .98);
+    background: linear-gradient(180deg, rgba(var(--text-rgb), .03), rgba(var(--text-rgb), 0) 40%) var(--panel);
     -webkit-mask-image: none; mask-image: none;
   }
   header nav.open a { padding: .8rem .2rem; font-size: 1.05rem; border-bottom: 1px solid var(--hairline); align-items: flex-start; }

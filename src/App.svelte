@@ -137,7 +137,7 @@
 {#if phase.kind === 'loading'}
   <!-- The page's own shape while the session loads, under a header with
        the brand only, so nothing moves once it's there. -->
-  <header>
+  <header data-theme="dark">
     <Brand />
     <nav class="placeholder" aria-hidden="true"></nav>
   </header>
