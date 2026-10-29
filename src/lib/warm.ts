@@ -12,6 +12,7 @@ import { keepHome, keepSlides, keptHome, keptSlides } from './homecache';
 import { homeAvailability, loadHome, type HomeData } from './homeload';
 import { lastLibraryId, lastSort } from './lastlibrary';
 import { listKey, listQuery, listSort } from './lists';
+import { categoryPath } from './paths';
 import { cached, keepList, keptList } from './pagecache';
 import { router } from './router.svelte';
 import { session } from './session.svelte';
@@ -43,7 +44,10 @@ export function discoverRow(list: DiscoverList, kind: Kind, availability: Availa
 async function warmList(profile: string, id: string, category: boolean, libraryKind?: string) {
   const sort = listSort(lastSort(profile));
   if (sort === 'random') return; // a new shuffle each time it opens
-  const key = listKey(profile, `/${category ? 'category' : 'library'}/${id}`, new URLSearchParams(), sort, '');
+  // The address the list page uses (lib/paths), its key's part.
+  const c = category ? session.categories.find((x) => x.id === id) : undefined;
+  const base = c ? categoryPath(c, session.categories) : `/${category ? 'category' : 'library'}/${id}`;
+  const key = listKey(profile, base, new URLSearchParams(), sort, '');
   if (keptList(key)) return;
   const pages = overfin.pages(listQuery(id, category, libraryKind, { sort }));
   const { value: page, done } = await pages.next();

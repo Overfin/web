@@ -15,6 +15,7 @@
   import { ageText, clock, duration } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
+  import { titlePath } from '../lib/paths';
   import { canGoBack, replace } from '../lib/router.svelte';
   import SeekBar from '../components/SeekBar.svelte';
 
@@ -500,7 +501,7 @@
   // page.
   function back() {
     if (canGoBack()) history.back();
-    else replace(`/title/${id}`);
+    else replace(titlePath(id));
   }
 
   // Leaving the screen, or the page, ends the playback.

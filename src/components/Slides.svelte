@@ -17,6 +17,7 @@
   import { score } from '../lib/score';
   import { weigh } from '../lib/weigh';
   import { play } from '../lib/play';
+  import { titlePathOf } from '../lib/paths';
   import { pickSlides } from '../lib/slides';
   import ButtonIcon from './ButtonIcon.svelte';
   import Marks from './Marks.svelte';
@@ -165,14 +166,14 @@
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
           <div class="actions">
             {#if item.availability === 'missing'}
-              <a class="button primary" href="/title/{item.id}"><ButtonIcon name="info" />{t('home.moreInfo')}</a>
+              <a class="button primary" href={titlePathOf(item)}><ButtonIcon name="info" />{t('home.moreInfo')}</a>
             {:else if item.playable}
               <!-- Where the profile left off as the server says it: a kept
                    slideshow's titles may be from before a playback. -->
               <button class="primary" onclick={() => play(item.id)}>
                 <ButtonIcon name="play" />{position ? t('home.resume') : t('item.play')}
               </button>
-              <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
+              <a class="button toggle" href={titlePathOf(item)} aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
               </a>
               {#if seen.has(i)}<Marks id={item.id} played={item.userState?.played} favorite={item.userState?.favorite} />{/if}
@@ -181,12 +182,12 @@
               <button class="primary" onclick={() => play(ep.id, ep.positionMs)}>
                 <ButtonIcon name="play" />{ep.positionMs ? t('home.resume') : t('item.play')}
               </button>
-              <a class="button toggle" href="/title/{item.id}" aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
+              <a class="button toggle" href={titlePathOf(item)} aria-label={t('home.moreInfo')} title={t('home.moreInfo')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.6v.1" /></svg>
               </a>
               {#if seen.has(i)}<Marks id={item.id} played={item.userState?.played} favorite={item.userState?.favorite} />{/if}
             {:else}
-              <a class="button primary" href="/title/{item.id}"><ButtonIcon name="info" />{t('home.seeSeries')}</a>
+              <a class="button primary" href={titlePathOf(item)}><ButtonIcon name="info" />{t('home.seeSeries')}</a>
             {/if}
           </div>
         </div>

@@ -13,6 +13,7 @@
   import { play } from '../lib/play';
   import { ask } from '../lib/requests';
   import { session } from '../lib/session.svelte';
+  import { titlePathOf } from '../lib/paths';
   import { prefetchTitle } from '../lib/titlecache';
 
   let { item, wide = false, flags = true, note = '', remove, removeLabel }: {
@@ -67,7 +68,7 @@
 </script>
 
 <div class="cardbox" class:wide>
-  <svelte:element this={item.upcoming ? 'div' : 'a'} class="card" class:wide href={item.upcoming ? undefined : `/title/${item.id}`}
+  <svelte:element this={item.upcoming ? 'div' : 'a'} class="card" class:wide href={item.upcoming ? undefined : titlePathOf(item)}
     onpointerenter={item.upcoming ? undefined : soon} onpointerleave={cancel} role={item.upcoming ? 'group' : undefined}
     ontouchstart={() => !item.upcoming && prefetchTitle(item.id)} onfocus={() => !item.upcoming && prefetchTitle(item.id)}>
     <div class="poster" class:wide>

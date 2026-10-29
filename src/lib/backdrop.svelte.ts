@@ -15,21 +15,30 @@ export interface Backdrop {
 
 export const pageBackdrop = $state<{ current: Backdrop | null }>({ current: null });
 
-const some = (b: Backdrop | undefined) => (b && (b.wide || b.tall) ? b : null);
+const some = (b: Backdrop | undefined) => (b && (b.wide || b.tall) ? { ...b } : null);
+
+// Which page's backdrop is shown: a plain marker of its own (the state
+// keeps a copy of a backdrop, never the same object, so a page can't tell
+// by it whether the one shown is still its own).
+let owner: object | null = null;
 
 /** backdropOf is an action making b the page's backdrop while node is
  * there (and as b changes); none when it has no picture. */
 export function backdropOf(node: HTMLElement, b: Backdrop | undefined) {
-  let mine = some(b);
-  pageBackdrop.current = mine;
+  const mine = {};
+  owner = mine;
+  pageBackdrop.current = some(b);
   return {
     update(next: Backdrop | undefined) {
-      mine = some(next);
-      pageBackdrop.current = mine;
+      owner = mine;
+      pageBackdrop.current = some(next);
     },
     destroy() {
       // Another page may have set its own meanwhile.
-      if (pageBackdrop.current === mine) pageBackdrop.current = null;
+      if (owner === mine) {
+        owner = null;
+        pageBackdrop.current = null;
+      }
     },
   };
 }
