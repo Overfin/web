@@ -229,15 +229,20 @@ const api = (p, path) => p.evaluate(async (path) => {
   return r.ok ? r.json() : null;
 }, path);
 
-// series finds a series with two seasons or more, as its page's address.
+// series finds a series with two seasons or more, as its page's address:
+// one a library has, with an overview, when there's one (the tests of its
+// Play button and of folding texts need them).
 async function series(p) {
   const list = await api(p, '/api/v1/titles?kind=series&limit=40');
+  let fallback = null;
   for (const item of list?.items ?? []) {
     const t = await api(p, `/api/v1/titles/${item.id}`);
     const m = /^title_series_tmdb_(\d+)$/.exec(t?.id ?? '');
-    if (m && (t.seasons ?? []).filter((s) => s.seasonNumber > 0).length >= 2) return `/title/s${m[1]}`;
+    if (!m || (t.seasons ?? []).filter((s) => s.seasonNumber > 0).length < 2) continue;
+    if (t.overview && t.availability !== 'missing') return `/title/s${m[1]}`;
+    fallback ??= `/title/s${m[1]}`;
   }
-  return null;
+  return fallback;
 }
 
 // The relative luminance of a CSS color, 0 (black) to 1 (white).
@@ -293,6 +298,7 @@ test('long texts fold, with Read more only when they do', { skip }, async (t) =>
   const at = await series(p);
   if (!at) return t.skip('no series with two seasons'), done(p);
   await p.goto(base + at);
+  await p.locator('.hero .actions').first().waitFor();
   const overview = p.locator('.hero .overview');
   if (!(await overview.count())) return t.skip('no overview'), done(p);
   assert.ok(await overview.evaluate((o) => o.classList.contains('folded')), 'folded at first');
