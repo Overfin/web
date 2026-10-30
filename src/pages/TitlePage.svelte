@@ -56,6 +56,20 @@
     const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     requestAnimationFrame(() => node.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' }));
   }
+  // The row of seasons is one stop for Tab (the chosen season); the arrows,
+  // Home and End move along it, Enter or Space chooses.
+  function seasonKeys(e: KeyboardEvent) {
+    const tabs = [...(e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role=tab]')];
+    const at = tabs.indexOf(document.activeElement as HTMLElement);
+    if (at < 0) return;
+    const to = e.key === 'ArrowRight' ? Math.min(at + 1, tabs.length - 1) : e.key === 'ArrowLeft' ? Math.max(at - 1, 0)
+      : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    tabs[to].focus();
+    tabs[to].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
   // The row of seasons opens on the chosen one, without moving the page.
   function onChosen(row: HTMLElement) {
     const active = row.querySelector<HTMLElement>('[aria-selected="true"]');
@@ -243,9 +257,9 @@
           {/if}
         </div>
         {#if title.overview}
-          <p class="overview" class:folded={!unfolded.title} use:overflows={(long) => (longAbout.title = long)}>{title.overview}</p>
+          <p class="overview" id="title-overview" class:folded={!unfolded.title} use:overflows={(long) => (longAbout.title = long)}>{title.overview}</p>
           {#if longAbout.title || unfolded.title}
-            <button class="link about-toggle" type="button" aria-expanded={!!unfolded.title}
+            <button class="link about-toggle" type="button" aria-expanded={!!unfolded.title} aria-controls="title-overview"
               onclick={() => (unfolded.title = !unfolded.title)}>
               {unfolded.title ? t('common.readLess') : t('common.readMore')}
             </button>
@@ -259,11 +273,12 @@
   <div class="sheet">
 
   {#if title.kind === 'series' && title.seasons && title.seasons.length > 1}
-    <div class="seasons" role="tablist" aria-label={t('item.seasons')} use:onChosen>
+    <!-- svelte-ignore a11y_interactive_supports_focus -->
+    <div class="seasons" role="tablist" aria-label={t('item.seasons')} use:onChosen onkeydown={seasonKeys}>
       {#each title.seasons as s (s.id)}
         {@const art = s.images?.primary ?? title.images?.primary}
         <button type="button" role="tab" aria-selected={seasonID === s.id} class:active={seasonID === s.id}
-          onclick={() => choose(title, s)}>
+          tabindex={seasonID === s.id ? 0 : -1} aria-controls="season-episodes" onclick={() => choose(title, s)}>
           <span class="season-poster">
             {#if art}<img src={overfin.imageUrl(art, 'small')} alt="" loading="lazy" use:loaded />{/if}
             {#if !s.images?.primary}<span class="number">{s.seasonNumber === 0 ? t('title.specials') : s.seasonNumber}</span>{/if}
@@ -276,6 +291,8 @@
       {/each}
     </div>
   {/if}
+  <!-- The chosen season's episodes: the seasons' tab panel. -->
+  <div id="season-episodes" role={title.kind === 'series' && (title.seasons?.length ?? 0) > 1 ? 'tabpanel' : undefined}>
   {#key `${seasonID}:${seasonReload}`}
   {#await title.kind === 'season' && !seasonReload ? Promise.resolve(title) : title.kind === 'season' ? overfin.title(title.id)
     : seasonID ? (seasonReload ? overfin.title(seasonID) : titleOf(seasonID)) : Promise.resolve(null)}
@@ -297,9 +314,9 @@
       <h2>{t('item.episodes')}</h2>
     {/if}
     {#if season.overview && title.kind === 'series' && season.overview !== title.overview}
-      <p class="muted season-overview" class:folded={!unfolded[season.id]} use:overflows={(long) => (longAbout[season.id] = long)}>{season.overview}</p>
+      <p class="muted season-overview" id="season-overview" class:folded={!unfolded[season.id]} use:overflows={(long) => (longAbout[season.id] = long)}>{season.overview}</p>
       {#if longAbout[season.id] || unfolded[season.id]}
-        <button class="link about-toggle" type="button" aria-expanded={!!unfolded[season.id]}
+        <button class="link about-toggle" type="button" aria-expanded={!!unfolded[season.id]} aria-controls="season-overview"
           onclick={() => (unfolded[season.id] = !unfolded[season.id])}>
           {unfolded[season.id] ? t('common.readLess') : t('common.readMore')}
         </button>
@@ -365,6 +382,7 @@
     <PageError {error} />
   {/await}
   {/key}
+  </div>
 
   {#if title.cast?.length}
     {@const cast = wholeCast ? title.cast : title.cast.slice(0, castShown)}

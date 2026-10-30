@@ -266,6 +266,12 @@ test('a series: seasons as posters, centered while they fit; choosing one shows 
     return { fits: r.scrollWidth <= r.clientWidth, left: first.left - box.left, right: box.right - last.right };
   });
   if (fit.fits) assert.ok(Math.abs(fit.left - fit.right) < 4, `centered: ${fit.left} left, ${fit.right} right`);
+  // One stop for Tab, the chosen season; the arrows move along the row.
+  const stops = await buttons.evaluateAll((bs) => bs.filter((b) => b.tabIndex === 0).length);
+  assert.equal(stops, 1, 'one Tab stop in the row');
+  await buttons.first().focus();
+  await p.keyboard.press('ArrowRight');
+  assert.ok(await buttons.nth(1).evaluate((b) => b === document.activeElement), 'ArrowRight moves to the next season');
   const second = buttons.nth(1);
   await second.click();
   assert.equal(await second.getAttribute('aria-selected'), 'true');
