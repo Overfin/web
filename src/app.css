@@ -241,6 +241,9 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
   .hero.art .poster { display: none; }
   .actions button { flex: 1 1 auto; }
   .actions button.primary { flex-basis: 100%; }
+  /* A title's buttons as the home's slides have them: side by side, from
+     the text's edge, not a full-width Play. */
+  .hero .actions button, .hero .actions button.primary, .hero .actions .button { flex: 0 0 auto; }
 }
 .toolbar { display: flex; gap: .8rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
 
