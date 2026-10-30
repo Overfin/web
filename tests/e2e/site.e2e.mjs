@@ -24,7 +24,8 @@ async function page(viewport = { width: 1280, height: 860 }) {
   const context = await browser.newContext({ storageState: state, viewport });
   const p = await context.newPage();
   p.problems = [];
-  p.on('pageerror', (e) => p.problems.push(`page error: ${e.message}`));
+  // With where it happened and its stack: a rare one can't be found again.
+  p.on('pageerror', (e) => p.problems.push(`page error at ${new URL(p.url()).pathname}: ${e.message}\n${(e.stack || '').split('\n').slice(1, 6).join('\n')}`));
   p.on('dialog', (d) => { p.problems.push(`browser dialog: ${d.message()}`); d.dismiss(); });
   return p;
 }
