@@ -464,13 +464,34 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .hero .tagline { font-style: italic; color: rgba(var(--text-rgb), .8); margin: 0 0 .5rem; }
 /* Whether a library has it: words, not a link (nothing in the link color). */
 .meta .availability { color: var(--text); font-weight: 600; }
-.seasons { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) .3rem; }
-.seasons button { flex: none; min-height: 2.25rem; border-radius: 999px; gap: .45rem; }
-/* Centered while they fit; scrolled from the first one when they don't
-   (justify-content: center would hide the first ones). */
-.seasons button:first-child { margin-left: auto; }
-.seasons button:last-child { margin-right: auto; }
-.seasons button.active { background: var(--text); border-color: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+/* A series' seasons: a row of posters smaller than titles' (a phone shows
+   three and a half), the chosen one outlined; sideways when they don't
+   fit. A season without a poster: the series', its number over it. */
+.seasons { display: flex; gap: .8rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: .4rem var(--gutter) .5rem; }
+.seasons button {
+  flex: none; width: clamp(5.5rem, 24vw, 7.5rem); display: grid; gap: .15rem; justify-items: start; align-content: start;
+  min-height: 0; padding: 0; border: none; border-radius: 0; background: none; box-shadow: none; text-align: left; font-weight: 400;
+}
+.seasons button:hover { background: none; }
+.season-poster {
+  position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; margin-bottom: .3rem;
+  border-radius: var(--radius-s); background: var(--panel-2); box-shadow: var(--shadow-s); outline: 2px solid transparent; outline-offset: 2px;
+  transition: outline-color .15s, transform .2s ease;
+}
+.season-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.season-poster .number {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: .3rem; text-align: center;
+  font-size: 1.6rem; font-weight: 800; color: #fff; background: rgba(0, 0, 0, .5); text-shadow: 0 1px 6px rgba(0, 0, 0, .6);
+}
+.season-poster .flag { position: absolute; top: .3rem; left: .3rem; font-size: .65rem; padding: .1em .45em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); border: 1px solid var(--hairline); color: var(--text); }
+.seasons button:hover .season-poster { transform: translateY(-2px); }
+.seasons button.active .season-poster { outline-color: var(--accent); }
+.seasons button.active .season-name { font-weight: 650; }
+.season-name { font-size: .9rem; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.season-year { font-size: .8rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .seasons button:hover .season-poster { transform: none; } }
+/* Brought into view when a season is chosen: just under the header. */
+.season-head { scroll-margin-top: calc(var(--header-h) + .8rem); }
 /* A row of names, one chosen (the libraries): centered while they fit,
    scrolling sideways when they don't. */
 .pills { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: .2rem calc(-1 * var(--gutter)) 1.4rem; padding: .2rem var(--gutter) .3rem; }
@@ -483,8 +504,6 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .pills a:last-child { margin-right: auto; }
 .pills a:hover { background-color: var(--panel-3); border-color: var(--border-strong); }
 .pills a.active { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; }
-.seasons .dot { width: .45rem; height: .45rem; border-radius: 50%; background: var(--accent); }
-.seasons .dot.missing { background: var(--muted); }
 .season-overview { max-width: 50rem; margin-top: -.3rem; }
 .season-overview.folded { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: .3rem; }
 /* A season's episodes: cards filling the width, as many per row as fit at

@@ -1,7 +1,8 @@
 <!-- A title, in a library or not: a film, a series, a season or an episode.
      Everything about it (text, images, cast) is TMDB's; the library only
-     decides whether it plays. A series shows its seasons as tabs, with the
-     chosen season's episodes, those no library has too. -->
+     decides whether it plays. A series shows its seasons as a row of
+     posters, with the chosen season's episodes, those no library has too;
+     an episode shows its season's poster. -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
   import { similarOf, titleOf } from '../lib/titlecache';
@@ -41,9 +42,24 @@
     if (title.kind !== 'series' || !title.seasons?.length) return null;
     return chosen ?? (title.seasons.find((s) => String(s.seasonNumber) === params.get('season')) ?? title.seasons[0]).id;
   }
+  // A season chosen from the row: its episodes are brought into view once
+  // they're there (its heading just under the header).
+  let reveal = false;
   function choose(title: Title, s: TitleSummary) {
     chosen = s.id;
+    reveal = true;
     history.replaceState(history.state, '', `${titlePathOf(title)}?season=${s.seasonNumber}`);
+  }
+  function revealed(node: HTMLElement) {
+    if (!reveal) return;
+    reveal = false;
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    requestAnimationFrame(() => node.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' }));
+  }
+  // The row of seasons opens on the chosen one, without moving the page.
+  function onChosen(row: HTMLElement) {
+    const active = row.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (active) row.scrollLeft = active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2;
   }
 
   // An episode marked from the list.
@@ -134,6 +150,7 @@
   {@const position = title.userState?.positionMs ?? 0}
   {@const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined)}
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
+  {@const seasonPoster = title.kind === 'episode' && title.season ? titleOf(title.season.id) : undefined}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
   <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large'), tall: title.images?.textless ? overfin.imageUrl(title.images.textless, 'large') : undefined } : undefined}>
     <div class="info">
@@ -141,6 +158,15 @@
         <div class="poster">
           <img src={overfin.imageUrl(poster, 'medium')} alt="" use:loaded />
         </div>
+      {:else if seasonPoster && title.season}
+        <!-- An episode: its season's poster, leading back to it. -->
+        {#await seasonPoster then s}
+          {#if s.images?.primary}
+            <a class="poster" href={titlePath(title.season.id, title.series?.name ?? s.name)} aria-label={s.name || seasonName(s)}>
+              <img src={overfin.imageUrl(s.images.primary, 'medium')} alt="" use:loaded />
+            </a>
+          {/if}
+        {:catch}{/await}
       {/if}
       <div>
         {#if title.series}
@@ -233,12 +259,19 @@
   <div class="sheet">
 
   {#if title.kind === 'series' && title.seasons && title.seasons.length > 1}
-    <div class="seasons" role="tablist" aria-label={t('item.seasons')}>
+    <div class="seasons" role="tablist" aria-label={t('item.seasons')} use:onChosen>
       {#each title.seasons as s (s.id)}
+        {@const art = s.images?.primary ?? title.images?.primary}
         <button type="button" role="tab" aria-selected={seasonID === s.id} class:active={seasonID === s.id}
           onclick={() => choose(title, s)}>
-          {seasonName(s)}
-          {#if s.availability !== 'available'}<span class="dot" class:missing={s.availability === 'missing'}></span>{/if}
+          <span class="season-poster">
+            {#if art}<img src={overfin.imageUrl(art, 'small')} alt="" loading="lazy" use:loaded />{/if}
+            {#if !s.images?.primary}<span class="number">{s.seasonNumber === 0 ? t('title.specials') : s.seasonNumber}</span>{/if}
+            {#if s.availability === 'missing'}<span class="flag">{t('title.notHere')}</span>
+            {:else if s.availability === 'partiallyAvailable'}<span class="flag">{t('discover.partly')}</span>{/if}
+          </span>
+          <span class="season-name">{seasonName(s)}</span>
+          {#if s.year}<span class="season-year">{s.year}</span>{/if}
         </button>
       {/each}
     </div>
@@ -250,7 +283,7 @@
   {:then season}
   {#if season?.episodes?.length}
     {#if title.kind === 'series'}
-      <div class="season-head">
+      <div class="season-head" use:revealed>
         <h2>{seasonName(season)}{#if availabilityText(season)} <span class="muted small">· {availabilityText(season)}</span>{/if}</h2>
         {#if askable(season)}
           {#if season.request}
