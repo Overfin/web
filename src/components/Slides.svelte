@@ -132,7 +132,7 @@
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <!-- The current slide's backdrop is the page's (lib/backdrop); out of
        view, the slideshow holds still, and so does the backdrop. -->
-  <section class="slides" aria-roledescription="carousel" aria-label={t('home.featured')}
+  <section class="slides" data-theme="dark" aria-roledescription="carousel" aria-label={t('home.featured')}
     use:backdropOf={slides[index]?.images?.backdrops?.[0] ? {
       wide: overfin.imageUrl(slides[index].images!.backdrops![0], 'large'),
       tall: slides[index].images?.textless ? overfin.imageUrl(slides[index].images!.textless!, 'large') : undefined,

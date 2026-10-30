@@ -1,7 +1,8 @@
 <!-- The page's backdrop (lib/backdrop): fixed behind everything, darkened
      toward the text, cross-fading from one picture to the next; the
-     poster, when there's one, on a screen taller than wide. The page says
-     it has one, for the header and the sheet its content sits on. -->
+     poster, when there's one, on a screen taller than wide. Dark on every
+     page, as what's drawn over it (app.css). The page says it has one, for
+     the header and the sheet its content sits on. -->
 <script lang="ts">
   import { fade } from 'svelte/transition';
   import { pageBackdrop } from '../lib/backdrop.svelte';
@@ -26,7 +27,7 @@
 </script>
 
 {#if url}
-  <div class="page-backdrop" class:tall={url === pageBackdrop.current?.tall} aria-hidden="true">
+  <div class="page-backdrop" data-theme="dark" class:tall={url === pageBackdrop.current?.tall} aria-hidden="true">
     {#key url}
       <img src={url} alt="" transition:fade={{ duration: 600 }} />
     {/key}

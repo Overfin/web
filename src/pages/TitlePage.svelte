@@ -152,7 +152,7 @@
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
   {@const seasonPoster = title.kind === 'episode' && title.season ? titleOf(title.season.id) : undefined}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
-  <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large'), tall: title.images?.textless ? overfin.imageUrl(title.images.textless, 'large') : undefined } : undefined}>
+  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large'), tall: title.images?.textless ? overfin.imageUrl(title.images.textless, 'large') : undefined } : undefined}>
     <div class="info">
       {#if poster}
         <div class="poster">

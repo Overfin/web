@@ -30,7 +30,7 @@
   <Skeleton kind="title" />
 {:else}
   {@const backdrop = collection.images?.backdrops?.[0]}
-  <div class="hero" class:art={!!backdrop} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large') } : undefined}>
+  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large') } : undefined}>
     <div class="info">
       {#if collection.images?.primary}
         <div class="poster">
