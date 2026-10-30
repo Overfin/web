@@ -222,6 +222,131 @@ test('account: a setting is saved only once changed', { skip }, async () => {
   await done(p);
 });
 
+// api reads the API as the page's profile.
+const api = (p, path) => p.evaluate(async (path) => {
+  const r = await fetch(path, { credentials: 'same-origin' });
+  return r.ok ? r.json() : null;
+}, path);
+
+// series finds a series with two seasons or more, as its page's address.
+async function series(p) {
+  const list = await api(p, '/api/v1/titles?kind=series&limit=40');
+  for (const item of list?.items ?? []) {
+    const t = await api(p, `/api/v1/titles/${item.id}`);
+    const m = /^title_series_tmdb_(\d+)$/.exec(t?.id ?? '');
+    if (m && (t.seasons ?? []).filter((s) => s.seasonNumber > 0).length >= 2) return `/title/s${m[1]}`;
+  }
+  return null;
+}
+
+// The relative luminance of a CSS color, 0 (black) to 1 (white).
+function luminance(css) {
+  const [r, g, b] = css.match(/[\d.]+/g).slice(0, 3).map((v) => {
+    const c = Number(v) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+test('a series: seasons as posters, centered while they fit; choosing one shows its episodes', { skip }, async (t) => {
+  const p = await page();
+  await pick(p);
+  const at = await series(p);
+  if (!at) return t.skip('no series with two seasons'), done(p);
+  await p.goto(base + at);
+  const row = p.locator('.seasons');
+  await row.waitFor();
+  const buttons = row.locator('button[role=tab]');
+  assert.ok(await buttons.count() >= 2, 'a button per season');
+  assert.equal(await row.locator('button .season-poster').count(), await buttons.count(), 'each with its poster');
+  const fit = await row.evaluate((r) => {
+    const first = r.querySelector('button').getBoundingClientRect();
+    const last = [...r.querySelectorAll('button')].at(-1).getBoundingClientRect();
+    const box = r.getBoundingClientRect();
+    return { fits: r.scrollWidth <= r.clientWidth, left: first.left - box.left, right: box.right - last.right };
+  });
+  if (fit.fits) assert.ok(Math.abs(fit.left - fit.right) < 4, `centered: ${fit.left} left, ${fit.right} right`);
+  const second = buttons.nth(1);
+  await second.click();
+  assert.equal(await second.getAttribute('aria-selected'), 'true');
+  assert.match(new URL(p.url()).search, /season=\d+/);
+  const head = p.locator('.season-head');
+  await head.waitFor();
+  await p.waitForFunction(() => {
+    const h = document.querySelector('.season-head');
+    return h && Math.abs(h.getBoundingClientRect().top - document.querySelector('header').getBoundingClientRect().bottom) < 40;
+  }, null, { timeout: 5000 });
+  assert.ok(await p.locator('ol.episodes li').count() > 0, 'its episodes');
+  await done(p);
+});
+
+test('long texts fold, with Read more only when they do', { skip }, async (t) => {
+  const p = await page();
+  await pick(p);
+  const at = await series(p);
+  if (!at) return t.skip('no series with two seasons'), done(p);
+  await p.goto(base + at);
+  const overview = p.locator('.hero .overview');
+  if (!(await overview.count())) return t.skip('no overview'), done(p);
+  assert.ok(await overview.evaluate((o) => o.classList.contains('folded')), 'folded at first');
+  const long = await overview.evaluate((o) => o.scrollHeight > o.clientHeight + 1);
+  const toggle = p.locator('.hero .about-toggle');
+  assert.equal(await toggle.count(), long ? 1 : 0, 'Read more only when the text is cut');
+  if (long) {
+    await toggle.click();
+    assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+    assert.equal(await overview.evaluate((o) => o.classList.contains('folded')), false, 'unfolded');
+  }
+  await done(p);
+});
+
+test('light theme: the header and a picture with its text stay as on dark pages', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  const at = await series(p);
+  await p.goto(base + (at ?? '/'));
+  await p.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
+  const top = at ? '.hero.art[data-theme]' : '.slides';
+  await p.locator(top).waitFor();
+  const colors = await p.evaluate((top) => ({
+    page: getComputedStyle(document.body).backgroundColor,
+    header: getComputedStyle(document.querySelector('header')).color,
+    picture: getComputedStyle(document.querySelector(top)).color,
+  }), top);
+  assert.ok(luminance(colors.page) > 0.6, `a light page: ${colors.page}`);
+  assert.ok(luminance(colors.header) > 0.6, `the header's text light, on dark: ${colors.header}`);
+  assert.ok(luminance(colors.picture) > 0.6, `the text over the picture light, on dark: ${colors.picture}`);
+  await done(p);
+});
+
+test("phone: a title's Play and round buttons side by side", { skip }, async (t) => {
+  const p = await page({ width: 390, height: 844 });
+  await pick(p);
+  const at = await series(p);
+  if (!at) return t.skip('no series with two seasons'), done(p);
+  await p.goto(base + at);
+  const play = p.locator('.hero .actions button.primary, .hero .actions a.button.primary').first();
+  const round = p.locator('.hero .actions .toggle').first();
+  await p.locator('.hero .actions').first().waitFor();
+  if (!(await play.count()) || !(await round.count())) return t.skip('no Play or round button'), done(p);
+  const [a, b] = [await play.boundingBox(), await round.boundingBox()];
+  assert.ok(a.width < 390 * 0.6, `Play isn't full width: ${a.width}px`);
+  assert.ok(Math.abs((a.y + a.height / 2) - (b.y + b.height / 2)) < 6, 'on one line');
+  await done(p);
+});
+
+test('what you like: genres named, joint ones under their film genres', { skip }, async (t) => {
+  const p = await page();
+  await pick(p);
+  const tastes = await api(p, '/api/v1/me/tastes');
+  if (!tastes) return t.skip("the server doesn't ask"), done(p);
+  const ids = tastes.choices.map((c) => c.id);
+  for (const [joint, films] of [[10759, [28, 12]], [10765, [878, 14]], [10768, [10752]]]) {
+    if (films.some((f) => ids.includes(f))) assert.ok(!ids.includes(joint), `${joint} gives way to ${films}`);
+  }
+  await done(p);
+});
+
 test('control panel: lists, forms in windows, its own confirmations', { skip: skip || (process.env.OVERFIN_ADMIN ? false : 'OVERFIN_ADMIN not set') }, async () => {
   const p = await page();
   await pick(p);
