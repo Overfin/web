@@ -479,6 +479,10 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
   min-height: 0; padding: 0; border: none; border-radius: 0; background: none; box-shadow: none; text-align: left; font-weight: 400;
 }
 .seasons button:hover { background: none; }
+/* Centered while they fit; scrolled from the first one when they don't
+   (justify-content: center would hide the first ones). */
+.seasons button:first-child { margin-left: auto; }
+.seasons button:last-child { margin-right: auto; }
 .season-poster {
   position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; margin-bottom: .3rem;
   border-radius: var(--radius-s); background: var(--panel-2); box-shadow: var(--shadow-s); outline: 2px solid transparent; outline-offset: 2px;
@@ -660,9 +664,9 @@ html.has-backdrop .slide::before { content: none; }
 .slides + .sheet { padding-top: .5rem; }
 /* Light pages: the dark picture above gives way to the page's color before
    the first heading, so its dark text reads. */
-:root[data-theme="light"] .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .94) 2.2rem, var(--bg)); }
+:root[data-theme="light"] .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .8) 2.2rem, rgba(var(--bg-rgb), .84)); }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .94) 2.2rem, var(--bg)); }
+  :root:not([data-theme]) .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .8) 2.2rem, rgba(var(--bg-rgb), .84)); }
 }
 @media (max-width: 600px) {
   .page-backdrop::after { background: linear-gradient(to top, rgba(var(--bg-rgb), .95) 20%, rgba(var(--bg-rgb), .55) 55%, rgba(var(--bg-rgb), .15) 100%); }
