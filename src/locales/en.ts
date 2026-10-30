@@ -98,6 +98,10 @@ export default {
   'library.show.inProgress': 'In progress',
   'library.show.favorites': 'Favorites',
   'library.clear': 'Clear filters',
+  'genres.all': 'All',
+  'genres.recent': 'Recently added',
+  'genres.seeAll': 'See all',
+  'genres.everything': 'See all {count} titles, A to Z',
   'library.noMatch': 'No titles match these filters.',
 
   'item.play': 'Play',
