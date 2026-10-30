@@ -16,6 +16,7 @@
   import { visible } from '../lib/visible';
   import { landed } from '../lib/warm';
   import Card from '../components/Card.svelte';
+  import GenreRows from '../components/GenreRows.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -55,6 +56,9 @@
   // A decade, or "older" (before the last one listed).
   const decade = $derived(params.get('decade') || '');
   const filtered = $derived(!!genre || show !== 'all' || !!decade);
+  // A category opens on its genres to browse; its whole list, sorted and
+  // filtered, is a choice away.
+  const browsing = $derived(category && !filtered && !params.get('sort') && params.get('view') !== 'all');
 
   let genres = $state<Genre[]>([]);
   $effect(() => {
@@ -151,13 +155,25 @@
   {:else}
     <h1>{library.name}</h1>
   {/if}
+  {#if category && genres.length}
+    <nav class="pills genre-pills" aria-label={t('library.genre')}>
+      <a href={base} class:active={!genre} aria-current={!genre ? 'page' : undefined}>{t('genres.all')}</a>
+      {#each [...genres].sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0)) as g (g.name)}
+        <a href="{base}?genre={encodeURIComponent(g.name)}" class:active={genre === g.name} aria-current={genre === g.name ? 'page' : undefined}>{g.name}</a>
+      {/each}
+    </nav>
+  {/if}
+  {#if browsing}
+    <GenreRows category={id} {base} {genres} />
+    <p class="everything"><a href="{base}?view=all">{t('genres.everything', { count: total ?? '' })}</a></p>
+  {:else}
   <div class="toolbar">
     <select aria-label={t('library.sort')} value={sort} onchange={(event) => change('sort', event.currentTarget.value)}>
       {#each listSorts as value (value)}
         <option {value}>{t(`library.sort.${value}` as Key)}</option>
       {/each}
     </select>
-    {#if genres.length}
+    {#if genres.length && !category}
       <select aria-label={t('library.genre')} value={genre} onchange={(event) => change('genre', event.currentTarget.value)}>
         <option value="">{t('library.genre.all')}</option>
         {#each genres as g (g.name)}
@@ -199,5 +215,6 @@
     <PageError {error} />
   {:else if !finished}
     <div bind:this={sentinel} use:visible={more}></div>
+  {/if}
   {/if}
 {/if}
