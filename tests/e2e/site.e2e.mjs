@@ -353,6 +353,22 @@ test('what you like: genres named, joint ones under their film genres', { skip }
   await done(p);
 });
 
+test('control panel: a fresh browser signs in on the way and lands in it', { skip: skip || (process.env.OVERFIN_ADMIN ? false : 'OVERFIN_ADMIN not set') }, async () => {
+  // No session, no site visited first: what an admin's bookmark does.
+  const context = await browser.newContext();
+  const p = await context.newPage();
+  p.problems = [];
+  p.on('pageerror', (e) => p.problems.push(`page error: ${e.message}`));
+  await p.goto(`${base}/admin/`);
+  await p.waitForURL((u) => u.pathname.startsWith('/signin'), { timeout: 15000 });
+  await p.locator('input[type=email]').fill(email);
+  await p.locator('input[type=password]').fill(password);
+  await p.locator('form button[type=submit]').first().click();
+  await p.waitForURL((u) => u.pathname.startsWith('/admin/') && !u.pathname.startsWith('/admin/login'), { timeout: 15000 });
+  await p.locator('main h1').waitFor();
+  await done(p);
+});
+
 test('control panel: lists, forms in windows, its own confirmations', { skip: skip || (process.env.OVERFIN_ADMIN ? false : 'OVERFIN_ADMIN not set') }, async () => {
   const p = await page();
   await pick(p);
