@@ -121,14 +121,11 @@ plays HLS streams in browsers without native support. It's bundled into the
 site, so browsers never contact a third party; its license is published
 with it (`public/licenses/hls.js.txt`).
 
+## How it's made
+
+overfin-web is designed by its maintainer, who makes the architecture, security and product decisions, and written by Claude (Anthropic's AI); Claude's commits carry a `Co-Authored-By: Claude` trailer. The code is checked by its type check, its tests and a build that must match the committed `dist/`; it hasn't had an independent security review yet.
+
 ## License
 
 [MIT](LICENSE).
 
-Said plainly, as for Overfin: overfin-web is written by Claude (Anthropic's
-AI), its code, tests and documentation. The maintainer gives directions
-(what the site should do and look like, what to change) and uses it every
-day, but doesn't write the code or review it line by line. Commits Claude
-wrote carry a `Co-Authored-By: Claude` trailer. What checks the code is
-what runs before every push: the type check, the tests, and a build that
-must match the committed `dist/`.
