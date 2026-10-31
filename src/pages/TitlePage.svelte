@@ -5,6 +5,7 @@
      an episode shows its season's poster. -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
+  import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { similarOf, titleOf } from '../lib/titlecache';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
@@ -166,18 +167,18 @@
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
   {@const seasonPoster = title.kind === 'episode' && title.season ? titleOf(title.season.id) : undefined}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
-  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large'), tall: title.images?.textless ? overfin.imageUrl(title.images.textless, 'large') : undefined } : undefined}>
+  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: sized(backdrop, 'backdrop', screenWidth()), tall: title.images?.textless ? sized(title.images.textless, 'poster', screenWidth()) : undefined } : undefined}>
     <div class="info">
       {#if poster}
         <div class="poster">
-          <img src={overfin.imageUrl(poster, 'medium')} alt="" use:loaded />
+          <img src={overfin.imageUrl(poster, 'medium')} srcset={srcset(poster, 'poster')} sizes={sizes.heroPoster} alt="" use:loaded />
         </div>
       {:else if seasonPoster && title.season}
         <!-- An episode: its season's poster, leading back to it. -->
         {#await seasonPoster then s}
           {#if s.images?.primary}
             <a class="poster" href={titlePath(title.season.id, title.series?.name ?? s.name)} aria-label={s.name || seasonName(s)}>
-              <img src={overfin.imageUrl(s.images.primary, 'medium')} alt="" use:loaded />
+              <img src={overfin.imageUrl(s.images.primary, 'medium')} srcset={srcset(s.images.primary, 'poster')} sizes={sizes.card} alt="" use:loaded />
             </a>
           {/if}
         {:catch}{/await}
@@ -198,7 +199,7 @@
           </nav>
         {/if}
         {#if title.images?.logo && title.kind !== 'episode' && title.kind !== 'season'}
-          <h1 class="logo"><img src={overfin.imageUrl(title.images.logo, 'medium')} alt={title.name} /></h1>
+          <h1 class="logo"><img src={overfin.imageUrl(title.images.logo, 'medium')} srcset={srcset(title.images.logo, 'logo')} sizes={sizes.logo} alt={title.name} /></h1>
         {:else}
           <h1>{title.name}</h1>
         {/if}
@@ -280,7 +281,7 @@
         <button type="button" role="tab" aria-selected={seasonID === s.id} class:active={seasonID === s.id}
           tabindex={seasonID === s.id ? 0 : -1} aria-controls="season-episodes" onclick={() => choose(title, s)}>
           <span class="season-poster">
-            {#if art}<img src={overfin.imageUrl(art, 'small')} alt="" loading="lazy" use:loaded />{/if}
+            {#if art}<img src={overfin.imageUrl(art, 'small')} srcset={srcset(art, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />{/if}
             {#if !s.images?.primary}<span class="number">{s.seasonNumber === 0 ? t('title.specials') : s.seasonNumber}</span>{/if}
             {#if s.availability === 'missing'}<span class="flag">{t('title.notHere')}</span>
             {:else if s.availability === 'partiallyAvailable'}<span class="flag">{t('discover.partly')}</span>{/if}
@@ -330,7 +331,7 @@
         <li class:missing={e.availability === 'missing'}>
           <div class="still">
             {#if e.images?.primary}
-              <img src={overfin.imageUrl(e.images.primary, 'medium')} alt="" loading="lazy" use:loaded />
+              <img src={overfin.imageUrl(e.images.primary, 'medium')} srcset={srcset(e.images.primary, 'still')} sizes={sizes.episode} alt="" loading="lazy" use:loaded />
             {/if}
             {#if at && e.durationMs}<div class="progress" style:width="{Math.min(100, (100 * at) / e.durationMs)}%"></div>{/if}
             {#if e.playable}
@@ -399,7 +400,7 @@
         <svelte:element this={c.id ? 'a' : 'div'} class="card person" href={c.id ? personPath(c.id, c.name) : undefined}>
           <div class="poster round">
             {#if c.image}
-              <img src={overfin.imageUrl(c.image, 'small')} alt="" loading="lazy" use:loaded />
+              <img src={overfin.imageUrl(c.image, 'small')} srcset={srcset(c.image, 'profile')} sizes={sizes.face} alt="" loading="lazy" use:loaded />
             {:else}
               <div class="fallback initials">{c.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</div>
             {/if}

@@ -3,6 +3,7 @@
      cancelling one while it's pending. -->
 <script lang="ts">
   import type { MediaRequest } from '../lib/sdk/overfin.js';
+  import { sizes, srcset } from '../lib/images';
   import { explain, overfin } from '../lib/client';
   import { confirm, notice } from '../lib/dialog.svelte';
   import { homeChanged } from '../lib/homecache';
@@ -39,7 +40,7 @@
           <li>
             <a class="thumb" href={titlePathOf(r.title)}>
               {#if r.title.images?.primary}
-                <img src={overfin.imageUrl(r.title.images.primary, 'small')} alt="" loading="lazy" use:loaded />
+                <img src={overfin.imageUrl(r.title.images.primary, 'small')} srcset={srcset(r.title.images.primary, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />
               {/if}
             </a>
             <div class="what">

@@ -9,6 +9,7 @@
      after 3 s without moving, and stay while paused. -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
+  import { sizes, srcset } from '../lib/images';
   import { onDestroy, onMount, untrack } from 'svelte';
   import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
@@ -554,10 +555,10 @@
 
   {#if !started && !notice}
     <div class="loading">
-      {#if backdrop}<img class="backdrop" src={overfin.imageUrl(backdrop, 'large')} alt="" />{/if}
+      {#if backdrop}<img class="backdrop" src={overfin.imageUrl(backdrop, 'large')} srcset={srcset(backdrop, 'backdrop')} sizes={sizes.page} alt="" />{/if}
       <div class="loading-title">
         {#if shownTitle?.images?.logo}
-          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} alt={shownTitle.series?.name ?? shownTitle.name} />
+          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} srcset={srcset(shownTitle.images.logo, 'logo')} sizes={sizes.logo} alt={shownTitle.series?.name ?? shownTitle.name} />
         {:else if shownTitle}
           <div class="name">{shownTitle.series?.name ?? shownTitle.name}</div>
         {/if}
@@ -577,7 +578,7 @@
       <div class="paused-about">
         <div class="watching">{t('player.watching')}</div>
         {#if shownTitle.images?.logo}
-          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} alt={shownTitle.series?.name ?? shownTitle.name} />
+          <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} srcset={srcset(shownTitle.images.logo, 'logo')} sizes={sizes.logo} alt={shownTitle.series?.name ?? shownTitle.name} />
         {:else}
           <h1>{shownTitle.series?.name ?? shownTitle.name}</h1>
         {/if}
@@ -611,7 +612,7 @@
   {#if upNext && next}
     <div class="upnext" role="dialog" aria-label={t('player.next')}>
       <div class="still">
-        {#if next.images?.primary}<img src={overfin.imageUrl(next.images.primary, 'small')} alt="" />{/if}
+        {#if next.images?.primary}<img src={overfin.imageUrl(next.images.primary, 'small')} srcset={srcset(next.images.primary, 'still')} sizes={sizes.smallStill} alt="" />{/if}
       </div>
       <div class="about">
         <div class="label">{t('player.next')} · {t('player.nextIn', { n: countdown })}</div>
@@ -661,7 +662,7 @@
         {#each episodes as e (e.id)}
           <button class="episode" class:current={e.id === playback?.title?.id} disabled={!e.playable && e.id !== playback?.title?.id}
             onclick={() => playEpisode(e)}>
-            <span class="still">{#if e.images?.primary}<img src={overfin.imageUrl(e.images.primary, 'small')} alt="" loading="lazy" />{/if}</span>
+            <span class="still">{#if e.images?.primary}<img src={overfin.imageUrl(e.images.primary, 'small')} srcset={srcset(e.images.primary, 'still')} sizes={sizes.smallStill} alt="" loading="lazy" />{/if}</span>
             <span class="text">
               <span class="name">{e.episodeNumber}. {e.name}</span>
               {#if e.durationMs}<span class="hint">{duration(e.durationMs)}{#if e.userState?.played} · ✓{/if}</span>{/if}

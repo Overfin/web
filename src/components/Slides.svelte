@@ -8,6 +8,7 @@
      keys move it too. -->
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { backdropOf } from '../lib/backdrop.svelte';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
@@ -134,8 +135,8 @@
        view, the slideshow holds still, and so does the backdrop. -->
   <section class="slides" data-theme="dark" aria-roledescription="carousel" aria-label={t('home.featured')}
     use:backdropOf={slides[index]?.images?.backdrops?.[0] ? {
-      wide: overfin.imageUrl(slides[index].images!.backdrops![0], 'large'),
-      tall: slides[index].images?.textless ? overfin.imageUrl(slides[index].images!.textless!, 'large') : undefined,
+      wide: sized(slides[index].images!.backdrops![0], 'backdrop', screenWidth()),
+      tall: slides[index].images?.textless ? sized(slides[index].images!.textless!, 'poster', screenWidth()) : undefined,
     } : undefined}
     use:inView={(on) => (away = !on)}
     onmouseenter={() => (hovered = true)} onmouseleave={() => (hovered = false)}
@@ -147,7 +148,7 @@
         aria-label={t('home.slide', { n: i + 1, total: slides.length })}>
         <div class="content">
           {#if item.images?.logo}
-            <img class="logo" src={overfin.imageUrl(item.images.logo, 'medium')} alt={item.name} use:weigh />
+            <img class="logo" src={overfin.imageUrl(item.images.logo, 'medium')} srcset={srcset(item.images.logo, 'logo')} sizes={sizes.logo} alt={item.name} use:weigh />
           {:else}
             <h2>{item.name}</h2>
           {/if}
