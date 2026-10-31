@@ -55,6 +55,27 @@
     }
   }
 
+  // This profile's audio and subtitles: what its playbacks start with,
+  // unless chosen otherwise for a title while watching it. The languages
+  // and their names are Overfin's, the same as the player's tracks.
+  // svelte-ignore state_referenced_locally
+  let audioLanguage = $state(profile?.audioLanguage ?? '');
+  // svelte-ignore state_referenced_locally
+  let subtitleLanguage = $state(profile?.subtitleLanguage ?? '');
+  let languages = $state<{ tag: string; name: string }[]>([]);
+  overfin.languages().then((r) => (languages = r.languages)).catch(() => {});
+
+  async function saveTracks(change: { audioLanguage?: string; subtitleLanguage?: string }) {
+    if (!profile) return;
+    message = '';
+    try {
+      const changed = await overfin.updateProfile(profile.id, change);
+      if (session.me) session.me.activeProfile = changed;
+    } catch (err) {
+      message = explain(err);
+    }
+  }
+
   // Bringing the history of a previous account into this profile, when the
   // server offers it (once per account; never to kids profiles).
   let bring = $state(false);
@@ -183,6 +204,27 @@
         <option value="">{t('account.themeDevice')}</option>
         <option value="light">{t('account.themeLight')}</option>
         <option value="dark">{t('account.themeDark')}</option>
+      </select>
+    </div>
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.audioTitle')}</h2>
+        <p class="muted">{t('account.audioText')}</p>
+      </div>
+      <select bind:value={audioLanguage} onchange={() => saveTracks({ audioLanguage })} aria-label={t('account.audioTitle')}>
+        <option value="">{t('account.audioSite')}</option>
+        <option value="original">{t('account.audioOriginal')}</option>
+        {#each languages as l (l.tag)}<option value={l.tag}>{l.name}</option>{/each}
+      </select>
+    </div>
+    <div class="panel setting">
+      <div>
+        <h2>{t('account.subtitlesTitle')}</h2>
+        <p class="muted">{t('account.subtitlesText')}</p>
+      </div>
+      <select bind:value={subtitleLanguage} onchange={() => saveTracks({ subtitleLanguage })} aria-label={t('account.subtitlesTitle')}>
+        <option value="">{t('account.subtitlesOff')}</option>
+        {#each languages as l (l.tag)}<option value={l.tag}>{l.name}</option>{/each}
       </select>
     </div>
   {/if}
