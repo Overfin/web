@@ -8,6 +8,7 @@
      The search icon, from another page, starts a new one, empty. -->
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { sizes, srcset } from '../lib/images';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
@@ -136,7 +137,7 @@
         <a class="card person" href={personPath(p.id, p.name)}>
           <div class="poster round">
             {#if p.image}
-              <img src={overfin.imageUrl(p.image, 'small')} alt="" loading="lazy" use:loaded />
+              <img src={overfin.imageUrl(p.image, 'small')} srcset={srcset(p.image, 'profile')} sizes={sizes.face} alt="" loading="lazy" use:loaded />
             {:else}
               <div class="fallback initials">{p.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</div>
             {/if}

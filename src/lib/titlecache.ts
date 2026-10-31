@@ -1,6 +1,7 @@
 // Title pages through the page cache: the title, a season's page, the
 // similar titles, each kept per profile.
 import type { Title, TitleSummary } from './sdk/overfin.js';
+import { preload, screenWidth, sized, sizes } from './images';
 import { overfin } from './client';
 import { cached, prefetch } from './pagecache';
 import { session } from './session.svelte';
@@ -31,11 +32,10 @@ export function prefetchTitle(id: string) {
   pictured.add(id);
   titleOf(id).then((title) => {
     const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined);
-    const urls = [
-      backdrop && overfin.imageUrl(backdrop, 'large'),
-      title.kind !== 'episode' && title.images?.primary && overfin.imageUrl(title.images.primary, 'medium'),
-      title.images?.logo && overfin.imageUrl(title.images.logo, 'medium'),
-    ];
-    for (const url of urls) if (url) new Image().src = url;
+    // As its page shows them: the background for this screen's width, the
+    // poster and the logo at the sizes the browser takes for them.
+    if (backdrop) new Image().src = sized(backdrop, 'backdrop', screenWidth());
+    if (title.kind !== 'episode') preload(title.images?.primary, 'poster', sizes.heroPoster);
+    preload(title.images?.logo, 'logo', sizes.logo);
   }, () => pictured.delete(id));
 }

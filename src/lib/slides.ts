@@ -3,6 +3,8 @@
 // also loads their pictures ahead.
 
 import type { Title, TitleSummary } from './sdk/overfin.js';
+
+import { preload, screenWidth, sized, sizes } from './images';
 import { overfin } from './client';
 import type { HomeData } from './homeload';
 
@@ -82,14 +84,20 @@ export async function preloadSlides(slides: Title[], go: () => boolean) {
   const tall = typeof matchMedia === 'function' && matchMedia('(max-aspect-ratio: 1/1)').matches;
   for (const slide of slides) {
     const picture = tall ? (slide.images?.textless ?? slide.images?.backdrops?.[0]) : slide.images?.backdrops?.[0];
-    for (const [image, size] of [[picture, 'large'], [slide.images?.logo, 'medium']] as const) {
-      if (!image) continue;
+    // As the slideshow shows them: the background for this screen's
+    // width, the logo at the size the browser takes for it.
+    if (picture) {
       if (!go()) return;
+      const url = sized(picture, tall && slide.images?.textless ? 'poster' : 'backdrop', screenWidth());
       await new Promise<void>((done) => {
         const img = new Image();
         img.onload = img.onerror = () => done();
-        img.src = overfin.imageUrl(image, size);
+        img.src = url;
       });
+    }
+    if (slide.images?.logo) {
+      if (!go()) return;
+      await preload(slide.images.logo, 'logo', sizes.logo);
     }
   }
 }

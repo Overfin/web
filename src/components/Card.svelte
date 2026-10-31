@@ -7,6 +7,7 @@
      One not out yet (a collection's) says so, and has neither. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
+  import { sizes, srcset } from '../lib/images';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { t, type Key } from '../lib/i18n.svelte';
@@ -73,7 +74,7 @@
     ontouchstart={() => !item.upcoming && prefetchTitle(item.id)} onfocus={() => !item.upcoming && prefetchTitle(item.id)}>
     <div class="poster" class:wide>
       {#if image}
-        <img src={overfin.imageUrl(image, 'small')} alt="" loading="lazy" use:loaded />
+        <img src={overfin.imageUrl(image, 'small')} srcset={srcset(image, wide ? 'backdrop' : 'poster')} sizes={wide ? sizes.wideCard : sizes.card} alt="" loading="lazy" use:loaded />
       {:else}
         <div class="fallback">{item.name}</div>
       {/if}

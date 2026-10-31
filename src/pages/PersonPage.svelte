@@ -2,6 +2,7 @@
      a library has first. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
+  import { sizes, srcset } from '../lib/images';
   import { loaded } from '../lib/loaded';
   import { has, t } from '../lib/i18n.svelte';
   import { correct, personIdOf, personPath } from '../lib/paths';
@@ -31,7 +32,7 @@
   <div class="hero">
     <div class="info">
       <div class="poster">
-        {#if person.image}<img src={overfin.imageUrl(person.image, 'medium')} alt="" use:loaded />{/if}
+        {#if person.image}<img src={overfin.imageUrl(person.image, 'medium')} srcset={srcset(person.image, 'profile')} sizes={sizes.heroPoster} alt="" use:loaded />{/if}
       </div>
       <div>
         <h1>{person.name}</h1>

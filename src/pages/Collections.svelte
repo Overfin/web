@@ -3,6 +3,7 @@
      menu's list, then read again. -->
 <script lang="ts">
   import { overfin } from '../lib/client';
+  import { sizes, srcset } from '../lib/images';
   import { loaded } from '../lib/loaded';
   import { collectionPath } from '../lib/paths';
   import { t } from '../lib/i18n.svelte';
@@ -20,7 +21,7 @@
       <a class="card" href={collectionPath(c.id, c.name)}>
         <div class="poster">
           {#if c.images?.primary}
-            <img src={overfin.imageUrl(c.images.primary, 'small')} alt="" loading="lazy" use:loaded />
+            <img src={overfin.imageUrl(c.images.primary, 'small')} srcset={srcset(c.images.primary, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />
           {:else}
             <div class="fallback">{c.name}</div>
           {/if}

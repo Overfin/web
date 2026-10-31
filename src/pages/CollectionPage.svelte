@@ -3,6 +3,7 @@
      requested, once out), as title pages show them. -->
 <script lang="ts">
   import type { Collection } from '../lib/sdk/overfin.js';
+  import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
@@ -30,11 +31,11 @@
   <Skeleton kind="title" />
 {:else}
   {@const backdrop = collection.images?.backdrops?.[0]}
-  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: overfin.imageUrl(backdrop, 'large') } : undefined}>
+  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: sized(backdrop, 'backdrop', screenWidth()) } : undefined}>
     <div class="info">
       {#if collection.images?.primary}
         <div class="poster">
-          <img src={overfin.imageUrl(collection.images.primary, 'medium')} alt="" use:loaded />
+          <img src={overfin.imageUrl(collection.images.primary, 'medium')} srcset={srcset(collection.images.primary, 'poster')} sizes={sizes.heroPoster} alt="" use:loaded />
         </div>
       {/if}
       <div>
