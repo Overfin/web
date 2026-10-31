@@ -11,7 +11,7 @@
   import { homeChanged } from '../lib/homecache';
   import { sizes, srcset } from '../lib/images';
   import { onDestroy, onMount, untrack } from 'svelte';
-  import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
+  import type { Player, Playback, Segment, Title, TitleSummary, Track } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { ageText, clock, duration } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
@@ -24,6 +24,8 @@
 
   let root = $state<HTMLDivElement>();
   let video = $state<HTMLVideoElement>();
+  // Subtitles that are pictures are drawn here, over the video, by the SDK.
+  let pictureCanvas = $state<HTMLCanvasElement>();
   let player: Player | null = null;
   let playback = $state<Playback | null>(null);
   let audio = $state('');
@@ -386,19 +388,13 @@
   const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} Mb/s`;
   const rangeName = (r?: string) => !r ? '' : r === 'SDR' ? 'SDR' : r === 'HDR10Plus' ? 'HDR10+'
     : r.startsWith('DOVI') ? `Dolby Vision${r.includes('HDR10Plus') ? ' (HDR10+)' : r.includes('HDR10') ? ' (HDR10)' : r.includes('HLG') ? ' (HLG)' : ''}` : r;
-  // A language's name in the site's language, from a media file's code
-  // ("fre", "eng"…); the code itself when it's not known.
-  const bibliographic: Record<string, string> = { fre: 'fr', ger: 'de', chi: 'zh', cze: 'cs', dut: 'nl', gre: 'el', per: 'fa',
-    rum: 'ro', slo: 'sk', ice: 'is', may: 'ms', wel: 'cy', baq: 'eu', geo: 'ka', arm: 'hy', alb: 'sq', bur: 'my', mac: 'mk', mao: 'mi' };
-  function languageName(code?: string) {
-    if (!code) return '';
-    try {
-      const name = new Intl.DisplayNames([i18n.locale], { type: 'language' }).of(bibliographic[code] ?? code);
-      return name && name !== code ? name : code;
-    } catch {
-      return code;
-    }
-  }
+  // Channels as people say them: stereo, 5.1, 7.1.
+  const channelsName = (n?: number) => n === 6 ? '5.1' : n === 8 ? '7.1' : n === 2 ? t('player.stereo') : n === 1 ? t('player.mono') : n ? `${n} ch` : '';
+  // An audio track in the menu: its language (named in itself, by
+  // Overfin), its channels, what it's for when it's not the film's sound.
+  const roles: Record<string, Key> = { commentary: 'player.commentary', description: 'player.audioDescription' };
+  const audioLabel = (track: Track) =>
+    [track.label, channelsName(track.channels), track.role ? (roles[track.role] ? t(roles[track.role]) : track.role) : ''].filter(Boolean).join(' · ');
   const reasonText = (r: string) => has(`player.reason.${r}`) ? t(`player.reason.${r}` as Key) : r;
   const videoLine = $derived.by(() => {
     const v = playback?.info?.video;
@@ -409,8 +405,8 @@
   const audioLine = $derived.by(() => {
     const a = playback?.info?.audio;
     if (!a) return '';
-    const ch = a.channels === 6 ? '5.1' : a.channels === 8 ? '7.1' : a.channels === 2 ? t('player.stereo') : a.channels ? `${a.channels} ch` : '';
-    return [a.codec?.toUpperCase(), ch, languageName(a.language), a.bitrateKbps ? mbps(a.bitrateKbps) : ''].filter(Boolean).join(' · ');
+    const name = playback?.audioTracks?.find((tr) => tr.id === audio)?.label;
+    return [a.codec?.toUpperCase(), channelsName(a.channels), name, a.bitrateKbps ? mbps(a.bitrateKbps) : ''].filter(Boolean).join(' · ');
   });
 
   // ---- The episodes, without leaving -------------------------------------------
@@ -463,8 +459,10 @@
       player = await overfin.play(video, id, {
         startMs: takeStart(),
         Hls: await hls(),
-        // The site's language, when the video has it.
+        // The site's language, when the video has it (and the profile
+        // prefers it).
         audioLanguage: i18n.locale,
+        pictureCanvas,
         // Every (re)start: the title and the track menus.
         onStart(pb) {
           notice = null;
@@ -529,16 +527,13 @@
     player?.setAudioTrack(trackId);
     menu = '';
   }
-  // The subtitles chosen are the profile's from now on: their language
-  // (or none) starts its next playbacks. A track without a known
-  // language changes nothing kept.
+  // The audio and subtitles chosen are the title's from now on (the SDK
+  // tells Overfin): its next playbacks start with them.
   function chooseSubtitles(trackId: string) {
     subtitles = trackId;
     player?.setSubtitleTrack(trackId || null);
     menu = '';
     queueMicrotask(followCues);
-    const language = trackId ? playback?.subtitleTracks?.find((tr) => tr.id === trackId)?.language : '';
-    if (language !== undefined) overfin.setSubtitleLanguage(language).catch(() => {});
   }
 </script>
 
@@ -552,6 +547,7 @@
     ontimeupdate={timeUpdate} onplay={() => { paused = false; blocked = false; }} onpause={() => (paused = true)}
     onwaiting={() => (waiting = true)} onplaying={() => { waiting = false; started = true; }} oncanplay={() => { waiting = false; tryStart(); }}
     onvolumechange={() => { if (video) { volume = video.volume; muted = video.muted; } }}></video>
+  <canvas class="pictures" bind:this={pictureCanvas}></canvas>
 
   {#if !started && !notice}
     <div class="loading">
@@ -718,7 +714,7 @@
             <div class="tracks" role="dialog" aria-label={t('player.audio')}>
               <h3>{t('player.audio')}</h3>
               {#each playback.audioTracks as track (track.id)}
-                <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{track.label}</button>
+                <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{audioLabel(track)}</button>
               {/each}
             </div>
           {/if}
@@ -796,6 +792,7 @@
   .player.idle { cursor: none; }
   /* Layers, spelled out: a video can be composited above what follows it. */
   video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 0; }
+  .pictures { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
   .controls { position: absolute; z-index: 2; left: 0; right: 0; padding: .6rem clamp(.75rem, 2vw, 1.5rem); transition: opacity .25s; }
   .idle .controls, .idle .skip { opacity: 0; pointer-events: none; }
   .top { top: 0; display: flex; align-items: center; background: linear-gradient(rgba(0, 0, 0, .7), transparent); padding-bottom: 2.5rem; }
