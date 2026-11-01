@@ -27,7 +27,7 @@
 </script>
 
 {#if url}
-  <div class="page-backdrop" data-theme="dark" class:tall={url === pageBackdrop.current?.tall} aria-hidden="true">
+  <div class="page-backdrop" data-theme="dark" class:tall={url === pageBackdrop.current?.tall} class:even={pageBackdrop.current?.even} aria-hidden="true">
     {#key url}
       <img src={url} alt="" transition:fade={{ duration: 600 }} />
     {/key}

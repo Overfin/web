@@ -11,6 +11,9 @@ export interface Backdrop {
   wide?: string;
   /** tall is the text-free poster's, for screens taller than wide. */
   tall?: string;
+  /** even: one even veil over the whole picture (a title's page), not
+   * the fade toward the text that the home page's slideshow has. */
+  even?: boolean;
 }
 
 export const pageBackdrop = $state<{ current: Backdrop | null }>({ current: null });

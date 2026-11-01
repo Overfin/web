@@ -52,16 +52,21 @@ export function screenWidth(): number {
   return globalThis.innerWidth || 1280;
 }
 
+/** big is a place's width beyond 1536 px, where the whole page grows with
+ * the window (app.css, html's font-size): its rem in vw. A media query in
+ * sizes counts rem at 16 px, whatever the page's. */
+const big = (rem: number) => `(min-width: 96rem) ${(rem * 100 / 96).toFixed(2)}vw`;
+
 /** sizes are how wide each place draws its image, for srcset: the
  * stylesheet's widths (app.css), so the browser takes the size it needs. */
 export const sizes = {
-  card: '(max-width: 37.5rem) 28vw, 10.5rem',
-  wideCard: '(max-width: 37.5rem) 45vw, 17rem',
-  heroPoster: '(max-width: 37.5rem) 8rem, 11rem',
-  logo: '(max-width: 37.5rem) 80vw, 26rem',
-  episode: '(max-width: 37.5rem) 90vw, 22rem',
-  smallStill: '12rem',
-  face: '8rem',
+  card: `(max-width: 37.5rem) 28vw, ${big(10.5)}, 10.5rem`,
+  wideCard: `(max-width: 37.5rem) 45vw, ${big(17)}, 17rem`,
+  heroPoster: `(max-width: 37.5rem) 55vw, ${big(20)}, 20rem`,
+  logo: `(max-width: 37.5rem) 80vw, ${big(26)}, 26rem`,
+  episode: `(max-width: 37.5rem) 90vw, ${big(22)}, 22rem`,
+  smallStill: `${big(12)}, 12rem`,
+  face: `${big(8)}, 8rem`,
   page: '100vw',
 } as const;
 
