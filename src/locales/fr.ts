@@ -379,6 +379,7 @@ const fr: Record<keyof typeof en, string> = {
   'error.pin-incorrect': 'Code incorrect.',
   'error.pin-required': 'Ce profil est protégé par un code.',
   'error.pin-locked': 'Trop de codes incorrects. Demandez au titulaire du compte.',
+  'error.pin-lockedFor': 'Trop de codes incorrects. Réessayez dans {minutes} min.',
   'error.rate-limited': 'Trop de tentatives ; patientez un instant.',
   'error.claim-failed': 'Nom d’utilisateur ou mot de passe incorrect.',
   'error.claim-not-allowed': 'L’historique de ce compte a déjà été récupéré.',

@@ -13,6 +13,9 @@ export async function hls(): Promise<unknown> {
 /** explain turns an error into a sentence for the person. */
 export function explain(err: unknown): string {
   if (!(err instanceof OverfinError)) return t('error.generic');
+  // A PIN lock that ends by itself says when, in minutes; one that doesn't
+  // waits for the account owner.
+  if (err.type === 'pin-locked' && err.retryAfter) return t('error.pin-lockedFor', { minutes: Math.ceil(err.retryAfter / 60) });
   const key = `error.${err.type}`;
   const message = has(key) ? t(key) : t('error.generic');
   return err.retryAfter ? t('error.retryAfter', { message, seconds: err.retryAfter }) : message;
