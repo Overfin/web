@@ -3,7 +3,7 @@
      deleting the account. Changes need a fresh login, or the profile's
      PIN. -->
 <script lang="ts">
-  import { explain, overfin } from '../lib/client';
+  import { explain, isError, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
   import { confirm, notice } from '../lib/dialog.svelte';
   import { homeChanged } from '../lib/homecache';
@@ -17,7 +17,7 @@
 
   // How the account holder signs in, with Overfin's own sign-in only (the
   // server answers 404 otherwise, and the section stays hidden).
-  let signin = $state<{ email: string; hasPassword: boolean; reset: boolean } | null>(null);
+  let signin = $state<{ email: string; hasPassword: boolean; reset: boolean; rules: { minLength: number; digit: boolean; special: boolean } } | null>(null);
   let editing = $state(false);
   let newPassword = $state('');
   overfin.signinInfo().then((s) => (signin = s), () => {});
@@ -99,9 +99,25 @@
     }
   }
 
+  // The rules a new password follows, as the operator set them: "At least
+  // 12 characters, with a digit and a special character".
+  const passwordRules = $derived.by(() => {
+    if (!signin) return '';
+    const needs = [signin.rules.digit && t('account.rulesDigit'), signin.rules.special && t('account.rulesSpecial')].filter(Boolean);
+    const length = t('account.rules', { n: signin.rules.minLength });
+    return needs.length ? `${length}${t('account.rulesWith')}${needs.join(t('account.rulesAnd'))}.` : `${length}.`;
+  });
+
   async function savePassword(event: SubmitEvent) {
     event.preventDefault();
-    if (await confirmed(() => overfin.setPassword(newPassword), (m) => (message = m))) {
+    // A password Overfin refuses comes back saying what it lacks, in the
+    // person's language: that's what they see.
+    let refused = '';
+    const save = () => overfin.setPassword(newPassword).catch((err) => {
+      if (isError(err, 'invalid-request') && err.problem.detail) refused = err.problem.detail;
+      throw err;
+    });
+    if (await confirmed(save, (m) => (message = refused || m))) {
       signin = signin && { ...signin, hasPassword: true };
       editing = false;
       newPassword = '';
@@ -162,8 +178,9 @@
       <Modal title={t('account.changePassword')} close={() => (editing = false)}>
         <form class="stack" onsubmit={savePassword}>
           <!-- svelte-ignore a11y_autofocus -->
-          <input type="password" autocomplete="new-password" minlength="10" maxlength="256" required autofocus
-            aria-label={t('account.newPassword')} placeholder={t('account.newPassword')} bind:value={newPassword} />
+          <input type="password" autocomplete="new-password" minlength={signin.rules.minLength} maxlength="256" required autofocus
+            aria-label={t('account.newPassword')} aria-describedby="password-rules" placeholder={t('account.newPassword')} bind:value={newPassword} />
+          <p class="muted" id="password-rules">{passwordRules}</p>
           {#if message}<p class="error">{message}</p>{/if}
           <div class="actions">
             <button type="button" onclick={() => (editing = false)}>{t('common.cancel')}</button>
