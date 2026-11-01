@@ -2,6 +2,8 @@
      watching?"), then the screen the address names. -->
 <script lang="ts">
   import { warmLater } from './lib/warm';
+  import { tabTitle } from './lib/tabtitle';
+  import { brand } from './lib/brand.svelte';
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router, takeScroll } from './lib/router.svelte';
@@ -163,7 +165,7 @@
 {:else}
   <PageBackdrop />
   {#if !bare}<Header />{/if}
-  <main>
+  <main use:tabTitle={brand.name}>
     <!-- A kids profile without limits shows nothing: its owner is asked to
          choose them. -->
     {#if !bare && session.me?.activeProfile?.ageNeeded}
@@ -189,9 +191,9 @@
       {:else if route.parts[0] === 'title' && titleIdOf(route.parts.slice(1))}
         <!-- Readable addresses (lib/paths): only the number counts. -->
         <TitlePage id={titleIdOf(route.parts.slice(1))!} params={route.params} />
-      {:else if route.parts[0] === 'play' && route.parts[1]}
+      {:else if route.parts[0] === 'play' && titleIdOf(route.parts.slice(1))}
         <!-- A new player for each title, as the next episode replaces one. -->
-        {#key route.parts[1]}<Player id={route.parts[1]} />{/key}
+        {#key titleIdOf(route.parts.slice(1))}<Player id={titleIdOf(route.parts.slice(1))!} />{/key}
       {:else if route.parts[0] === 'profiles'}
         <Profiles />
       {:else if route.parts[0] === 'manage'}

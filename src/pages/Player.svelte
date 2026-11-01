@@ -16,7 +16,7 @@
   import { ageText, clock, duration } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
-  import { titlePath } from '../lib/paths';
+  import { correct, playPath, titleIdOf, titlePath } from '../lib/paths';
   import { canGoBack, replace } from '../lib/router.svelte';
   import SeekBar from '../components/SeekBar.svelte';
 
@@ -444,7 +444,10 @@
 
   onMount(async () => {
     if (!video) return;
-    overfin.title(id).then((t) => (about = t), () => {});
+    overfin.title(id).then((t) => {
+      about = t;
+      correct(playPath(t.id, (t.series ?? t).name), (parts) => titleIdOf(parts) === id);
+    }, () => {});
     loadVolume();
     video.volume = volume;
     video.muted = muted;
@@ -541,6 +544,8 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions: pointer moves only wake the controls -->
 <div class="player" class:idle={!shown} bind:this={root} onpointermove={wake} onpointerdowncapture={(e) => (lastPointer = e.pointerType)} onwheel={wheel}>
+  <!-- What plays, for screen readers and the tab's title (lib/tabtitle). -->
+  {#if title || shownTitle}<h1 class="sr-only">{title || shownTitle?.series?.name || shownTitle?.name}</h1>{/if}
   <!-- svelte-ignore a11y_media_has_caption: subtitles come from the server's tracks -->
   <video bind:this={video} autoplay playsinline
     onclick={pictureClick} ondblclick={toggleFullscreen}
@@ -576,7 +581,7 @@
         {#if shownTitle.images?.logo}
           <img class="logo" src={overfin.imageUrl(shownTitle.images.logo, 'medium')} srcset={srcset(shownTitle.images.logo, 'logo')} sizes={sizes.logo} alt={shownTitle.series?.name ?? shownTitle.name} />
         {:else}
-          <h1>{shownTitle.series?.name ?? shownTitle.name}</h1>
+          <p class="heading">{shownTitle.series?.name ?? shownTitle.name}</p>
         {/if}
         {#if facts}<div class="facts">{facts}</div>{/if}
         {#if about?.overview}<p class="overview">{about.overview}</p>{/if}
@@ -886,7 +891,7 @@
   }
   .paused-about { max-width: min(36rem, 80vw); padding: 0 clamp(1.5rem, 6vw, 5rem); }
   .watching { color: rgba(255, 255, 255, .7); font-size: .95rem; margin-bottom: .6rem; }
-  .paused-about h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 3rem); }
+  .paused-about .heading { margin: 0; font-weight: 700; line-height: 1.2; font-size: clamp(1.8rem, 4vw, 3rem); }
   .paused-about .facts { margin: .8rem 0 .4rem; font-weight: 600; }
   .paused-about .overview {
     margin: .4rem 0 0; color: rgba(255, 255, 255, .85); line-height: 1.5;

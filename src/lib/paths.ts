@@ -38,6 +38,12 @@ export function titlePath(id: string, name?: string): string {
   return `/title/${parts.join('/')}`;
 }
 
+/** playPath is the player's address for a title: its own, under /play/
+ * (/play/m550988/free-guy). */
+export function playPath(id: string, name?: string): string {
+  return '/play/' + titlePath(id, name).slice('/title/'.length);
+}
+
 /** titlePathOf is a title's address, from what lists and pages carry. */
 export function titlePathOf(t: { id: string; name: string; series?: { name: string } }): string {
   return titlePath(t.id, t.series?.name ?? t.name);

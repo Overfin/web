@@ -83,6 +83,7 @@
 </script>
 
 <div class="search">
+  <h1 class="sr-only">{t('search.label')}</h1>
   <form role="search" onsubmit={(e) => { e.preventDefault(); clearTimeout(timer); run(query); }}>
     <input bind:this={input} type="search" bind:value={query} oninput={typed} placeholder={t('search.placeholder')}
       aria-label={t('search.label')} autocomplete="off" maxlength="200" />

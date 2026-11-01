@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { categoryIdOf, categoryPath, collectionIdOf, collectionPath, personIdOf, personPath, slug, titleIdOf, titlePath } from './paths';
+import { categoryIdOf, categoryPath, collectionIdOf, collectionPath, personIdOf, personPath, slug, playPath, titleIdOf, titlePath } from './paths';
 
 describe('slug', () => {
   it('keeps letters and digits, drops accents, dashes the rest', () => {
@@ -53,5 +53,11 @@ describe('categories', () => {
     expect(categoryIdOf('films', all)).toBe('cat_a');
     expect(categoryIdOf('cat_b', all)).toBe('cat_b');
     expect(categoryIdOf('kids', all)).toBe('kids');
+  });
+  it('gives the player the title\'s address under /play/', () => {
+    expect(playPath('title_movie_tmdb_1465063', 'Free Guy')).toBe('/play/m1465063/free-guy');
+    expect(playPath('title_series_tmdb_38527_s1_e3', '19-2')).toBe('/play/s38527/19-2/season-1/episode-3');
+    expect(playPath('title_movie_tmdb_550988')).toBe('/play/m550988');
+    expect(titleIdOf(['s38527', '19-2', 'season-1', 'episode-3'])).toBe('title_series_tmdb_38527_s1_e3');
   });
 });
