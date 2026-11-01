@@ -29,6 +29,7 @@ const fr: Record<keyof typeof en, string> = {
   'wish.state.unreleasedOn': 'Sortie le {date}',
   'wish.state.notFound': 'Pas encore trouvé',
   'wish.state.notFoundUntil': 'Pas encore trouvé, recherché à nouveau le {date}',
+  'wish.state.requested': 'Demandé, en attente de départ',
   'wish.state.downloading': 'En téléchargement',
   'wish.up': 'Monter : {name}',
   'wish.down': 'Descendre : {name}',

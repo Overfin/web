@@ -27,6 +27,8 @@
         return w.nextTry ? t('wish.state.notFoundUntil', { date: day(w.nextTry) }) : t('wish.state.notFound');
       case 'downloading':
         return t('wish.state.downloading');
+      case 'requested':
+        return t('wish.state.requested');
     }
     return t('wish.state.waiting');
   }

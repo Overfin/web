@@ -28,6 +28,7 @@ export default {
   'wish.state.unreleasedOn': 'Out on {date}',
   'wish.state.notFound': 'Not found yet',
   'wish.state.notFoundUntil': 'Not found yet, looked for again on {date}',
+  'wish.state.requested': 'Requested, waiting to start',
   'wish.state.downloading': 'Downloading',
   'wish.up': 'Move up: {name}',
   'wish.down': 'Move down: {name}',
