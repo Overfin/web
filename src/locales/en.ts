@@ -181,7 +181,7 @@ export default {
   'account.cleared': 'History cleared.',
   'account.deleteConfirm': 'Delete your account, all its profiles and their watch history? This cannot be undone.',
   'account.deleted': 'Your account and your watch history are deleted.',
-  'account.deletedKept': 'Your account is deleted. Your watch history stays on the server, unusable.',
+  'account.deletedKept': 'Your account and your watch history are deleted. Your requests stay, without your name.',
 
   'manage.titleOwner': 'Profiles',
   'manage.titleSelf': 'My profile',
