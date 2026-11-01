@@ -293,7 +293,6 @@ const fr: Record<keyof typeof en, string> = {
   'player.reason.ContainerNotSupported': 'Ce navigateur ne lit pas le format du fichier (réempaqueté, l’image est conservée)',
   'player.reason.VideoCodecNotSupported': 'Ce navigateur ne lit pas le format vidéo',
   'player.reason.AudioCodecNotSupported': 'Ce navigateur ne lit pas le format audio (converti)',
-  'player.reason.SubtitleCodecNotSupported': 'Les sous-titres sont des images : ils sont incrustés dans la vidéo',
   'player.reason.AudioIsExternal': 'L’audio est dans un fichier séparé',
   'player.reason.SecondaryAudioNotSupported': 'Une autre piste audio que la première a été choisie',
   'player.reason.VideoProfileNotSupported': 'Ce navigateur ne lit pas le profil de la vidéo',

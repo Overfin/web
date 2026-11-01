@@ -292,7 +292,6 @@ export default {
   'player.reason.ContainerNotSupported': 'This browser can’t read the file’s container (repackaged, the picture is kept)',
   'player.reason.VideoCodecNotSupported': 'This browser can’t play the video format',
   'player.reason.AudioCodecNotSupported': 'This browser can’t play the audio format (converted)',
-  'player.reason.SubtitleCodecNotSupported': 'The subtitles are pictures: they’re drawn into the video',
   'player.reason.AudioIsExternal': 'The audio is in a separate file',
   'player.reason.SecondaryAudioNotSupported': 'Another audio track than the first was chosen',
   'player.reason.VideoProfileNotSupported': 'This browser can’t play the video’s profile',
