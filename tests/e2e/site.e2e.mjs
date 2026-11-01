@@ -107,7 +107,8 @@ test('a title: its address, its backdrop, back to the list', { skip }, async () 
   const category = await p.$$eval('header nav a', (as) => as.map((a) => a.getAttribute('href')).find((h) => h.startsWith('/category/')));
   if (!category) return done(p);
   await p.goto(base + category);
-  const card = p.locator('main a.card').first();
+  // A title TMDB knows: one it doesn't keeps its ID in its address.
+  const card = p.locator('main a.card[href^="/title/m"], main a.card[href^="/title/s"]').first();
   await card.waitFor();
   const href = await card.getAttribute('href');
   assert.match(href, /^\/title\/[ms]\d+(\/|$)/, `a readable address: ${href}`);
@@ -174,7 +175,8 @@ test('player: its keys work whatever has the focus, the wheel sets the volume', 
   const start = await state();
   await p.keyboard.press(' ');
   await p.waitForFunction(() => !document.querySelector('.player video').paused);
-  assert.equal(path(p), `/play/${id}`, 'Space pressed the focused button');
+  // Still on the player (its address is put right to the readable one).
+  assert.ok(path(p).startsWith('/play/'), 'Space pressed the focused button');
   await p.keyboard.press(' ');
   await p.waitForFunction(() => document.querySelector('.player video').paused);
   // Right: 10 seconds on; Down and the wheel: the volume.
@@ -254,7 +256,7 @@ function luminance(css) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-test('a series: seasons as posters, centered while they fit; choosing one shows its episodes', { skip }, async (t) => {
+test('a series: seasons as posters, from the left on a computer and centered on a phone; choosing one shows its episodes', { skip }, async (t) => {
   const p = await page();
   await pick(p);
   const at = await series(p);
@@ -265,13 +267,22 @@ test('a series: seasons as posters, centered while they fit; choosing one shows 
   const buttons = row.locator('button[role=tab]');
   assert.ok(await buttons.count() >= 2, 'a button per season');
   assert.equal(await row.locator('button .season-poster').count(), await buttons.count(), 'each with its poster');
-  const fit = await row.evaluate((r) => {
+  const placed = (r) => {
     const first = r.querySelector('button').getBoundingClientRect();
     const last = [...r.querySelectorAll('button')].at(-1).getBoundingClientRect();
     const box = r.getBoundingClientRect();
-    return { fits: r.scrollWidth <= r.clientWidth, left: first.left - box.left, right: box.right - last.right };
-  });
-  if (fit.fits) assert.ok(Math.abs(fit.left - fit.right) < 4, `centered: ${fit.left} left, ${fit.right} right`);
+    const pad = parseFloat(getComputedStyle(r).paddingLeft);
+    return { fits: r.scrollWidth <= r.clientWidth, left: first.left - box.left, right: box.right - last.right, pad };
+  };
+  const fit = await row.evaluate(placed);
+  assert.ok(Math.abs(fit.left - fit.pad) < 4, `from the left: ${fit.left} from the row's edge, its padding ${fit.pad}`);
+  const phone = await page({ width: 390, height: 844 });
+  await pick(phone);
+  await phone.goto(base + at);
+  await phone.locator('.seasons').waitFor();
+  const small = await phone.locator('.seasons').evaluate(placed);
+  if (small.fits) assert.ok(Math.abs(small.left - small.right) < 4, `centered on a phone: ${small.left} left, ${small.right} right`);
+  await done(phone);
   // One stop for Tab, the chosen season; the arrows move along the row.
   const stops = await buttons.evaluateAll((bs) => bs.filter((b) => b.tabIndex === 0).length);
   assert.equal(stops, 1, 'one Tab stop in the row');
