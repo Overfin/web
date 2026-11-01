@@ -378,6 +378,7 @@ export default {
   'error.pin-incorrect': 'Wrong PIN.',
   'error.pin-required': 'This profile is protected by a PIN.',
   'error.pin-locked': 'Too many wrong PINs. Ask the account owner.',
+  'error.pin-lockedFor': 'Too many wrong PINs. Try again in {minutes} min.',
   'error.rate-limited': 'Too many attempts; wait a moment.',
   'error.claim-failed': 'Wrong username or password.',
   'error.claim-not-allowed': 'This account’s history was brought over already.',
