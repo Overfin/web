@@ -158,7 +158,6 @@
         <a href="/list">{t('nav.list')}</a>
         {#if session.wishes}<a href="/wishlist">{t('nav.wishlist')}</a>{/if}
         <a href="/profiles">{t('nav.switchProfile')}</a>
-        {#if session.requests}<a href="/requests">{t('request.mine')}</a>{/if}
         <a href="/manage">{t('nav.profiles')}</a>
         <a href="/account">{t('nav.account')}</a>
         <!-- Not one of the site's pages: target="_self" has the browser

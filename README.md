@@ -24,18 +24,20 @@ TypeScript, on Overfin's
   the libraries leave the menu when the operator says so.
 - **My list**: a page of the profile's list.
 - **Discover**, when the server offers it: trending, popular and upcoming
-  films and series the libraries don't have (to request, when the server
-  takes requests).
+  films and series the libraries don't have (to wish for, when the server
+  offers wishlists).
 - **Libraries**: sorting (the profile's last choice kept in the browser),
   filters (genre, decade, watched), a repeatable shuffle, infinite scroll.
 - **Title pages**: films, series, seasons, episodes, cast, ratings, similar
-  titles; my list, watched and favorite; requests, confirmed first, and
-  where they are.
+  titles; my list, watched and favorite; wishes, for a film, a season or a
+  series' seasons not here yet, and "Unavailable" on missing episodes.
 - **Collections**: TMDB's series of films the profile has films of, each
   with its page: every film in release order, those not here yet included
-  (to request, once out).
+  (to wish for, once out).
 - **Search** (titles and people) and **people's pages**.
-- **Requests**: the profile's, and cancelling one while it's pending.
+- **My wishlist**: the profile's films and seasons to get, in its order (a
+  series moves as a whole, its seasons each removable), with what became
+  of each, and what arrived since; Overfin takes turns between accounts.
 - **Player**: Overfin picks direct play, repackaging or transcoding from what
   the browser declares; audio and subtitle choice, quality, playback info,
   previews while seeking, "Skip intro", the next episode, progress, resume,

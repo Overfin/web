@@ -151,9 +151,9 @@
   async function remove() {
     if (!(await confirm(t('account.deleteConfirm'), true))) return;
     await confirmed(async () => {
-      const out = await overfin.deleteAccount();
+      await overfin.deleteAccount();
       setPicked(false);
-      await notice(out.requests === 'kept' ? t('account.deletedKept') : t('account.deleted'));
+      await notice(t('account.deleted'));
       location.href = '/';
     }, (m) => (message = m));
   }

@@ -1,19 +1,18 @@
 <!-- One title in a row or grid, in a library or not: its poster (or a still,
      wide), its name, how far the profile got. Hovered or focused, a title
      that can play (a series a library has too) shows a play button in its
-     corner, and one no library has
-     a request button (when the server takes requests); the rest of the card
-     opens the title's page. A requested title says where its request is.
-     One not out yet (a collection's) says so, and has neither. -->
+     corner, and a film or a season no library has whole a wishlist button
+     (when the server offers wishlists); the rest of the card opens the
+     title's page. One on the wishlist says so. One not out yet (a
+     collection's) says so, and has neither. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { sizes, srcset } from '../lib/images';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
-  import { t, type Key } from '../lib/i18n.svelte';
+  import { t } from '../lib/i18n.svelte';
   import { play } from '../lib/play';
-  import { ask } from '../lib/requests';
-  import { session } from '../lib/session.svelte';
+  import { loadWishes, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
   import { titlePathOf } from '../lib/paths';
   import { prefetchTitle } from '../lib/titlecache';
 
@@ -42,16 +41,12 @@
     const up = await overfin.upNext(item.id).catch(() => null);
     if (up) play(up.title.id, up.positionMs);
   }
-  // The request covering it: as loaded, then as made here.
-  let asked = $state<TitleSummary['request'] | null>(null);
-  const request = $derived(asked ?? item.request);
-  const askable = $derived(session.requests && !item.playable && !series && item.availability !== 'available' && !request
-    && item.kind !== 'other' && !item.upcoming);
-  async function requestIt() {
-    asked = await ask(item);
-  }
+  // The wishlist, for a film or a season (a series' are on its page).
+  loadWishes();
+  const wishing = $derived(!series && !item.upcoming && (item.kind === 'movie' || item.kind === 'season') && wishable(item));
+  const wished = $derived(!!wishes.ids[item.id]);
   const flag = $derived(item.upcoming ? t('item.upcoming')
-    : request && item.availability !== 'available' ? t(`request.status.${request.status}` as Key)
+    : wished ? t('wish.on')
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 
@@ -93,10 +88,15 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
     </button>
   {/if}
-  {#if askable}
-    <button class="act ask" type="button" aria-label={t('request.ask') + ' : ' + item.name} title={t('request.ask')}
-      onclick={requestIt}>
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v8.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4L11 12.2zM5 18h14v2H5z" /></svg>
+  {#if wishing}
+    <button class="act ask" class:on={wished} type="button" aria-pressed={wished}
+      aria-label={(wished ? t('wish.on') : t('wish.add')) + ' : ' + item.name} title={wished ? t('wish.on') : t('wish.add')}
+      onclick={() => toggleWish(item)}>
+      {#if wished}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>
+      {:else}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8zm0 4.3l-1.6 3.4-3.7.5 2.7 2.6-.7 3.7 3.3-1.8 3.3 1.8-.7-3.7 2.7-2.6-3.7-.5z" fill-rule="evenodd" /></svg>
+      {/if}
     </button>
   {/if}
   {#if remove}

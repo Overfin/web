@@ -5,9 +5,9 @@ import { overfin } from './client';
 
 export const session = $state<{
   me: Me | null; libraries: Library[]; categories: Category[]; librariesShown: boolean;
-  collections: Collection[]; discovery: boolean; requests: boolean; wishes: boolean; kidsNeedLimits: boolean;
+  collections: Collection[]; discovery: boolean; wishes: boolean; kidsNeedLimits: boolean;
 }>({
-  me: null, libraries: [], categories: [], librariesShown: true, collections: [], discovery: false, requests: false, wishes: false,
+  me: null, libraries: [], categories: [], librariesShown: true, collections: [], discovery: false, wishes: false,
   kidsNeedLimits: false,
 });
 
@@ -30,13 +30,6 @@ export async function loadCategories() {
 export async function offersDiscovery(): Promise<boolean> {
   if (session.me?.offers) return session.me.offers.discovery;
   return overfin.discover('trending', 'movie', { limit: 1 }).then(() => true, () => false);
-}
-
-/** offersRequests says whether the server takes requests (with Seerr): /me
- * says so; a server before 0.5 is asked. */
-export async function offersRequests(): Promise<boolean> {
-  if (session.me?.offers) return session.me.offers.requests;
-  return overfin.requests().then(() => true, () => false);
 }
 
 /** offersWishes says whether the server offers wishlists: /me says so
@@ -67,7 +60,6 @@ export async function refresh() {
   session.libraries = await overfin.libraries().catch(() => []);
   await loadCategories();
   session.discovery = await offersDiscovery();
-  session.requests = await offersRequests();
   session.wishes = offersWishes();
   session.kidsNeedLimits = await kidsNeedLimits();
 }
