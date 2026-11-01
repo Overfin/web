@@ -687,15 +687,15 @@ html.has-backdrop .slide::before { content: none; }
 @media (min-width: 601px) { .hero.title-hero .overview.folded { display: block; -webkit-line-clamp: none; overflow: visible; } }
 /* On desktop the seasons start under the poster; on a phone they stay centred. */
 @media (min-width: 601px) { .sheet .seasons button:first-child { margin-left: 0; } }
-/* The home page: the slideshow carries its own fades (the side one gone
-   before its bottom, the bottom one ending at the sheet's veil), and the
+/* The home page: the slideshow carries its own fades (the side one melting
+   into the bottom one, which ends at the sheet's veil), and the
    sheet under it is one even veil, as on a title's page. */
 html:has(.slides) .page-backdrop::after { background: none; }
 html.has-backdrop .slides::before {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background: linear-gradient(to right, rgba(var(--bg-rgb), .92) 0%, rgba(var(--bg-rgb), .8) 40%, rgba(var(--bg-rgb), .35) 66%, rgba(var(--bg-rgb), 0) 86%);
-  -webkit-mask-image: linear-gradient(to top, transparent calc(var(--under) + 1rem), #000 60%);
-  mask-image: linear-gradient(to top, transparent calc(var(--under) + 1rem), #000 60%);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 calc(var(--under) + 1rem));
+  mask-image: linear-gradient(to top, transparent 0, #000 calc(var(--under) + 1rem));
 }
 html.has-backdrop .slides::after {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
