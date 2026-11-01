@@ -104,11 +104,11 @@ input[type=checkbox]:focus, input[type=radio]:focus { box-shadow: none; }
 input[type=checkbox]:focus-visible, input[type=radio]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .muted { color: var(--muted); }
 .error { color: var(--danger); }
-main > .notice {
+main > .notice, .center > .notice {
   background: linear-gradient(90deg, rgba(var(--accent-rgb), .12), rgba(var(--accent-rgb), .03)) var(--panel);
   border: 1px solid rgba(var(--accent-rgb), .25); border-radius: var(--radius); padding: .75em 1.1em; margin: 0 0 1rem; box-shadow: var(--shadow-s);
 }
-main > .notice a { color: var(--accent); }
+main > .notice a, .center > .notice a { color: var(--accent); }
 
 /* The header: brand, sections, then the profile menu. On phones the
    sections take a second line that scrolls sideways. Dark on every page
@@ -549,10 +549,19 @@ ol.episodes .marks .toggle svg { width: 1.1rem; height: 1.1rem; }
 .season-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin: 2rem 0 .7rem; }
 .season-head h2 { margin: 0; }
 /* My requests. */
-.list.requests li { justify-content: flex-start; }
-.list.requests .thumb { flex: none; width: 3.5rem; aspect-ratio: 2 / 3; border-radius: var(--radius-s); overflow: hidden; background: var(--panel-2); }
-.list.requests .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.list.requests .what { flex: 1; min-width: 0; }
+:is(.list.requests, .list.wishes) li { justify-content: flex-start; }
+:is(.list.requests, .list.wishes) .thumb { flex: none; width: 3.5rem; aspect-ratio: 2 / 3; border-radius: var(--radius-s); overflow: hidden; background: var(--panel-2); }
+:is(.list.requests, .list.wishes) .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+:is(.list.requests, .list.wishes) .what { flex: 1; min-width: 0; }
+/* The wishlist: each title's order buttons, small and round; what arrived
+   at the top, with its button beside it. */
+.list.wishes .order { display: flex; gap: .3rem; flex: none; }
+.list.wishes .icon-button { width: 2.25rem; min-height: 2.25rem; height: 2.25rem; padding: 0; border-radius: 50%; display: inline-grid; place-items: center; }
+.list.wishes .icon-button svg { width: 1.2rem; height: 1.2rem; fill: currentColor; }
+.list.wishes .icon-button:disabled { opacity: .35; }
+.notice.arrived { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.notice.arrived p { margin: 0; }
+.chip.unavailable { margin-left: .4rem; }
 .chip.status.approved, .chip.status.processing { color: var(--accent); border-color: rgba(var(--accent-rgb), .4); }
 .chip.status.available, .chip.status.partiallyAvailable { color: var(--ok); border-color: var(--ok); }
 .chip.status.declined, .chip.status.failed { color: var(--danger); border-color: rgba(var(--danger-rgb), .4); }

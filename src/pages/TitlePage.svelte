@@ -18,6 +18,7 @@
   import { play } from '../lib/play';
   import { score } from '../lib/score';
   import { ask } from '../lib/requests';
+  import { loadWishes, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
   import { session } from '../lib/session.svelte';
   import ButtonIcon from '../components/ButtonIcon.svelte';
   import Marks from '../components/Marks.svelte';
@@ -121,7 +122,11 @@
     check();
     return { destroy: () => watch.disconnect() };
   }
-  const askable = (x: TitleSummary) => session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
+  // With wishlists, wishes take requests' place (never on episodes).
+  const askable = (x: TitleSummary) => !session.wishes && session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
+  loadWishes();
+  const wishLabel = (x: TitleSummary) => wishes.ids[x.id] ? t('wish.on')
+    : x.kind === 'season' ? t('wish.addSeason', { number: x.seasonNumber ?? '?' }) : t('wish.add');
   async function requestMain(x: Title) {
     const made = await ask(x);
     if (made) mainRequest = made;
@@ -219,6 +224,11 @@
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
         <div class="actions">
+          {#if wishable(title)}
+            <button class:primary={!wishes.ids[title.id]} aria-pressed={!!wishes.ids[title.id]} onclick={() => toggleWish(title)}>
+              <ButtonIcon name={wishes.ids[title.id] ? 'wished' : 'wish'} />{wishLabel(title)}
+            </button>
+          {/if}
           {#if !title.playable && askable(title)}
             {#if request}
               <span class="request-status">{statusLabel(request)}</span>
@@ -304,6 +314,11 @@
     {#if title.kind === 'series'}
       <div class="season-head" use:revealed>
         <h2>{seasonName(season)}{#if availabilityText(season)} <span class="muted small">· {availabilityText(season)}</span>{/if}</h2>
+        {#if wishable(season)}
+          <button aria-pressed={!!wishes.ids[season.id]} onclick={() => toggleWish(season)}>
+            <ButtonIcon name={wishes.ids[season.id] ? 'wished' : 'wish'} />{wishLabel(season)}
+          </button>
+        {/if}
         {#if askable(season)}
           {#if season.request}
             <span class="request-status">{statusLabel(season.request)}</span>
@@ -364,8 +379,8 @@
           <div class="muted small">
             {#if e.airDate}{new Date(e.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}{/if}
             {#if e.durationMs} · {duration(e.durationMs)}{/if}
-            {#if e.request && e.availability !== 'available'} · {statusLabel(e.request)}
-            {:else if e.availability === 'missing'} · {t('title.notHere')}{/if}
+            {#if e.request && e.availability !== 'available'} · {statusLabel(e.request)}{/if}
+            {#if e.availability === 'missing' && !e.request}<span class="chip unavailable">{t('title.unavailable')}</span>{/if}
           </div>
           {#if e.overview}
             <p class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>{e.overview}</p>

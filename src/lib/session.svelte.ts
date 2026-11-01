@@ -5,9 +5,9 @@ import { overfin } from './client';
 
 export const session = $state<{
   me: Me | null; libraries: Library[]; categories: Category[]; librariesShown: boolean;
-  collections: Collection[]; discovery: boolean; requests: boolean; kidsNeedLimits: boolean;
+  collections: Collection[]; discovery: boolean; requests: boolean; wishes: boolean; kidsNeedLimits: boolean;
 }>({
-  me: null, libraries: [], categories: [], librariesShown: true, collections: [], discovery: false, requests: false,
+  me: null, libraries: [], categories: [], librariesShown: true, collections: [], discovery: false, requests: false, wishes: false,
   kidsNeedLimits: false,
 });
 
@@ -39,6 +39,12 @@ export async function offersRequests(): Promise<boolean> {
   return overfin.requests().then(() => true, () => false);
 }
 
+/** offersWishes says whether the server offers wishlists: /me says so
+ * (since 0.8; none before). */
+export function offersWishes(): boolean {
+  return !!session.me?.offers?.wishes;
+}
+
 /** kidsNeedLimits says, for the owner, whether a kids profile has no
  * limits yet (it shows nothing until they're chosen). */
 export async function kidsNeedLimits(): Promise<boolean> {
@@ -62,6 +68,7 @@ export async function refresh() {
   await loadCategories();
   session.discovery = await offersDiscovery();
   session.requests = await offersRequests();
+  session.wishes = offersWishes();
   session.kidsNeedLimits = await kidsNeedLimits();
 }
 

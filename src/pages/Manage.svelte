@@ -4,7 +4,7 @@
      devices. The profiles are a list; each one's form opens in a window. -->
 <script lang="ts">
   import type { Profile, Session } from '../lib/sdk/overfin.js';
-  import { overfin } from '../lib/client';
+  import { explain, overfin } from '../lib/client';
   import { confirmed } from '../lib/confirmed';
   import { confirm } from '../lib/dialog.svelte';
   import { homeChanged } from '../lib/homecache';
@@ -26,6 +26,9 @@
     name: string; kidsTitles: boolean; kids: boolean; age: number; pin: string; message: string;
     allCategories: boolean; categories: string[];
     allLibraries: boolean; libraries: string[]; hiddenTags: string[];
+    // wishing: whether it may add to its wishlist (null until read);
+    // wishingWas, as it was.
+    wishing: boolean | null; wishingWas: boolean | null;
   }
   let editing = $state<Profile | null>(null);
   let form = $state<Form | null>(null);
@@ -59,7 +62,13 @@
       name: p.name, kidsTitles: !!p.kidsTitles, kids: p.kind === 'kids', pin: '', message: '',
       age: p.maxAge ?? 8, allCategories: !p.categories, categories: [...(p.categories ?? [])],
       allLibraries: !p.libraries, libraries: [...(p.libraries ?? [])], hiddenTags: [...(p.blockedTags ?? [])],
+      wishing: null, wishingWas: null,
     };
+    if (session.wishes && me?.owner && !p.owner) {
+      overfin.profileWishing(p.id).then((w) => {
+        if (form && editing?.id === p.id) form.wishing = form.wishingWas = w.on;
+      }, () => {});
+    }
   }
 
   // A profile changed: what its pages kept in this tab is read again (its
@@ -102,6 +111,16 @@
     if (me.owner && f.name.trim() !== p.name) change.name = f.name.trim();
     if (p.kind !== 'kids' && (me.owner || p.id === me.id) && f.kidsTitles !== !!p.kidsTitles) change.kidsTitles = f.kidsTitles ? true : null;
     if (me.owner && !p.owner && JSON.stringify(limitsOf(f)) !== JSON.stringify(limitsNow(p))) Object.assign(change, limitsOf(f));
+    // Wishing, on its own.
+    if (f.wishing !== null && f.wishing !== f.wishingWas) {
+      try {
+        await overfin.setProfileWishing(p.id, f.wishing);
+        f.wishingWas = f.wishing;
+      } catch (err) {
+        f.message = explain(err);
+        return;
+      }
+    }
     if (!Object.keys(change).length) {
       editing = null;
       return;
@@ -241,6 +260,10 @@
             <AccessPicker libraries={session.libraries} tags={loaded?.tags ?? []}
               bind:all={f.allLibraries} bind:chosen={f.libraries} bind:hidden={f.hiddenTags}
               categories={session.categories} bind:allCategories={f.allCategories} bind:chosenCategories={f.categories} />
+            {#if f.wishing !== null}
+              <label class="check"><input type="checkbox" bind:checked={f.wishing} /> {t('manage.wishing')}</label>
+              <p class="muted small">{t('manage.wishingHint')}</p>
+            {/if}
           </div>
         {/if}
         {#if f.message}<p class="error">{f.message}</p>{/if}

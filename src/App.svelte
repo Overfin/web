@@ -7,7 +7,7 @@
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router, takeScroll } from './lib/router.svelte';
-  import { loadCategories, offersDiscovery, offersRequests, picked, session } from './lib/session.svelte';
+  import { loadCategories, offersDiscovery, offersRequests, offersWishes, picked, session } from './lib/session.svelte';
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
@@ -29,6 +29,8 @@
   import PersonPage from './pages/PersonPage.svelte';
   import Profiles from './pages/Profiles.svelte';
   import Requests from './pages/Requests.svelte';
+  import Wishlist from './pages/Wishlist.svelte';
+  import { tellArrived } from './lib/wishlist.svelte';
   import Search from './pages/Search.svelte';
   import Setup from './pages/Setup.svelte';
   import TitlePage from './pages/TitlePage.svelte';
@@ -65,6 +67,7 @@
     }
     session.libraries = libraries;
     [session.discovery, session.requests] = await Promise.all([offersDiscovery(), offersRequests(), loadCategories()]);
+    session.wishes = offersWishes();
     session.kidsNeedLimits = profiles.some((p) => p.ageNeeded) && !!session.me.activeProfile?.owner;
     // "Who's watching?" once per tab, when there's a choice.
     const where = router.route.parts[0];
@@ -79,6 +82,7 @@
       return;
     }
     phase = { kind: 'ready' };
+    if (session.me.activeProfile && where !== 'play' && where !== 'profiles') tellArrived(where === 'wishlist');
   }
   start();
 
@@ -204,6 +208,8 @@
         <Search />
       {:else if route.parts[0] === 'requests'}
         <Requests />
+      {:else if route.parts[0] === 'wishlist' && session.wishes}
+        <Wishlist />
       {:else if route.parts[0] === 'account'}
         <Account />
       {:else}
