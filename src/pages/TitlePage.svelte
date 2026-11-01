@@ -167,7 +167,7 @@
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
   {@const seasonPoster = title.kind === 'episode' && title.season ? titleOf(title.season.id) : undefined}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
-  <div class="hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: sized(backdrop, 'backdrop', screenWidth()), tall: title.images?.textless ? sized(title.images.textless, 'poster', screenWidth()) : undefined } : undefined}>
+  <div class="hero title-hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: sized(backdrop, 'backdrop', screenWidth()), tall: title.images?.textless ? sized(title.images.textless, 'poster', screenWidth()) : undefined, even: true } : undefined}>
     <div class="info">
       {#if poster}
         <div class="poster">
@@ -271,7 +271,8 @@
   </div>
 
   <!-- The rest scrolls up over the backdrop. -->
-  <div class="sheet">
+  <!-- Over a backdrop, the page's veil is the sheet: nothing more. -->
+  <div class="sheet" class:clear={!!backdrop} data-theme={backdrop ? 'dark' : undefined}>
 
   {#if title.kind === 'series' && title.seasons && title.seasons.length > 1}
     <!-- svelte-ignore a11y_interactive_supports_focus -->

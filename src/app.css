@@ -34,11 +34,14 @@
   :root { --grid-min: 6.5rem; --gap: .6rem; }
 }
 
+/* Sizes are in rem; beyond 1536 px wide, the whole page grows with the
+   window, so a big screen shows the same page, larger. */
+html { font-size: clamp(100%, 100vw / 96, 250%); }
 * { box-sizing: border-box; }
 #app { min-height: 100vh; }
 [hidden] { display: none !important; }
 body {
-  margin: 0; color: var(--text); font: 16px/1.5 var(--font); overflow-x: hidden;
+  margin: 0; color: var(--text); font: 1rem/1.5 var(--font); overflow-x: hidden;
   /* A faint glow of the logo's colors at the top, fading into the night. */
   background:
     radial-gradient(70rem 36rem at 8% -12rem, rgba(123, 92, 240, .09), transparent 70%),
@@ -670,6 +673,46 @@ html.has-backdrop .slide::before { content: none; }
 :root[data-theme="light"] .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .8) 2.2rem, rgba(var(--bg-rgb), .84)); }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) .sheet { background: linear-gradient(to bottom, rgba(var(--bg-rgb), 0), rgba(var(--bg-rgb), .8) 2.2rem, rgba(var(--bg-rgb), .84)); }
+}
+/* A title's page: one even veil over its whole backdrop (not the home
+   page's fade), its content straight on it, its poster large beside the
+   text. */
+.page-backdrop.even::after { background: rgba(var(--bg-rgb), .9); }
+.sheet.clear { background: none; padding-top: .5rem; }
+.title-hero.art { min-height: 0; }
+.title-hero .info { align-items: flex-start; gap: 2.5rem; padding-top: 2.5rem; max-width: 76rem; }
+.title-hero .poster { width: clamp(13rem, 22vw, 20rem); }
+.title-hero h1.logo img { max-height: 7rem; }
+/* Beside a large poster there's room for the whole overview. */
+@media (min-width: 601px) { .hero.title-hero .overview.folded { display: block; -webkit-line-clamp: none; overflow: visible; } }
+/* On desktop the seasons start under the poster; on a phone they stay centred. */
+@media (min-width: 601px) { .sheet .seasons button:first-child { margin-left: 0; } }
+/* The home page: the slideshow carries its own fades (the side one gone
+   before its bottom, the bottom one ending at the sheet's veil), and the
+   sheet under it is one even veil, as on a title's page. */
+html:has(.slides) .page-backdrop::after { background: none; }
+html.has-backdrop .slides::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(to right, rgba(var(--bg-rgb), .92) 0%, rgba(var(--bg-rgb), .8) 40%, rgba(var(--bg-rgb), .35) 66%, rgba(var(--bg-rgb), 0) 86%);
+  -webkit-mask-image: linear-gradient(to top, transparent calc(var(--under) + 1rem), #000 60%);
+  mask-image: linear-gradient(to top, transparent calc(var(--under) + 1rem), #000 60%);
+}
+html.has-backdrop .slides::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(var(--bg-rgb), .9) 0, rgba(var(--bg-rgb), .9) calc(var(--under) + 1rem), rgba(var(--bg-rgb), 0) 70%);
+}
+html.has-backdrop .slides + .sheet { --under: 8rem; background: linear-gradient(to bottom, transparent calc(var(--under) + 1rem), rgba(var(--bg-rgb), .9) 0); }
+@media (max-width: 600px) {
+  html.has-backdrop .slides::before { content: none; }
+  html.has-backdrop .slides + .sheet { --under: 5rem; }
+}
+@media (max-width: 600px) {
+  .title-hero .info { align-items: center; gap: 1.25rem; padding-top: 1.5rem; }
+  .title-hero.art { padding-top: 0; }
+  .title-hero.art .poster { display: block; width: 55%; }
+  .title-hero .info > div:last-child { align-self: stretch; }
+  /* The poster above already shows the logo: kept for screen readers only. */
+  .title-hero.art .info:has(.poster) h1.logo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 @media (max-width: 600px) {
   .page-backdrop::after { background: linear-gradient(to top, rgba(var(--bg-rgb), .95) 20%, rgba(var(--bg-rgb), .55) 55%, rgba(var(--bg-rgb), .15) 100%); }
