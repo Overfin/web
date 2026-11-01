@@ -13,11 +13,11 @@ let loading: Promise<void> | null = null;
 let loadedFor = '';
 
 /** loadWishes reads which titles are on the active profile's wishlist,
- * once per profile. */
-export function loadWishes(): Promise<void> {
+ * once per profile (again with fresh). */
+export function loadWishes(fresh = false): Promise<void> {
   const profile = session.me?.activeProfile?.id ?? '';
   if (!session.wishes || !profile) return Promise.resolve();
-  if (loading && loadedFor === profile) return loading;
+  if (loading && loadedFor === profile && !fresh) return loading;
   loadedFor = profile;
   wishes.ids = {};
   loading = overfin.wishlist().then((w) => {
@@ -28,11 +28,46 @@ export function loadWishes(): Promise<void> {
   return loading;
 }
 
-/** wishable says whether x can go on the wishlist: offered, not here
- * whole, a film, a whole series or a season (never an episode). */
-export function wishable(x: TitleSummary): boolean {
-  return session.wishes && !x.playable && x.availability !== 'available' &&
-    (x.kind === 'movie' || x.kind === 'series' || x.kind === 'season');
+/** wishable says whether x can go on the wishlist: offered, and a film
+ * not here, a season not here whole, or a series with such seasons
+ * (seasons): never an episode. */
+export function wishable(x: TitleSummary, seasons?: TitleSummary[]): boolean {
+  if (!session.wishes || x.availability === 'available') return false;
+  switch (x.kind) {
+    case 'movie':
+      return !x.playable;
+    case 'season':
+      return true;
+    case 'series':
+      return wishableSeasons(seasons ?? []).length > 0;
+  }
+  return false;
+}
+
+/** wishableSeasons are a series' seasons a wish for it adds: out now
+ * (specials aside) and not here whole. */
+export function wishableSeasons(seasons: TitleSummary[]): TitleSummary[] {
+  const today = new Date().toISOString().slice(0, 10);
+  return seasons.filter((s) => (s.seasonNumber ?? 0) > 0 && !!s.airDate && s.airDate <= today && s.availability !== 'available');
+}
+
+/** seriesWished says whether all of a series' seasons a wish adds are on
+ * the wishlist. */
+export function seriesWished(seasons: TitleSummary[]): boolean {
+  const all = wishableSeasons(seasons);
+  return all.length > 0 && all.every((s) => wishes.ids[s.id]);
+}
+
+/** toggleSeries puts a series' seasons on the wishlist, or takes them all
+ * off. */
+export async function toggleSeries(series: TitleSummary, seasons: TitleSummary[]): Promise<void> {
+  try {
+    if (seriesWished(seasons)) await overfin.removeFromWishlist(series.id);
+    else await overfin.addToWishlist(series.id);
+  } catch (err) {
+    await notice(explain(err));
+  }
+  await loadWishes(true);
 }
 
 /** toggleWish puts x on the wishlist, or takes it off; the person is told

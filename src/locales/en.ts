@@ -18,6 +18,7 @@ export default {
   'wish.off': 'Wishing is switched off for this profile: its wishes are kept, and wait.',
   'wish.add': 'Add to my wishlist',
   'wish.addSeason': 'Add season {number} to my wishlist',
+  'wish.addSeries': 'Add its seasons to my wishlist',
   'wish.on': 'On my wishlist',
   'wish.arrived': 'Here now, in My list:',
   'wish.arrivedNotice': 'A title you wished for is here: {name}. It’s in My list.',
