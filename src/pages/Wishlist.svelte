@@ -1,6 +1,7 @@
-<!-- The profile's wishlist: titles not here yet, in its own order (moved
-     up and down, or taken off), each with what became of it; what arrived
-     since it was last told, at the top, until it's acknowledged. -->
+<!-- The profile's wishlist: films and series not here yet, in its own
+     order (moved up and down, or taken off), each with what became of it;
+     a series with its seasons, by number, each taken off on its own. What
+     arrived since it was last told, at the top, until it's acknowledged. -->
 <script lang="ts">
   import type { Wish, Wishlist } from '../lib/sdk/overfin.js';
   import { sizes, srcset } from '../lib/images';
@@ -29,30 +30,43 @@
     }
     return t('wish.state.waiting');
   }
-  // A season shows its series' name first.
-  const nameOf = (w: Wish) => w.title.kind === 'season' && w.title.series ? `${w.title.series.name} · ${w.title.name}` : w.title.name;
+  // The list's elements: a film, or a series with its seasons (the
+  // server keeps them together, by number).
+  interface Group { key: string; name: string; first: Wish; items: Wish[]; series?: string }
+  const groups = $derived.by(() => {
+    const out: Group[] = [];
+    for (const w of list?.items ?? []) {
+      const series = w.title.kind === 'season' ? w.title.series : undefined;
+      const key = series ? 'series:' + series.id : w.title.id;
+      const last = out[out.length - 1];
+      if (last?.key === key) last.items.push(w);
+      else out.push({ key, name: series?.name ?? w.title.name, first: w, items: [w], series: series?.id });
+    }
+    return out;
+  });
 
   // Moving one: shown at once, kept by the server, put back if it refuses.
   async function move(i: number, by: number) {
     if (!list) return;
     const before = list.items;
-    const items = [...before];
-    const [w] = items.splice(i, 1);
-    items.splice(i + by, 0, w);
-    list.items = items;
+    const order = [...groups];
+    const [g] = order.splice(i, 1);
+    order.splice(i + by, 0, g);
+    list.items = order.flatMap((x) => x.items);
     try {
-      await overfin.orderWishlist(items.map((x) => x.title.id));
+      await overfin.orderWishlist(list.items.map((x) => x.title.id));
     } catch (err) {
       list.items = before;
       await notice(explain(err));
     }
   }
-  async function remove(w: Wish) {
+  // Taking off a film, a season, or a series (all its seasons).
+  async function remove(id: string, gone: (w: Wish) => boolean) {
     if (!list) return;
     try {
-      await overfin.removeFromWishlist(w.title.id);
-      list.items = list.items.filter((x) => x.title.id !== w.title.id);
-      delete wishes.ids[w.title.id];
+      await overfin.removeFromWishlist(id);
+      for (const w of list.items.filter(gone)) delete wishes.ids[w.title.id];
+      list.items = list.items.filter((w) => !gone(w));
     } catch (err) {
       await notice(explain(err));
     }
@@ -85,26 +99,43 @@
       <p class="muted">{t('wish.none')}</p>
     {:else}
       <ol class="list wishes">
-        {#each list.items as w, i (w.title.id)}
+        {#each groups as g, i (g.key)}
           <li>
-            <a class="thumb" href={titlePathOf(w.title)}>
-              {#if w.title.images?.primary}
-                <img src={overfin.imageUrl(w.title.images.primary, 'small')} srcset={srcset(w.title.images.primary, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />
+            <a class="thumb" href={titlePathOf(g.first.title)}>
+              {#if g.first.title.images?.primary}
+                <img src={overfin.imageUrl(g.first.title.images.primary, 'small')} srcset={srcset(g.first.title.images.primary, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />
               {/if}
             </a>
             <div class="what">
-              <a href={titlePathOf(w.title)}><strong>{nameOf(w)}</strong></a>
-              {#if w.title.year}<span class="muted"> ({w.title.year})</span>{/if}
-              <div class="muted small">{stateText(w)}</div>
+              {#if g.series}
+                <strong>{g.name}</strong>
+                <ul class="seasons">
+                  {#each g.items as w (w.title.id)}
+                    <li>
+                      <a href={titlePathOf(w.title)}>{w.title.name}</a>
+                      <span class="muted small">{stateText(w)}</span>
+                      <button type="button" class="icon-button small" aria-label={t('wish.remove', { name: `${g.name} · ${w.title.name}` })} title={t('wish.remove', { name: `${g.name} · ${w.title.name}` })}
+                        onclick={() => remove(w.title.id, (x) => x.title.id === w.title.id)}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z" /></svg>
+                      </button>
+                    </li>
+                  {/each}
+                </ul>
+              {:else}
+                <a href={titlePathOf(g.first.title)}><strong>{g.name}</strong></a>
+                {#if g.first.title.year}<span class="muted"> ({g.first.title.year})</span>{/if}
+                <div class="muted small">{stateText(g.first)}</div>
+              {/if}
             </div>
             <div class="order">
-              <button type="button" class="icon-button" disabled={i === 0} aria-label={t('wish.up', { name: nameOf(w) })} title={t('wish.up', { name: nameOf(w) })} onclick={() => move(i, -1)}>
+              <button type="button" class="icon-button" disabled={i === 0} aria-label={t('wish.up', { name: g.name })} title={t('wish.up', { name: g.name })} onclick={() => move(i, -1)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.4 15.4L12 10.8l4.6 4.6L18 14l-6-6-6 6z" /></svg>
               </button>
-              <button type="button" class="icon-button" disabled={i === list.items.length - 1} aria-label={t('wish.down', { name: nameOf(w) })} title={t('wish.down', { name: nameOf(w) })} onclick={() => move(i, 1)}>
+              <button type="button" class="icon-button" disabled={i === groups.length - 1} aria-label={t('wish.down', { name: g.name })} title={t('wish.down', { name: g.name })} onclick={() => move(i, 1)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.4 8.6L12 13.2l4.6-4.6L18 10l-6 6-6-6z" /></svg>
               </button>
-              <button type="button" class="icon-button" aria-label={t('wish.remove', { name: nameOf(w) })} title={t('wish.remove', { name: nameOf(w) })} onclick={() => remove(w)}>
+              <button type="button" class="icon-button" aria-label={t('wish.remove', { name: g.name })} title={t('wish.remove', { name: g.name })}
+                onclick={() => g.series ? remove(g.series, (x) => x.title.series?.id === g.series) : remove(g.first.title.id, (x) => x.title.id === g.first.title.id)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z" /></svg>
               </button>
             </div>

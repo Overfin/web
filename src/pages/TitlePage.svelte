@@ -18,7 +18,7 @@
   import { play } from '../lib/play';
   import { score } from '../lib/score';
   import { ask } from '../lib/requests';
-  import { loadWishes, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
+  import { loadWishes, seriesWished, toggleSeries, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
   import { session } from '../lib/session.svelte';
   import ButtonIcon from '../components/ButtonIcon.svelte';
   import Marks from '../components/Marks.svelte';
@@ -224,7 +224,14 @@
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
         <div class="actions">
-          {#if wishable(title)}
+          {#if title.kind === 'series' && wishable(title, title.seasons)}
+            <!-- A series is wished for season by season: its seasons out
+                 now that aren't here whole. -->
+            {@const on = seriesWished(title.seasons ?? [])}
+            <button class:primary={!on} aria-pressed={on} onclick={() => toggleSeries(title, title.seasons ?? [])}>
+              <ButtonIcon name={on ? 'wished' : 'wish'} />{on ? t('wish.on') : t('wish.addSeries')}
+            </button>
+          {:else if title.kind !== 'series' && wishable(title)}
             <button class:primary={!wishes.ids[title.id]} aria-pressed={!!wishes.ids[title.id]} onclick={() => toggleWish(title)}>
               <ButtonIcon name={wishes.ids[title.id] ? 'wished' : 'wish'} />{wishLabel(title)}
             </button>

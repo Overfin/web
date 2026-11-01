@@ -19,6 +19,7 @@ const fr: Record<keyof typeof en, string> = {
   'wish.off': 'Les souhaits sont désactivés pour ce profil : les siens sont gardés et attendent.',
   'wish.add': 'Ajouter à mes souhaits',
   'wish.addSeason': 'Ajouter la saison {number} à mes souhaits',
+  'wish.addSeries': 'Ajouter ses saisons à mes souhaits',
   'wish.on': 'Dans mes souhaits',
   'wish.arrived': 'Arrivés, dans Ma liste :',
   'wish.arrivedNotice': 'Un titre que vous souhaitiez est arrivé : {name}. Il est dans Ma liste.',
