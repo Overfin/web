@@ -379,6 +379,7 @@ export default {
   'error.claim-not-allowed': 'This account’s history was brought over already.',
   'error.invitation-required': 'Joining needs an invitation. Ask the person who runs this site for one.',
   'error.account-not-allowed': "This login can't use this site.",
+  'error.account-expired': 'Access to this account has ended.',
   'error.stream-limit-reached': 'Too many streams on this account.',
   'error.server-busy': 'The server is busy; try again shortly.',
   'error.playback-ended-by-admin': 'The server’s administrator stopped this playback.',

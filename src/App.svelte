@@ -51,7 +51,7 @@
       if (isError(err, 'account-setup-required')) {
         if (err.problem.language) i18n.follow(err.problem.language);
         phase = { kind: 'setup', claim: err.problem.claim, languages: err.problem.languages ?? [], language: err.problem.language ?? '' };
-      } else if (isError(err, 'account-not-allowed')) phase = { kind: 'blocked', title: t('access.none'), message: explain(err) };
+      } else if (isError(err, 'account-not-allowed') || isError(err, 'account-expired')) phase = { kind: 'blocked', title: t('access.none'), message: explain(err) };
       else if (isError(err, 'invitation-required')) phase = { kind: 'blocked', title: t('access.invitation'), message: explain(err) };
       else phase = { kind: 'blocked', title: '', message: explain(err) };
       return;

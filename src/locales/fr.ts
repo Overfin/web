@@ -380,6 +380,7 @@ const fr: Record<keyof typeof en, string> = {
   'error.claim-not-allowed': 'L’historique de ce compte a déjà été récupéré.',
   'error.invitation-required': 'Une invitation est nécessaire pour nous rejoindre. Demandez-en une à la personne qui gère ce site.',
   'error.account-not-allowed': 'Cet identifiant ne peut pas utiliser ce site.',
+  'error.account-expired': 'L’accès à ce compte a pris fin.',
   'error.stream-limit-reached': 'Trop de lectures en cours sur ce compte.',
   'error.server-busy': 'Le serveur est occupé ; réessayez dans un instant.',
   'error.playback-ended-by-admin': 'L’administrateur du serveur a arrêté cette lecture.',
