@@ -31,6 +31,9 @@ TypeScript, on Overfin's
 - **Title pages**: films, series, seasons, episodes, cast, ratings, similar
   titles; my list, watched and favorite; requests, confirmed first, and
   where they are.
+- **Collections**: TMDB's series of films the profile has films of, each
+  with its page: every film in release order, those not here yet included
+  (to request, once out).
 - **Search** (titles and people) and **people's pages**.
 - **Requests**: the profile's, and cancelling one while it's pending.
 - **Player**: Overfin picks direct play, repackaging or transcoding from what
