@@ -194,7 +194,7 @@ test('phone: no page scrolls sideways', { skip }, async () => {
   const p = await page({ width: 360, height: 740 });
   await pick(p);
   const film = await p.evaluate(async () => (await (await fetch('/api/v1/titles?kind=movie&limit=1')).json()).items?.[0]?.id);
-  const pages = ['/', '/discover', '/collections', '/search', '/list', '/requests', '/manage', '/account'];
+  const pages = ['/', '/discover', '/collections', '/search', '/list', '/wishlist', '/manage', '/account'];
   if (film) pages.push(`/title/${film}`);
   for (const at of pages) {
     await p.goto(base + at, { waitUntil: 'networkidle' });

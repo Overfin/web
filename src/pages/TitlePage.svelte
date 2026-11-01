@@ -14,10 +14,9 @@
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
   import { ageText, clock, duration } from '../lib/format';
   import { t, tn, type Key } from '../lib/i18n.svelte';
-  import { confirm, notice } from '../lib/dialog.svelte';
+  import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
-  import { ask } from '../lib/requests';
   import { loadWishes, seriesWished, toggleSeries, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
   import { session } from '../lib/session.svelte';
   import ButtonIcon from '../components/ButtonIcon.svelte';
@@ -101,13 +100,9 @@
     }
   }
 
-  // Requests: the one made or cancelled here replaces what was loaded; a
-  // season's or an episode's reloads the season's episodes.
-  let mainRequest = $state<TitleSummary['request'] | null | undefined>(undefined);
   // The cast: the first dozen in a row, everyone on demand.
   const castShown = 12;
   let wholeCast = $state(false);
-  let seasonReload = $state(0);
   // Long texts fold, unless unfolded: the title's overview (four lines),
   // the season's (three) and episodes' descriptions (two); "Read more"
   // only on those that don't fit. By key: "title", a season's or an episode's ID.
@@ -122,31 +117,11 @@
     check();
     return { destroy: () => watch.disconnect() };
   }
-  // With wishlists, wishes take requests' place (never on episodes).
-  const askable = (x: TitleSummary) => !session.wishes && session.requests && !x.playable && x.availability !== 'available' && x.kind !== 'other';
+  // Wishes: films, seasons, and a series as its seasons (never episodes).
+  // The wish button leads only when nothing of the title is here.
   loadWishes();
   const wishLabel = (x: TitleSummary) => wishes.ids[x.id] ? t('wish.on')
     : x.kind === 'season' ? t('wish.addSeason', { number: x.seasonNumber ?? '?' }) : t('wish.add');
-  async function requestMain(x: Title) {
-    const made = await ask(x);
-    if (made) mainRequest = made;
-  }
-  async function cancelMain(id: string) {
-    if (!(await confirm(t('request.cancelConfirm')))) return;
-    try {
-      await overfin.cancelRequest(id);
-      homeChanged();
-      mainRequest = null;
-    } catch {
-      mainRequest = undefined;
-    }
-  }
-  async function requestPart(x: TitleSummary) {
-    if (await ask(x)) seasonReload++;
-  }
-  const askLabel = (x: TitleSummary) => x.kind === 'series' ? t('request.askSeries')
-    : x.kind === 'season' || x.kind === 'episode' ? t('request.askSeason', { number: x.seasonNumber ?? '?' }) : t('request.ask');
-  const statusLabel = (r: NonNullable<TitleSummary['request']>) => t(`request.status.${r.status}` as Key);
 
   function availabilityText(x: TitleSummary): string {
     if (x.availability === 'missing') return t('title.notHere');
@@ -166,7 +141,6 @@
   <Skeleton kind="title" />
 {:then title}
   {@const seasonID = seasonOf(title)}
-  {@const request = mainRequest === undefined ? title.request : mainRequest}
   {@const position = title.userState?.positionMs ?? 0}
   {@const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined)}
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
@@ -224,28 +198,6 @@
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
         <div class="actions">
-          {#if title.kind === 'series' && wishable(title, title.seasons)}
-            <!-- A series is wished for season by season: its seasons out
-                 now that aren't here whole. -->
-            {@const on = seriesWished(title.seasons ?? [])}
-            <button class:primary={!on} aria-pressed={on} onclick={() => toggleSeries(title, title.seasons ?? [])}>
-              <ButtonIcon name={on ? 'wished' : 'wish'} />{on ? t('wish.on') : t('wish.addSeries')}
-            </button>
-          {:else if title.kind !== 'series' && wishable(title)}
-            <button class:primary={!wishes.ids[title.id]} aria-pressed={!!wishes.ids[title.id]} onclick={() => toggleWish(title)}>
-              <ButtonIcon name={wishes.ids[title.id] ? 'wished' : 'wish'} />{wishLabel(title)}
-            </button>
-          {/if}
-          {#if !title.playable && askable(title)}
-            {#if request}
-              <span class="request-status">{statusLabel(request)}</span>
-              {#if request.status === 'pending' && request.id}
-                <button onclick={() => cancelMain(request.id!)}>{t('request.cancel')}</button>
-              {/if}
-            {:else}
-              <button class="primary" onclick={() => requestMain(title)}><ButtonIcon name="request" />{askLabel(title)}</button>
-            {/if}
-          {/if}
           {#if title.kind === 'series' && title.availability !== 'missing'}
             <!-- The episode playing the series plays: the one in progress,
                  the next one, or the first. -->
@@ -272,6 +224,19 @@
             <a class="button toggle" href={collectionPath(title.collection.id, title.collection.name)} aria-label={t('title.seeCollection')} title={t('title.seeCollection')}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3.5" width="12" height="15" rx="1.5" /><path d="M4.5 7v12a1.5 1.5 0 0 0 1.5 1.5h10" /></svg>
             </a>
+          {/if}
+          {#if title.kind === 'series' && wishable(title, title.seasons)}
+            <!-- A series is wished for season by season: its seasons out
+                 now that aren't here whole. After Play and the marks:
+                 first only when nothing is here. -->
+            {@const on = seriesWished(title.seasons ?? [])}
+            <button class:primary={!on && title.availability === 'missing'} aria-pressed={on} onclick={() => toggleSeries(title, title.seasons ?? [])}>
+              <ButtonIcon name={on ? 'wished' : 'wish'} />{on ? t('wish.on') : t('wish.addSeries')}
+            </button>
+          {:else if title.kind !== 'series' && wishable(title)}
+            <button class:primary={!wishes.ids[title.id] && title.availability === 'missing'} aria-pressed={!!wishes.ids[title.id]} onclick={() => toggleWish(title)}>
+              <ButtonIcon name={wishes.ids[title.id] ? 'wished' : 'wish'} />{wishLabel(title)}
+            </button>
           {/if}
         </div>
         {#if title.overview}
@@ -312,9 +277,8 @@
   {/if}
   <!-- The chosen season's episodes: the seasons' tab panel. -->
   <div id="season-episodes" role={title.kind === 'series' && (title.seasons?.length ?? 0) > 1 ? 'tabpanel' : undefined}>
-  {#key `${seasonID}:${seasonReload}`}
-  {#await title.kind === 'season' && !seasonReload ? Promise.resolve(title) : title.kind === 'season' ? overfin.title(title.id)
-    : seasonID ? (seasonReload ? overfin.title(seasonID) : titleOf(seasonID)) : Promise.resolve(null)}
+  {#key seasonID}
+  {#await title.kind === 'season' ? Promise.resolve(title) : seasonID ? titleOf(seasonID) : Promise.resolve(null)}
     {#if title.kind === 'series'}<Skeleton kind="list" />{/if}
   {:then season}
   {#if season?.episodes?.length}
@@ -325,13 +289,6 @@
           <button aria-pressed={!!wishes.ids[season.id]} onclick={() => toggleWish(season)}>
             <ButtonIcon name={wishes.ids[season.id] ? 'wished' : 'wish'} />{wishLabel(season)}
           </button>
-        {/if}
-        {#if askable(season)}
-          {#if season.request}
-            <span class="request-status">{statusLabel(season.request)}</span>
-          {:else}
-            <button onclick={() => requestPart(season)}><ButtonIcon name="request" />{askLabel(season)}</button>
-          {/if}
         {/if}
       </div>
     {:else}
@@ -361,10 +318,6 @@
               <button class="act" type="button" aria-label={t('item.play') + ' : ' + e.name} onclick={() => play(e.id, at)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
               </button>
-            {:else if askable(e) && !e.request}
-              <button class="act ask" type="button" aria-label={askLabel(e)} title={askLabel(e)} onclick={() => requestPart(e)}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v8.2l3.1-3.1 1.4 1.4L12 16l-5.5-5.5 1.4-1.4L11 12.2zM5 18h14v2H5z" /></svg>
-              </button>
             {/if}
           </div>
           <div class="head">
@@ -386,8 +339,7 @@
           <div class="muted small">
             {#if e.airDate}{new Date(e.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}{/if}
             {#if e.durationMs} · {duration(e.durationMs)}{/if}
-            {#if e.request && e.availability !== 'available'} · {statusLabel(e.request)}{/if}
-            {#if e.availability === 'missing' && !e.request}<span class="chip unavailable">{t('title.unavailable')}</span>{/if}
+            {#if e.availability === 'missing'}<span class="chip unavailable">{t('title.unavailable')}</span>{/if}
           </div>
           {#if e.overview}
             <p class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>{e.overview}</p>
