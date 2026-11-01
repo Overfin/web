@@ -153,7 +153,7 @@
     await confirmed(async () => {
       const out = await overfin.deleteAccount();
       setPicked(false);
-      await notice(out.history === 'kept' ? t('account.deletedKept') : t('account.deleted'));
+      await notice(out.requests === 'kept' ? t('account.deletedKept') : t('account.deleted'));
       location.href = '/';
     }, (m) => (message = m));
   }

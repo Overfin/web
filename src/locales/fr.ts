@@ -182,7 +182,7 @@ const fr: Record<keyof typeof en, string> = {
   'account.cleared': 'Historique effacé.',
   'account.deleteConfirm': 'Supprimer votre compte, tous ses profils et leur historique de visionnage ? Cette action est définitive.',
   'account.deleted': 'Votre compte et votre historique de visionnage sont supprimés.',
-  'account.deletedKept': 'Votre compte est supprimé. Votre historique de visionnage reste sur le serveur, inutilisable.',
+  'account.deletedKept': 'Votre compte et votre historique de visionnage sont supprimés. Vos demandes restent, sans votre nom.',
 
   'manage.titleOwner': 'Profils',
   'manage.titleSelf': 'Mon profil',
