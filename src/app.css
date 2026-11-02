@@ -688,7 +688,7 @@ html.has-backdrop .slide::before { content: none; }
 /* A title's page: one even veil over its whole backdrop (not the home
    page's fade), its content straight on it, its poster large beside the
    text. */
-.page-backdrop.even::after { background: rgba(var(--bg-rgb), .9); }
+.page-backdrop.even::after { background: rgba(var(--bg-rgb), .8); }
 .sheet.clear { background: none; padding-top: .5rem; }
 .title-hero.art { min-height: 0; }
 .title-hero .info { align-items: flex-start; gap: 2.5rem; padding-top: 2.5rem; max-width: 76rem; }
@@ -698,24 +698,40 @@ html.has-backdrop .slide::before { content: none; }
 @media (min-width: 601px) { .hero.title-hero .overview.folded { display: block; -webkit-line-clamp: none; overflow: visible; } }
 /* On desktop the seasons start under the poster; on a phone they stay centred. */
 @media (min-width: 601px) { .sheet .seasons button:first-child { margin-left: 0; } }
-/* The home page: the slideshow carries its own fades (the side one melting
-   into the bottom one, which ends at the sheet's veil), and the
-   sheet under it is one even veil, as on a title's page. */
+/* The home page: the slideshow's only fades are one at its foot, into the
+   sheet, and a veil under its text alone, not its logo or buttons, fading
+   everywhere but on the left, where the text is aligned. The sheet under
+   it is one even veil, as on a title's page. The foot's fade is in the
+   page's color (--page-rgb), the slideshow itself being always dark. */
+:root { --page-rgb: var(--bg-rgb); }
 html:has(.slides) .page-backdrop::after { background: none; }
-html.has-backdrop .slides::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(to right, rgba(var(--bg-rgb), .92) 0%, rgba(var(--bg-rgb), .8) 40%, rgba(var(--bg-rgb), .35) 66%, rgba(var(--bg-rgb), 0) 86%);
-  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 calc(var(--under) + 1rem));
-  mask-image: linear-gradient(to top, transparent 0, #000 calc(var(--under) + 1rem));
-}
 html.has-backdrop .slides::after {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(to top, rgba(var(--bg-rgb), .9) 0, rgba(var(--bg-rgb), .9) calc(var(--under) + 1rem), rgba(var(--bg-rgb), 0) 70%);
+  background: linear-gradient(to top, rgba(var(--page-rgb), .8) 0, rgba(var(--page-rgb), .8) calc(var(--under) + .25rem), rgba(var(--page-rgb), 0) calc(var(--under) + 3.5rem));
 }
-html.has-backdrop .slides + .sheet { --under: 8rem; background: linear-gradient(to bottom, transparent calc(var(--under) + 1rem), rgba(var(--bg-rgb), .9) 0); }
+html.has-backdrop .slides + .sheet { --under: 8rem; background: linear-gradient(to bottom, transparent calc(var(--under) + 1rem), rgba(var(--bg-rgb), .8) 0); }
+.slide .lower { position: relative; display: flow-root; }
+.slide .text { position: relative; }
+html.has-backdrop .slide .text::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  inset: -2.6rem -14rem -2.6rem calc(-1 * var(--gutter));
+  background: linear-gradient(to right, rgba(var(--bg-rgb), .55) 0, rgba(var(--bg-rgb), .55) 45%, rgba(var(--bg-rgb), .385) 65%, rgba(var(--bg-rgb), .14) 85%, rgba(var(--bg-rgb), 0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
+}
+/* On a phone, one veil: from above the text to the slideshow's foot,
+   dark behind the buttons and dots, then the page's color. */
 @media (max-width: 600px) {
-  html.has-backdrop .slides::before { content: none; }
+  html.has-backdrop .slides::after { content: none; }
   html.has-backdrop .slides + .sheet { --under: 5rem; }
+  html.has-backdrop .slide .text::before { content: none; }
+  html.has-backdrop .slide .lower::before {
+    content: ""; position: absolute; z-index: -1; pointer-events: none;
+    inset: -2.6rem calc(-1 * var(--gutter)) calc(-1 * (4rem + var(--under))) calc(-1 * var(--gutter));
+    background: linear-gradient(to bottom, rgba(var(--bg-rgb), .8) calc(100% - var(--under) - 1rem), rgba(var(--page-rgb), .8) calc(100% - var(--under) + 1rem));
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem);
+    mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem);
+  }
 }
 @media (max-width: 600px) {
   .title-hero .info { align-items: center; gap: 1.25rem; padding-top: 1.5rem; }

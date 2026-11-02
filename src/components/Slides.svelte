@@ -152,6 +152,8 @@
           {:else}
             <h2>{item.name}</h2>
           {/if}
+          <div class="lower">
+          <div class="text">
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
             {#if ageText(item.age)}<span class="age">{ageText(item.age)}</span>{/if}
@@ -165,6 +167,7 @@
             {#if item.genres?.length}<span>{item.genres.slice(0, 3).join(', ')}</span>{/if}
           </div>
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
+          </div>
           <div class="actions">
             {#if item.availability === 'missing'}
               <a class="button primary" href={titlePathOf(item)}><ButtonIcon name="info" />{t('home.moreInfo')}</a>
@@ -190,6 +193,7 @@
             {:else}
               <a class="button primary" href={titlePathOf(item)}><ButtonIcon name="info" />{t('home.seeSeries')}</a>
             {/if}
+          </div>
           </div>
         </div>
       </div>
