@@ -707,7 +707,7 @@ html.has-backdrop .slide::before { content: none; }
 html:has(.slides) .page-backdrop::after { background: none; }
 html.has-backdrop .slides::after {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(to top, rgba(var(--page-rgb), .8) 0, rgba(var(--page-rgb), .8) var(--under), rgba(var(--page-rgb), 0) calc(var(--under) + 1.5rem));
+  background: linear-gradient(to top, rgba(var(--page-rgb), .8) 0, rgba(var(--page-rgb), .8) 5%, rgba(var(--page-rgb), 0) calc(var(--under) + 3.5rem));
 }
 html.has-backdrop .slides + .sheet { --under: 8rem; background: linear-gradient(to bottom, transparent calc(var(--under) + 1rem), rgba(var(--bg-rgb), .8) 0); }
 /* Rows, for the veil to span some of them: logo, text, buttons. */
