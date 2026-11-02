@@ -152,7 +152,6 @@
           {:else}
             <h2>{item.name}</h2>
           {/if}
-          <div class="lower">
           <div class="text">
           <div class="meta">
             {#if item.year}<span>{item.year}</span>{/if}
@@ -193,7 +192,6 @@
             {:else}
               <a class="button primary" href={titlePathOf(item)}><ButtonIcon name="info" />{t('home.seeSeries')}</a>
             {/if}
-          </div>
           </div>
         </div>
       </div>
