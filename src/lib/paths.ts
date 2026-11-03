@@ -23,7 +23,7 @@ export function slug(name: string | undefined): string {
   return cut.includes('-') ? cut.slice(0, cut.lastIndexOf('-')) : cut;
 }
 
-const titleId = /^title_(movie|series)_tmdb_(\d+)(?:_s(\d+)(?:_e(\d+))?)?$/;
+const titleId = /^title_(movie|series)_tmdb_(\d+)(?:_s(\d+)(?:_e(\d+))?|_e(\d+))?$/;
 
 /** titlePath is a title's address; name is its own, or its series' for a
  * season or an episode. A title TMDB doesn't know keeps its ID. */
@@ -35,6 +35,7 @@ export function titlePath(id: string, name?: string): string {
   if (s) parts.push(s);
   if (m[3] !== undefined) parts.push(`season-${m[3]}`);
   if (m[4] !== undefined) parts.push(`episode-${m[4]}`);
+  if (m[5] !== undefined) parts.push(`e${m[5]}`);
   return `/title/${parts.join('/')}`;
 }
 
@@ -59,6 +60,9 @@ export function titleIdOf(parts: string[]): string | null {
   if (!m) return null;
   let id = `title_${m[1] === 'm' ? 'movie' : 'series'}_tmdb_${m[2]}`;
   if (m[1] === 's') {
+    // An episode by TMDB's ID; season-1/episode-3 is an older address.
+    const byId = rest.map((p) => /^e([1-9]\d{0,9})$/.exec(p)?.[1]).find(Boolean);
+    if (byId !== undefined) return `${id}_e${byId}`;
     const season = rest.map((p) => /^season-(\d{1,4})$/.exec(p)?.[1]).find(Boolean);
     const episode = rest.map((p) => /^episode-(\d{1,5})$/.exec(p)?.[1]).find(Boolean);
     if (season !== undefined) {
