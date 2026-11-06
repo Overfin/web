@@ -8,7 +8,7 @@
      the header; it closes with a tap outside, Escape, or going somewhere. -->
 <script lang="ts">
   import { tick } from 'svelte';
-  import { overfin } from '../lib/client';
+  import { leave, overfin } from '../lib/client';
   import { t } from '../lib/i18n.svelte';
   import { librariesHref } from '../lib/lastlibrary';
   import { categoryIdOf, categoryPath } from '../lib/paths';
@@ -90,6 +90,7 @@
   }
 
   async function logout() {
+    leave();
     setPicked(false);
     const out = await overfin.logout().catch(() => ({ logoutUrl: undefined }));
     location.href = out.logoutUrl || '/';

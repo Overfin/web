@@ -2,8 +2,21 @@
 import { Overfin, OverfinError } from './sdk/overfin.js';
 import { has, t } from './i18n.svelte';
 
-export const overfin = new Overfin();
+// Signing out (leave), the page's requests still on their way come back
+// "not signed in": they don't send the browser to sign in again.
+let leaving = false;
+
+export const overfin = new Overfin({
+  onLoginRequired: (url) => {
+    if (!leaving) location.href = url;
+  },
+});
 export { OverfinError };
+
+/** leave says the person is signing out: see overfin above. */
+export function leave() {
+  leaving = true;
+}
 
 /** hls loads hls.js, for browsers without native HLS, only once something plays. */
 export async function hls(): Promise<unknown> {
