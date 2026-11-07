@@ -6,5 +6,5 @@
 
 <p class="powered">
   {t('app.poweredBy')}
-  <a href="https://github.com/overfin/server" target="_blank" rel="noopener"><OverfinBanner /></a>
+  <a href="https://overfin.org" target="_blank" rel="noopener"><OverfinBanner /></a>
 </p>
