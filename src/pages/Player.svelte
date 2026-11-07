@@ -5,7 +5,9 @@
      Whatever has the focus: ← and → seek 10 s (Shift: 1 min), ↑ and ↓ set
      the volume, Space plays and pauses, F is full screen, M mutes. The
      mouse wheel over the player sets the volume. A click on the picture
-     plays or pauses; a double-click is full screen. The controls hide
+     plays or pauses; a double-click is full screen. On a touch screen, a
+     double tap on the left or right third seeks 10 s back or ahead (each
+     tap after it 10 s more). The controls hide
      after 3 s without moving, and stay while paused. -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
@@ -225,18 +227,53 @@
 
   // A click on the picture plays or pauses; with the menu open, it closes
   // the menu; on a touch screen with the controls hidden, a tap only shows
-  // them.
+  // them. A tap on a side waits a moment: a second one there seeks
+  // instead, and so does each next one soon after.
   let lastPointer = 'mouse';
-  function pictureClick() {
+  const DOUBLE_TAP = 300;
+  let tapTimer: ReturnType<typeof setTimeout> | undefined;
+  let tapSide = 0; // -1 left, 1 right: the side of a tap waiting for a second
+  let seekingSide = 0; // the side seeking by taps, until a pause in them
+  let seekingTimer: ReturnType<typeof setTimeout> | undefined;
+  function pictureClick(event: MouseEvent) {
     if (menu) {
       menu = '';
       return;
     }
-    if (lastPointer !== 'mouse' && !shown) {
-      wake();
+    if (lastPointer === 'mouse') {
+      togglePlay();
       return;
     }
-    togglePlay();
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const side = x < 1 / 3 ? -1 : x > 2 / 3 ? 1 : 0;
+    if (side && (side === tapSide || side === seekingSide)) {
+      clearTimeout(tapTimer);
+      tapSide = 0;
+      seekingSide = side;
+      clearTimeout(seekingTimer);
+      seekingTimer = setTimeout(() => (seekingSide = 0), DOUBLE_TAP * 2);
+      jump(side * 10);
+      return;
+    }
+    clearTimeout(tapTimer);
+    if (!side) {
+      tap();
+      return;
+    }
+    tapSide = side;
+    tapTimer = setTimeout(() => {
+      tapSide = 0;
+      tap();
+    }, DOUBLE_TAP);
+  }
+  function tap() {
+    if (!shown) wake();
+    else togglePlay();
+  }
+  // A double-click is full screen; a double tap is for seeking.
+  function pictureDoubleClick() {
+    if (lastPointer === 'mouse') toggleFullscreen();
   }
 
   // The wheel over the player: one step a notch; a touchpad's small moves
@@ -525,6 +562,8 @@
     close();
     clearTimeout(hideTimer);
     clearTimeout(osdTimer);
+    clearTimeout(tapTimer);
+    clearTimeout(seekingTimer);
     window.removeEventListener('keydown', key, { capture: true });
     window.removeEventListener('keyup', keyUp, { capture: true });
     document.removeEventListener('fullscreenchange', onFullscreen);
@@ -554,7 +593,7 @@
   {#if title || shownTitle}<h1 class="sr-only">{title || shownTitle?.series?.name || shownTitle?.name}</h1>{/if}
   <!-- svelte-ignore a11y_media_has_caption: subtitles come from the server's tracks -->
   <video bind:this={video} autoplay playsinline
-    onclick={pictureClick} ondblclick={toggleFullscreen}
+    onclick={pictureClick} ondblclick={pictureDoubleClick}
     ontimeupdate={timeUpdate} onplay={() => { paused = false; blocked = false; }} onpause={() => (paused = true)}
     onwaiting={() => (waiting = true)} onplaying={() => { waiting = false; started = true; }} oncanplay={() => { waiting = false; tryStart(); }}
     onvolumechange={() => { if (video) { volume = video.volume; muted = video.muted; } }}></video>
@@ -802,7 +841,8 @@
   .player { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: #000; z-index: 10; overflow: hidden; color: #fff; }
   .player.idle { cursor: none; }
   /* Layers, spelled out: a video can be composited above what follows it. */
-  video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 0; }
+  /* manipulation: a double tap seeks, never zooms. */
+  video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 0; touch-action: manipulation; }
   .pictures { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
   .controls { position: absolute; z-index: 2; left: 0; right: 0; padding: .6rem clamp(.75rem, 2vw, 1.5rem); transition: opacity .25s; }
   .idle .controls, .idle .skip { opacity: 0; pointer-events: none; }
