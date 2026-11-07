@@ -94,9 +94,12 @@
     }, () => {});
   });
 
+  // The next slide comes a full wait after this one showed: changing
+  // slides (by hand too) starts the wait again.
   $effect(() => {
+    const at = index;
     if (still || hovered || focused || hidden || away || slides.length < 2) return;
-    const timer = setTimeout(() => show(index + 1), every);
+    const timer = setTimeout(() => show(at + 1), every);
     return () => clearTimeout(timer);
   });
 
