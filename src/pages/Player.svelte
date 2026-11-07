@@ -22,7 +22,6 @@
 
   let { id }: { id: string } = $props();
 
-  let root = $state<HTMLDivElement>();
   let video = $state<HTMLVideoElement>();
   // Subtitles that are pictures are drawn here, over the video, by the SDK.
   let pictureCanvas = $state<HTMLCanvasElement>();
@@ -48,7 +47,8 @@
   let bufferedMs = $state(0);
   let volume = $state(1);
   let muted = $state(false);
-  let fullscreen = $state(false);
+  // Already full screen when the next episode replaced the player.
+  let fullscreen = $state(typeof document !== 'undefined' && !!document.fullscreenElement);
   let scrubbing = $state(false);
   // The menu open: audio, subtitles, the episodes, the settings, or none.
   let menu = $state<'' | 'audio' | 'subtitles' | 'episodes' | 'settings'>('');
@@ -167,8 +167,10 @@
     sign(muted ? t('player.muted') : t('player.volumeLevel', { n: Math.round(volume * 100) }));
   }
 
+  // The whole page goes full screen, not the player: the next episode's
+  // player replaces this one, and full screen stays.
   async function toggleFullscreen() {
-    const el = root as HTMLElement & { webkitRequestFullscreen?: () => void };
+    const el = document.documentElement;
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
     } else if (el?.requestFullscreen) {
@@ -367,6 +369,7 @@
   function goNext() {
     const n = next;
     if (!n) return;
+    handover = true;
     close();
     playInstead(n.id, n.userState?.played ? 0 : (n.userState?.positionMs ?? 0));
   }
@@ -435,6 +438,7 @@
   function playEpisode(e: TitleSummary) {
     menu = '';
     if (e.id === playback?.title?.id || !e.playable) return;
+    handover = true;
     close();
     playInstead(e.id, e.userState?.played ? 0 : (e.userState?.positionMs ?? 0));
   }
@@ -508,6 +512,8 @@
 
   // Leaving the screen, or the page, ends the playback.
   let left = false;
+  // handover: another episode takes the player's place; full screen stays.
+  let handover = false;
   function close() {
     homeChanged(); // where it stopped shows in Continue Watching
     const p = player;
@@ -522,7 +528,7 @@
     window.removeEventListener('keydown', key, { capture: true });
     window.removeEventListener('keyup', keyUp, { capture: true });
     document.removeEventListener('fullscreenchange', onFullscreen);
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (document.fullscreenElement && !handover) document.exitFullscreen().catch(() => {});
   });
 
   function chooseAudio(trackId: string) {
@@ -543,7 +549,7 @@
 <svelte:window onpagehide={close} />
 
 <!-- svelte-ignore a11y_no_static_element_interactions: pointer moves only wake the controls -->
-<div class="player" class:idle={!shown} bind:this={root} onpointermove={wake} onpointerdowncapture={(e) => (lastPointer = e.pointerType)} onwheel={wheel}>
+<div class="player" class:idle={!shown} onpointermove={wake} onpointerdowncapture={(e) => (lastPointer = e.pointerType)} onwheel={wheel}>
   <!-- What plays, for screen readers and the tab's title (lib/tabtitle). -->
   {#if title || shownTitle}<h1 class="sr-only">{title || shownTitle?.series?.name || shownTitle?.name}</h1>{/if}
   <!-- svelte-ignore a11y_media_has_caption: subtitles come from the server's tracks -->
