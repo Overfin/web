@@ -845,7 +845,7 @@
   video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 0; touch-action: manipulation; }
   .pictures { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
   .controls { position: absolute; z-index: 2; left: 0; right: 0; padding: .6rem clamp(.75rem, 2vw, 1.5rem); transition: opacity .25s; }
-  .idle .controls, .idle .skip { opacity: 0; pointer-events: none; }
+  .idle .controls { opacity: 0; pointer-events: none; }
   .top { top: 0; display: flex; align-items: center; background: linear-gradient(rgba(0, 0, 0, .7), transparent); padding-bottom: 2.5rem; }
   .top .title { margin-left: .5rem; font-size: 1.05rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px #000; }
   .bottom { bottom: 0; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); padding-top: 3rem; }
@@ -861,8 +861,10 @@
   .volume { display: flex; align-items: center; }
   .volume input { width: 6rem; min-height: 0; padding: 0; margin-left: .2rem; accent-color: var(--accent); background: none; border: none; }
   .clock { font-variant-numeric: tabular-nums; font-size: .9rem; margin-left: .6rem; white-space: nowrap; }
+  /* Shown with the controls hidden too, and above the bottom bar, whose
+     shade would cover its lower half. */
   .skip {
-    position: absolute; z-index: 2; right: clamp(.75rem, 2vw, 1.5rem); bottom: 7rem; transition: opacity .25s;
+    position: absolute; z-index: 3; right: clamp(.75rem, 2vw, 1.5rem); bottom: 7rem; transition: opacity .25s;
     background: rgba(20, 22, 28, .85); border: 1px solid rgba(255, 255, 255, .4); color: #fff; font-weight: 600;
   }
   .menuwrap { position: relative; }
