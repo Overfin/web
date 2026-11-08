@@ -8,10 +8,13 @@ const fr: Record<keyof typeof en, string> = {
 
   'nav.home': 'Accueil',
   'nav.list': 'Ma liste',
+  'nav.favorites': 'Favoris',
   'list.title': 'Ma liste',
   'manage.wishing': 'Peut ajouter à ses souhaits',
   'manage.wishingHint': 'Désactivé : ses souhaits sont gardés et attendent.',
   'list.empty': 'Votre liste est vide. Ajoutez-y des titres depuis leur page.',
+  'favorites.title': 'Favoris',
+  'favorites.empty': 'Vous n’avez pas encore de favoris. Ajoutez-en avec le cœur sur la page d’un titre.',
   'nav.wishlist': 'Mes souhaits',
   'wish.title': 'Mes souhaits',
   'wish.intro': 'Les titres que vous aimeriez trouver ici, le plus voulu en premier. Chacun son tour, pour que personne n’attende longtemps.',
