@@ -16,6 +16,7 @@
   import { visible } from '../lib/visible';
   import { landed } from '../lib/warm';
   import Card from '../components/Card.svelte';
+  import GenreMenu from '../components/GenreMenu.svelte';
   import GenreRows from '../components/GenreRows.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
@@ -152,16 +153,13 @@
       {/each}
     </nav>
     <h1 class="sr-only">{library.name}</h1>
+  {:else if category && genres.length}
+    <div class="title-row">
+      <h1>{library.name}</h1>
+      <GenreMenu {base} {genres} {genre} />
+    </div>
   {:else}
     <h1>{library.name}</h1>
-  {/if}
-  {#if category && genres.length}
-    <nav class="pills genre-pills" aria-label={t('library.genre')}>
-      <a href={base} class:active={!genre} aria-current={!genre ? 'page' : undefined}>{t('genres.all')}</a>
-      {#each [...genres].sort((a, b) => (b.itemCount ?? 0) - (a.itemCount ?? 0)) as g (g.name)}
-        <a href="{base}?genre={encodeURIComponent(g.name)}" class:active={genre === g.name} aria-current={genre === g.name ? 'page' : undefined}>{g.name}</a>
-      {/each}
-    </nav>
   {/if}
   {#if browsing}
     <GenreRows category={id} {base} {genres} />

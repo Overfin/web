@@ -116,7 +116,6 @@ const fr: Record<keyof typeof en, string> = {
   'library.show.inProgress': 'En cours',
   'library.show.favorites': 'Favoris',
   'library.clear': 'Effacer les filtres',
-  'genres.all': 'Tout',
   'genres.recent': 'Ajouts récents',
   'genres.seeAll': 'Tout voir',
   'genres.everything': 'Voir les {count} titres, de A à Z',

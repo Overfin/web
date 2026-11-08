@@ -517,6 +517,22 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .pills a:last-child { margin-right: auto; }
 .pills a:hover { background-color: var(--panel-3); border-color: var(--border-strong); }
 .pills a.active { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; }
+/* A category's name, its genres' button beside it (GenreMenu): their list
+   drops in columns, two across the page on a phone. */
+.title-row { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.2rem; margin-bottom: 1rem; }
+.title-row h1 { margin: .2rem 0; }
+.genre-menu { position: relative; }
+.genre-menu > button { gap: .45rem; border-radius: 999px; padding-inline: 1.1em .9em; }
+.genre-menu > button svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; transition: transform .15s; }
+.genre-menu > button[aria-expanded='true'] svg { transform: rotate(180deg); }
+.genre-menu .dropdown { left: 0; right: auto; z-index: 20; grid-template-columns: repeat(4, minmax(9.5rem, 1fr)); max-width: calc(100vw - 2 * var(--gutter)); }
+.genre-menu .dropdown a { white-space: nowrap; }
+.genre-menu .dropdown a.active { background: var(--panel-2); font-weight: 600; }
+@media (max-width: 40rem) {
+  .genre-menu { position: static; }
+  .genre-menu .dropdown { right: 0; grid-template-columns: 1fr 1fr; max-width: none; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .genre-menu > button svg { transition: none; } }
 .season-overview { max-width: 50rem; margin-top: -.3rem; }
 .season-overview.folded { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: .3rem; }
 /* A season's episodes: cards filling the width, as many per row as fit at
