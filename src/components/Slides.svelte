@@ -20,6 +20,7 @@
   import { play } from '../lib/play';
   import { titlePathOf } from '../lib/paths';
   import { pickSlides } from '../lib/slides';
+  import Arrow from './Arrow.svelte';
   import ButtonIcon from './ButtonIcon.svelte';
   import Marks from './Marks.svelte';
 
@@ -200,13 +201,16 @@
       </div>
     {/each}
     {#if slides.length > 1}
-      <button class="nav prev" type="button" aria-label={t('home.previous')} onclick={() => show(index - 1)}>‹</button>
-      <button class="nav next" type="button" aria-label={t('home.next')} onclick={() => show(index + 1)}>›</button>
-      <div class="dots">
-        {#each slides as item, i (item.id)}
-          <button type="button" class:current={i === index} aria-label={t('home.slide', { n: i + 1, total: slides.length })}
-            aria-current={i === index} onclick={() => show(i)}></button>
-        {/each}
+      <!-- Under the text's level, at the right: never over the text. -->
+      <div class="controls">
+        <button class="nav prev" type="button" aria-label={t('home.previous')} onclick={() => show(index - 1)}><Arrow left /></button>
+        <div class="dots">
+          {#each slides as item, i (item.id)}
+            <button type="button" class:current={i === index} aria-label={t('home.slide', { n: i + 1, total: slides.length })}
+              aria-current={i === index} onclick={() => show(i)}></button>
+          {/each}
+        </div>
+        <button class="nav next" type="button" aria-label={t('home.next')} onclick={() => show(index + 1)}><Arrow /></button>
       </div>
     {/if}
   </section>

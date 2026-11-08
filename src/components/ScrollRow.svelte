@@ -1,11 +1,18 @@
 <!-- A row that scrolls sideways. With a mouse, arrow buttons at its ends
      scroll it most of a screen at a time, and it shows no scrollbar; touch
-     screens swipe it, and keyboards and remotes move along its cards. -->
+     screens swipe it, and keyboards and remotes move along its cards. Its
+     class is "row" unless told another (the seasons'); other attributes go
+     on the row, and onrow has it as it's first shown. -->
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
   import { t } from '../lib/i18n.svelte';
+  import Arrow from './Arrow.svelte';
 
-  let { children }: { children: Snippet } = $props();
+  let { children, class: kind = 'row', onrow, ...rest }: HTMLAttributes<HTMLDivElement> & {
+    children: Snippet;
+    onrow?: (row: HTMLDivElement) => void;
+  } = $props();
 
   let row: HTMLDivElement;
   let atStart = $state(true);
@@ -23,6 +30,7 @@
   }
 
   $effect(() => {
+    onrow?.(row);
     update();
     const resized = new ResizeObserver(update);
     resized.observe(row);
@@ -31,9 +39,9 @@
 </script>
 
 <div class="scroller" role="presentation" onmouseenter={update}>
-  <div class="row" bind:this={row} onscroll={update}>
+  <div {...rest} class="scrolls {kind}" bind:this={row} onscroll={update}>
     {@render children()}
   </div>
-  <button class="shift prev" type="button" tabindex="-1" aria-label={t('home.previous')} hidden={atStart} onclick={() => by(-1)}>‹</button>
-  <button class="shift next" type="button" tabindex="-1" aria-label={t('home.next')} hidden={atEnd} onclick={() => by(1)}>›</button>
+  <button class="shift prev" type="button" tabindex="-1" aria-label={t('home.previous')} hidden={atStart} onclick={() => by(-1)}><Arrow left /></button>
+  <button class="shift next" type="button" tabindex="-1" aria-label={t('home.next')} hidden={atEnd} onclick={() => by(1)}><Arrow /></button>
 </div>

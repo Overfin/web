@@ -18,6 +18,7 @@
   import { t } from '../lib/i18n.svelte';
   import { session } from '../lib/session.svelte';
   import Card from '../components/Card.svelte';
+  import ScrollRow from '../components/ScrollRow.svelte';
 
   const saved = 'overfin-web-search';
   let query = $state('');
@@ -133,7 +134,7 @@
 {#snippet people(found: Awaited<ReturnType<typeof overfin.search>>['people'])}
   {#if found.length}
     <h2>{t('search.people')}</h2>
-    <div class="row">
+    <ScrollRow>
       {#each found as p (p.id)}
         <a class="card person" href={personPath(p.id, p.name)}>
           <div class="poster round">
@@ -146,6 +147,6 @@
           <div class="title">{p.name}</div>
         </a>
       {/each}
-    </div>
+    </ScrollRow>
   {/if}
 {/snippet}
