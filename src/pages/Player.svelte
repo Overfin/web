@@ -23,6 +23,10 @@
   import SeekBar from '../components/SeekBar.svelte';
 
   let { id }: { id: string } = $props();
+  // The title's whole ID: an episode's address carries TMDB's ID of it
+  // alone (title_episode_tmdb_…), its series' comes with the title. Set
+  // as it mounts: a new ID is a new player (App's #key).
+  let fullId = '';
 
   let video = $state<HTMLVideoElement>();
   // Subtitles that are pictures are drawn here, over the video, by the SDK.
@@ -484,10 +488,12 @@
   }
 
   onMount(async () => {
+    fullId = id;
     if (!video) return;
-    overfin.title(id).then((t) => {
+    const titled = overfin.title(id).then((t) => {
       about = t;
-      correct(playPath(t.id, (t.series ?? t).name), (parts) => titleIdOf(parts) === id);
+      fullId = t.id;
+      correct(playPath(t.id, (t.series ?? t).name, t.series ? t : undefined), (parts) => titleIdOf(parts, true) === id);
     }, () => {});
     loadVolume();
     video.volume = volume;
@@ -500,7 +506,9 @@
     window.addEventListener('keydown', key, { capture: true });
     window.addEventListener('keyup', keyUp, { capture: true });
     try {
-      player = await overfin.play(video, id, {
+      // Playing takes the whole ID.
+      if (id.startsWith('title_episode_tmdb_')) await titled;
+      player = await overfin.play(video, fullId, {
         startMs: takeStart(),
         Hls: await hls(),
         // The site's language, when the video has it (and the profile
@@ -544,7 +552,7 @@
   // page.
   function back() {
     if (canGoBack()) history.back();
-    else replace(titlePath(id));
+    else replace(titlePath(fullId));
   }
 
   // Leaving the screen, or the page, ends the playback.
