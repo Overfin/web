@@ -7,10 +7,13 @@ export default {
 
   'nav.home': 'Home',
   'nav.list': 'My list',
+  'nav.favorites': 'Favorites',
   'list.title': 'My list',
   'manage.wishing': 'Can add to their wishlist',
   'manage.wishingHint': 'Off: what’s on it is kept, and waits.',
   'list.empty': 'Your list is empty. Add titles to it from their page.',
+  'favorites.title': 'Favorites',
+  'favorites.empty': 'You have no favorites yet. Add some with the heart on a title’s page.',
   'nav.wishlist': 'My wishlist',
   'wish.title': 'My wishlist',
   'wish.intro': 'Titles you’d like to have here, the one you want most first. Everyone takes turns, so nobody waits for long.',

@@ -1,7 +1,7 @@
 <!-- The bar on top of every screen except the profile picker, account setup
      and the player: home, discovery, the operator's categories, and the
      libraries unless the operator took them out (one item, however
-     many there are), then a menu for who's watching (the profile's list,
+     many there are), then a menu for who's watching (the profile's list, its favorites,
      switching, managing profiles, the account, the control panel for
      admins, logging out).
      On phones the sections open from a button on the left, as a list under
@@ -157,6 +157,7 @@
     {#if open}
       <div class="dropdown">
         <a href="/list">{t('nav.list')}</a>
+        <a href="/favorites">{t('nav.favorites')}</a>
         {#if session.wishes}<a href="/wishlist">{t('nav.wishlist')}</a>{/if}
         <a href="/profiles">{t('nav.switchProfile')}</a>
         <a href="/manage">{t('nav.profiles')}</a>
