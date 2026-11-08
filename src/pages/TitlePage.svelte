@@ -22,6 +22,7 @@
   import ButtonIcon from '../components/ButtonIcon.svelte';
   import Marks from '../components/Marks.svelte';
   import Row from '../components/Row.svelte';
+  import ScrollRow from '../components/ScrollRow.svelte';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -258,7 +259,7 @@
 
   {#if title.kind === 'series' && title.seasons && title.seasons.length > 1}
     <!-- svelte-ignore a11y_interactive_supports_focus -->
-    <div class="seasons" role="tablist" aria-label={t('item.seasons')} use:onChosen onkeydown={seasonKeys}>
+    <ScrollRow class="seasons" role="tablist" aria-label={t('item.seasons')} onrow={onChosen} onkeydown={seasonKeys}>
       {#each title.seasons as s (s.id)}
         {@const art = s.images?.primary ?? title.images?.primary}
         <button type="button" role="tab" aria-selected={seasonID === s.id} class:active={seasonID === s.id}
@@ -273,7 +274,7 @@
           {#if s.year}<span class="season-year">{s.year}</span>{/if}
         </button>
       {/each}
-    </div>
+    </ScrollRow>
   {/if}
   <!-- The chosen season's episodes: the seasons' tab panel. -->
   <div id="season-episodes" role={title.kind === 'series' && (title.seasons?.length ?? 0) > 1 ? 'tabpanel' : undefined}>
@@ -370,7 +371,8 @@
         </button>
       {/if}
     </div>
-    <div class={wholeCast ? 'grid' : 'row'}>
+    <!-- The first dozen in a row; everyone, a grid. -->
+    {#snippet faces()}
       {#each cast as c, i (i)}
         <svelte:element this={c.id ? 'a' : 'div'} class="card person" href={c.id ? personPath(c.id, c.name) : undefined}>
           <div class="poster round">
@@ -384,7 +386,12 @@
           <div class="sub">{c.character ?? ''}</div>
         </svelte:element>
       {/each}
-    </div>
+    {/snippet}
+    {#if wholeCast}
+      <div class="grid">{@render faces()}</div>
+    {:else}
+      <ScrollRow>{@render faces()}</ScrollRow>
+    {/if}
   {/if}
   <Row title={t('item.similar')} items={similar} />
   </div>

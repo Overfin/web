@@ -419,16 +419,15 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slide .logo { display: block; max-width: min(24rem, 70vw); max-height: 9rem; width: auto; height: auto; margin-bottom: 1rem; object-fit: contain; object-position: left bottom; filter: var(--logo-shadow); }
 .slide h2 { font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3rem); line-height: 1.1; margin: 0 0 .75rem; text-shadow: var(--title-shadow); }
 .slide .overview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: rgba(var(--text-rgb), .88); }
+.slides .controls { position: absolute; z-index: 3; right: var(--gutter); bottom: calc(1.6rem + var(--under) - .8rem); display: flex; align-items: center; gap: .8rem; }
 .slides .nav {
-  position: absolute; z-index: 3; top: 50%; transform: translateY(-50%); width: 3rem; height: 3rem; min-height: 0; padding: 0;
+  display: grid; place-items: center; width: 2.4rem; height: 2.4rem; min-height: 0; padding: 0;
   border-radius: 50%; border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .45); backdrop-filter: blur(8px); box-shadow: var(--shadow-s);
-  font-size: 1.8rem; line-height: 1; opacity: 0; transition: opacity .2s, background-color .2s;
+  transition: background-color .2s;
 }
-.slides:hover .nav, .slides .nav:focus-visible { opacity: 1; }
 .slides .nav:hover { background: rgba(var(--bg-rgb), .75); }
-.slides .prev { left: 1rem; }
-.slides .next { right: 1rem; }
-.slides .dots { position: absolute; z-index: 3; right: var(--gutter); bottom: calc(1.6rem + var(--under)); display: flex; gap: .45rem; }
+.slides .nav svg.arrow { width: 1.15rem; height: 1.15rem; }
+.slides .dots { display: flex; gap: .45rem; }
 .slides .dots button { width: .6rem; height: .6rem; min-height: 0; padding: 0; border: none; box-shadow: none; border-radius: 999px; background: rgba(var(--text-rgb), .35); transition: width .3s, background-color .3s; }
 .slides .dots button.current { width: 1.6rem; background: var(--text); }
 @media (max-width: 600px) {
@@ -444,7 +443,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
   .slide .content > .logo { justify-self: center; object-position: center bottom; }
   .slide .overview { -webkit-line-clamp: 2; }
   .slides .nav { display: none; }
-  .slides .dots { left: 0; right: 0; justify-content: center; bottom: calc(1.2rem + var(--under)); }
+  .slides .controls { left: 0; right: 0; justify-content: center; bottom: calc(1.2rem + var(--under)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .slide, .slide img.backdrop, .slides .dots button { transition: none; }
@@ -634,19 +633,21 @@ button.link.about-toggle { align-self: flex-start; min-height: 0; padding: .1rem
 .scroller { position: relative; }
 .shift { display: none; }
 @media (hover: hover) and (pointer: fine) {
-  .scroller .row { scrollbar-width: none; }
-  .scroller .row::-webkit-scrollbar { display: none; }
+  .scroller .scrolls { scrollbar-width: none; }
+  .scroller .scrolls::-webkit-scrollbar { display: none; }
   .shift {
     display: grid; place-items: center; position: absolute; z-index: 2; top: 0; bottom: 2.8rem; margin: auto 0;
     width: 3rem; height: 3rem; min-height: 0; padding: 0; border-radius: 50%;
     border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .6); backdrop-filter: blur(8px); box-shadow: var(--shadow);
-    font-size: 1.8rem; line-height: 1; opacity: 0; transition: opacity .2s, background-color .2s;
+    opacity: 0; transition: opacity .2s, background-color .2s;
   }
   .scroller:hover .shift { opacity: 1; }
   .shift:hover { background: rgba(var(--bg-rgb), .85); }
   .shift.prev { left: calc(.75rem - var(--gutter)); }
   .shift.next { right: calc(.75rem - var(--gutter)); }
 }
+/* The arrows' chevrons (Arrow), in rows and the slideshow alike. */
+svg.arrow { display: block; width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Users' score, with a small star. */
 .meta .score { display: inline-flex; align-items: center; gap: .3em; color: var(--warn); font-weight: 600; }
