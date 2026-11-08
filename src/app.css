@@ -474,10 +474,12 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .meta .availability { color: var(--text); font-weight: 600; }
 /* A series' seasons: a row of posters smaller than titles' (a phone shows
    three and a half), the chosen one outlined; sideways when they don't
-   fit. A season without a poster: the series', its number over it. */
+   fit. A season without a poster: the series', its number over it. Each
+   poster the button's width from the start: sized by its name while its
+   picture loads, they'd differ. */
 .seasons { display: flex; gap: .8rem; overflow-x: auto; scrollbar-width: none; margin: 1.5rem calc(-1 * var(--gutter)) 0; padding: .4rem var(--gutter) .5rem; }
 .seasons button {
-  flex: none; width: clamp(5.5rem, 24vw, 7.5rem); display: grid; gap: .15rem; justify-items: start; align-content: start;
+  flex: none; width: clamp(5.5rem, 24vw, 7.5rem); display: grid; grid-template-columns: minmax(0, 1fr); gap: .15rem; justify-items: start; align-content: start;
   min-height: 0; padding: 0; border: none; border-radius: 0; background: none; box-shadow: none; text-align: left; font-weight: 400;
 }
 .seasons button:hover { background: none; }
