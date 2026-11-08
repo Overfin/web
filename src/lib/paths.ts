@@ -39,23 +39,37 @@ export function titlePath(id: string, name?: string): string {
   return `/title/${parts.join('/')}`;
 }
 
-/** playPath is the player's address for a title: its own, under /play/
- * (/play/m550988/free-guy). */
-export function playPath(id: string, name?: string): string {
+/** playPath is the player's address for a title: a film's or a series'
+ * own, under /play/ (/play/m550988/free-guy); an episode's, TMDB's ID of
+ * it alone, then its series' name (name), its numbers and its own name, as
+ * far as they're given (/play/e1158146/les-100-s3e3-le-treizieme-clan). */
+export function playPath(id: string, name?: string, episode?: { name?: string; seasonNumber?: number; episodeNumber?: number }): string {
+  const m = episodeId.exec(id);
+  if (m) {
+    const at = episode?.seasonNumber !== undefined && episode.episodeNumber !== undefined ? `s${episode.seasonNumber}e${episode.episodeNumber}` : '';
+    const s = slug([name, at, episode?.name].filter(Boolean).join(' '));
+    return `/play/e${m[1]}${s ? `/${s}` : ''}`;
+  }
   return '/play/' + titlePath(id, name).slice('/title/'.length);
 }
+
+/** episodeId is an episode's ID by TMDB's ID of it. */
+const episodeId = /^title_series_tmdb_\d+_e(\d+)$/;
 
 /** titlePathOf is a title's address, from what lists and pages carry. */
 export function titlePathOf(t: { id: string; name: string; series?: { name: string } }): string {
   return titlePath(t.id, t.series?.name ?? t.name);
 }
 
-/** titleIdOf reads a title's ID from its address's parts after /title/;
- * null when they name none. */
-export function titleIdOf(parts: string[]): string | null {
+/** titleIdOf reads a title's ID from its address's parts after /title/
+ * (or /play/, play: then an episode's may be TMDB's ID of it alone, e1158146,
+ * which the API takes for its page only); null when they name none. */
+export function titleIdOf(parts: string[], play = false): string | null {
   const [first, ...rest] = parts;
   if (!first) return null;
   if (first.startsWith('title_')) return first;
+  const alone = play ? /^e([1-9]\d{0,9})$/.exec(first) : null;
+  if (alone) return `title_episode_tmdb_${alone[1]}`;
   const m = /^([ms])([1-9]\d{0,9})$/.exec(first);
   if (!m) return null;
   let id = `title_${m[1] === 'm' ? 'movie' : 'series'}_tmdb_${m[2]}`;

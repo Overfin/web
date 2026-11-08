@@ -194,9 +194,9 @@
       {:else if route.parts[0] === 'title' && titleIdOf(route.parts.slice(1))}
         <!-- Readable addresses (lib/paths): only the number counts. -->
         <TitlePage id={titleIdOf(route.parts.slice(1))!} params={route.params} />
-      {:else if route.parts[0] === 'play' && titleIdOf(route.parts.slice(1))}
+      {:else if route.parts[0] === 'play' && titleIdOf(route.parts.slice(1), true)}
         <!-- A new player for each title, as the next episode replaces one. -->
-        {#key titleIdOf(route.parts.slice(1))}<Player id={titleIdOf(route.parts.slice(1))!} />{/key}
+        {#key titleIdOf(route.parts.slice(1), true)}<Player id={titleIdOf(route.parts.slice(1), true)!} />{/key}
       {:else if route.parts[0] === 'profiles'}
         <Profiles />
       {:else if route.parts[0] === 'manage'}

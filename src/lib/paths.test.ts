@@ -63,4 +63,15 @@ describe('categories', () => {
     expect(playPath('title_movie_tmdb_550988')).toBe('/play/m550988');
     expect(titleIdOf(['s38527', '19-2', 'season-1', 'episode-3'])).toBe('title_series_tmdb_38527_s1_e3');
   });
+  it('gives an episode\'s player its own ID alone, then its series, numbers and name', () => {
+    const ep = { name: 'Le treizième clan', seasonNumber: 3, episodeNumber: 3 };
+    expect(playPath('title_series_tmdb_48866_e1158146', 'Les 100', ep)).toBe('/play/e1158146/les-100-s3e3-le-treizieme-clan');
+    expect(playPath('title_series_tmdb_48866_e1158146', 'Les 100')).toBe('/play/e1158146/les-100');
+    expect(playPath('title_series_tmdb_48866_e1158146')).toBe('/play/e1158146');
+    // Read back: the episode alone, which the API takes for its page.
+    expect(titleIdOf(['e1158146', 'les-100-s3e3-le-treizieme-clan'], true)).toBe('title_episode_tmdb_1158146');
+    // Older addresses still work; a title's page has no such address.
+    expect(titleIdOf(['s48866', 'les-100', 'e1158146'], true)).toBe('title_series_tmdb_48866_e1158146');
+    expect(titleIdOf(['e1158146'])).toBe(null);
+  });
 });
