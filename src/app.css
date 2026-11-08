@@ -38,7 +38,9 @@
    window, so a big screen shows the same page, larger. */
 html { font-size: clamp(100%, 100vw / 96, 250%); }
 * { box-sizing: border-box; }
-#app { min-height: 100vh; }
+/* A column the screen's height at least: on a page shorter than the
+   screen, the footer ("Powered by Overfin") sits at the bottom. */
+#app { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; }
 [hidden] { display: none !important; }
 body {
   margin: 0; color: var(--text); font: 1rem/1.5 var(--font); overflow-x: hidden;
@@ -130,7 +132,7 @@ header {
 .brand .pending { display: block; height: 1.9rem; width: 7rem; }
 /* The bottom of every page: "Powered by Overfin" (with the operator's
    brand), then TMDB's attribution, small, last. */
-footer.site-foot { display: grid; justify-items: center; gap: .6rem; padding: 1.5rem var(--gutter) 1.5rem; text-align: center; }
+footer.site-foot { margin-top: auto; display: grid; justify-items: center; gap: .6rem; padding: 1.5rem var(--gutter) 1.5rem; text-align: center; }
 footer.site-foot p { margin: 0; }
 .powered { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--muted); }
 .powered svg { display: block; height: 1.2rem; width: auto; color: var(--text); }
