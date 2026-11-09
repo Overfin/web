@@ -87,7 +87,8 @@ OVERFIN_URL=http://… OVERFIN_EMAIL=… OVERFIN_PASSWORD=… npm run e2e
 
 They only look, or put back what they changed: the home page, the menu and
 its addresses, a category on a phone, a title and its address, the profiles
-page, collections and search, the control panel's windows. A page error or
+page, collections and search, the arrows, a TV's ways, the genres' button,
+favorites, a screen signed in with a code, the control panel's windows. A page error or
 a browser dialog fails them.
 
 CI rebuilds the site and fails if `dist/` isn't exactly what the sources

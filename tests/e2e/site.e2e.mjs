@@ -403,3 +403,161 @@ test('control panel: lists, forms in windows, its own confirmations', { skip: sk
   }
   await done(p);
 });
+
+const focused = (p) => p.evaluate(() => {
+  const e = document.activeElement;
+  const r = e.getBoundingClientRect();
+  return { tag: e.tagName, cls: String(e.className), text: (e.textContent || '').trim().slice(0, 40), left: r.left, top: r.top, body: e === document.body };
+});
+
+test('arrows: scroll with nothing focused; then go from item to item, stopping at a row\'s end', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  await p.goto(`${base}/`);
+  await p.locator('main .row .card').first().waitFor();
+  await p.keyboard.press('ArrowDown');
+  await p.waitForFunction(() => scrollY > 0);
+  assert.ok((await focused(p)).body, 'nothing focused: the page scrolled');
+  await p.evaluate(() => scrollTo(0, 0));
+  await p.locator('main .row .card').first().focus();
+  const first = await focused(p);
+  await p.keyboard.press('ArrowRight');
+  await p.waitForTimeout(100);
+  const second = await focused(p);
+  assert.match(second.cls, /card/);
+  assert.notEqual(second.text, first.text, 'along the row');
+  await p.keyboard.press('ArrowLeft');
+  await p.waitForTimeout(100);
+  assert.equal((await focused(p)).text, first.text, 'and back');
+  // To the row's end: it stays on a card of this row.
+  const row = p.locator('main .row').first();
+  const cards = await row.locator('.card').count();
+  await row.locator('.card').last().focus();
+  const last = await focused(p);
+  await p.keyboard.press('ArrowRight');
+  await p.waitForTimeout(100);
+  assert.equal((await focused(p)).text, last.text, `the end of a row of ${cards}`);
+  await done(p);
+});
+
+test('a TV (?tv=1): light look, the first arrow lands on an item; a text field lets go up and down', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  await p.goto(`${base}/?tv=1`);
+  await p.locator('main .row .card').first().waitFor();
+  assert.ok(await p.evaluate(() => document.documentElement.classList.contains('tv')), 'the class');
+  const blur = await p.evaluate(() => getComputedStyle(document.querySelector('header .dropdown, .slides .nav') ?? document.body).backdropFilter);
+  assert.ok(blur === 'none' || blur === '', `no blur: ${blur}`);
+  await p.keyboard.press('ArrowDown');
+  await p.waitForTimeout(100);
+  assert.ok(!(await focused(p)).body, 'the first arrow gave the focus to an item');
+  await p.goto(`${base}/search`);
+  await p.locator('main input[type=search]').waitFor();
+  await p.locator('main input[type=search]').focus();
+  await p.keyboard.press('ArrowUp');
+  await p.waitForTimeout(100);
+  assert.notEqual((await focused(p)).tag, 'INPUT', 'up left the text field');
+  await p.goto(`${base}/?tv=0`);
+  await p.waitForFunction(() => !document.documentElement.classList.contains('tv'));
+  await done(p);
+});
+
+test('a category: its genres behind one button, a list that fits the screen', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  const link = p.locator('header nav a[href^="/category/"]').first();
+  if (!(await link.count())) return;
+  await link.click();
+  const button = p.locator('.genre-menu > button');
+  await button.waitFor({ timeout: 15000 }).catch(() => {});
+  if (!(await button.count())) return; // a category without genres
+  await button.click();
+  const list = p.locator('.genre-menu .dropdown');
+  await list.waitFor();
+  const box = await list.boundingBox();
+  assert.ok(box.x >= 0 && box.x + box.width <= 1280, `inside the screen: ${JSON.stringify(box)}`);
+  await p.keyboard.press('Escape');
+  await list.waitFor({ state: 'detached' });
+  assert.equal(await p.evaluate(() => document.activeElement?.closest('.genre-menu') != null), true, 'the focus back on its button');
+  await button.click();
+  const genre = list.locator('a').nth(1);
+  const name = (await genre.textContent()).trim();
+  await genre.click();
+  await p.waitForURL((u) => u.searchParams.has('genre'));
+  await p.waitForFunction((n) => document.querySelector('.genre-menu > button')?.textContent.includes(n), name);
+  await done(p);
+});
+
+test('favorites: a heart on a title shows on its page, its button takes it off', { skip }, async () => {
+  const p = await page();
+  await pick(p);
+  await p.goto(`${base}/`);
+  const href = await p.locator('main .row a.card').first().getAttribute('href');
+  await p.goto(`${base}${href}`);
+  const heart = p.locator('.hero .heart').first();
+  await heart.waitFor();
+  const had = (await heart.getAttribute('aria-pressed')) === 'true';
+  if (!had) {
+    await heart.click();
+    await p.waitForFunction(() => document.querySelector('.hero .heart')?.getAttribute('aria-pressed') === 'true');
+  }
+  const name = (await p.locator('.hero h1').first().textContent()).trim();
+  await p.goto(`${base}/favorites`);
+  const card = p.locator('main .grid .cardbox', { hasText: name }).first();
+  await card.waitFor();
+  if (!had) { // put back as it was
+    await card.hover();
+    await card.locator('.remove').click();
+    await card.waitFor({ state: 'detached' });
+    await p.reload();
+    await p.locator('main h1').waitFor();
+    await p.waitForTimeout(500);
+    assert.equal(await p.locator('main .grid .cardbox', { hasText: name }).count(), 0, 'gone for good');
+  }
+  await done(p);
+});
+
+test('a screen signs in with a code confirmed elsewhere, and ending that device signs it out', { skip }, async () => {
+  const context = await browser.newContext();
+  const tv = await context.newPage();
+  tv.problems = [];
+  tv.on('pageerror', (e) => tv.problems.push(`page error: ${e.message}`));
+  await tv.goto(`${base}/signin`);
+  await tv.locator('#device-start').click();
+  await tv.locator('#device-code').filter({ hasText: '-' }).waitFor({ timeout: 30000 });
+  const code = (await tv.locator('#device-code').textContent()).trim();
+  assert.match(code, /^[A-Z]{4}-[A-Z]{4}$/);
+  assert.ok(await tv.locator('#device-qr path').getAttribute('d'), 'the QR code is drawn');
+
+  const p = await page();
+  await pick(p);
+  const before = await p.evaluate(async () => (await (await fetch('/api/v1/sessions')).json()).items.map((s) => s.id));
+  await p.goto(`${base}/link#${code.replace('-', '')}`);
+  const confirm = p.locator('#link-confirm');
+  await confirm.waitFor();
+  assert.match(await p.locator('#link-ask').textContent(), new RegExp(email.replace('.', '\\.')));
+  await confirm.locator('button[type=submit]').click();
+  await p.locator('#done').waitFor();
+
+  await tv.waitForURL((u) => !u.pathname.startsWith('/signin'), { timeout: 15000 });
+  await tv.waitForFunction(() => fetch('/api/v1/me').then((r) => r.ok), null, { timeout: 15000 });
+  // A code works once.
+  await p.goto(`${base}/link`);
+  await p.locator('#code').fill(code);
+  await p.locator('#link button[type=submit]').click();
+  await p.locator('#error').filter({ hasText: /./ }).waitFor();
+
+  // Ending the device: its next request isn't signed in any more.
+  const ended = await p.evaluate(async (known) => {
+    const all = (await (await fetch('/api/v1/sessions')).json()).items;
+    const fresh = all.filter((s) => !s.current && !known.includes(s.id));
+    for (const s of fresh) await fetch(`/api/v1/sessions/${s.id}`, { method: 'DELETE' });
+    return fresh.length;
+  }, before);
+  assert.equal(ended, 1, 'the screen is one new device');
+  const status = await tv.evaluate(() => fetch('/api/v1/me').then((r) => r.status));
+  assert.equal(status, 401, 'signed out');
+  assert.deepEqual(tv.problems, []);
+  await context.close();
+  await done(p);
+});
