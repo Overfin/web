@@ -6,8 +6,8 @@
 // a part that handles them itself (the seasons, the slideshow, the player)
 // keeps them. Inside an open menu or window, only its items are reached;
 // what Tab skips (tabindex -1: a row's arrows, the seasons but the chosen
-// one) or what's marked data-arrows="skip" (the slideshow's own arrows)
-// never is.
+// one) or what's in data-arrows="skip" (the slideshow's own arrows, an
+// episode's marks) never is.
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -79,7 +79,7 @@ export function arrows(event: KeyboardEvent): boolean {
   const current = document.activeElement;
   if (!current || current === document.body || keepsArrows(current)) return false;
   const scope = current.closest('dialog[open], [role=dialog], .dropdown') ?? document;
-  const elements = [...scope.querySelectorAll<HTMLElement>(focusable)].filter((e) => e !== current && !e.closest('[inert]') && e.dataset.arrows !== 'skip' && e.tabIndex >= 0);
+  const elements = [...scope.querySelectorAll<HTMLElement>(focusable)].filter((e) => e !== current && !e.closest('[inert]') && !e.closest('[data-arrows=skip]') && e.tabIndex >= 0);
   // The menu bar stays on top of the screen while the page scrolls: it's
   // taken where it belongs, at the page's top, so up reaches what's above
   // first.

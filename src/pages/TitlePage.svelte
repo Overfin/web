@@ -322,9 +322,11 @@
             {/if}
           </div>
           <div class="head">
-            <a href={titlePathOf(e)}><span class="number">{e.episodeNumber}.</span> {e.name}</a>
+            <!-- One stop per episode for the arrows (lib/spatial): its play
+                 button, else its name; the rest is Tab's. -->
+            <a href={titlePathOf(e)} data-arrows={e.playable ? 'skip' : undefined}><span class="number">{e.episodeNumber}.</span> {e.name}</a>
             <!-- Watched and favorite, as on a title's page. -->
-            <div class="marks actions">
+            <div class="marks actions" data-arrows="skip">
               <button class="toggle" class:on={seen} type="button" aria-pressed={seen}
                 aria-label={seen ? t('item.markUnwatched') : t('item.markWatched')} title={seen ? t('item.markUnwatched') : t('item.markWatched')}
                 onclick={() => toggleEpisode(e)}>
@@ -345,7 +347,7 @@
           {#if e.overview}
             <p class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>{e.overview}</p>
             {#if longAbout[e.id] || unfolded[e.id]}
-              <button class="link about-toggle" type="button" aria-expanded={!!unfolded[e.id]}
+              <button class="link about-toggle" type="button" data-arrows="skip" aria-expanded={!!unfolded[e.id]}
                 onclick={() => (unfolded[e.id] = !unfolded[e.id])}>
                 {unfolded[e.id] ? t('common.readLess') : t('common.readMore')}
               </button>

@@ -278,6 +278,9 @@ form.stack { display: grid; gap: .6rem; text-align: left; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .card:focus-visible { outline: none; }
 .card:focus-visible .poster { outline: 3px solid var(--accent); }
+/* An episode's play button focused: its whole picture outlined, seen from
+   across a room (the arrows' one stop per episode). */
+ol.episodes li:has(.still .act:focus-visible) .still { outline: 3px solid var(--accent); outline-offset: 2px; }
 .profile:focus-visible { outline: none; }
 .profile:focus-visible .avatar { outline: 3px solid var(--accent); }
 
