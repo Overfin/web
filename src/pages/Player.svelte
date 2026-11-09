@@ -21,6 +21,7 @@
   import { correct, playPath, titleIdOf, titlePath } from '../lib/paths';
   import { canGoBack, replace } from '../lib/router.svelte';
   import SeekBar from '../components/SeekBar.svelte';
+  import { onTV } from '../lib/tv';
 
   let { id }: { id: string } = $props();
   // The title's whole ID: an episode's address carries TMDB's ID of it
@@ -192,10 +193,61 @@
     else video?.requestPictureInPicture().catch(() => {});
   }
 
+  // On a TV (lib/tv) the remote's arrows also reach the buttons: with none
+  // focused, OK plays or pauses, left and right seek, up or down show the
+  // controls on play/pause; once one is, the arrows go from button to
+  // button (lib/spatial), OK presses it, and Back (Escape) lets go of the
+  // controls. They hide as usual, the focus with them.
+  let controls = $state<HTMLDivElement>();
+  function inControls() {
+    const focused = document.activeElement;
+    return !!focused && focused !== document.body && !!focused.closest('.player') && focused.tagName !== 'VIDEO';
+  }
+  function letGo() {
+    if (inControls()) (document.activeElement as HTMLElement).blur();
+  }
+  function tvKey(event: KeyboardEvent) {
+    if (inControls()) {
+      if (event.key !== 'Escape') {
+        wake();
+        return;
+      }
+      // Back closes an open menu first, then lets go of the controls.
+      if (menu) {
+        // The focus back on the menu's own button.
+        const opener = controls?.querySelector<HTMLElement>('button.on');
+        menu = '';
+        opener?.focus();
+        wake();
+      } else {
+        letGo();
+        if (!paused) shown = false;
+      }
+    } else {
+      switch (event.key) {
+        case 'Enter': case ' ': case 'Spacebar': if (!event.repeat) togglePlay(); break;
+        case 'ArrowLeft': jump(-10); break;
+        case 'ArrowRight': jump(10); break;
+        case 'ArrowUp': case 'ArrowDown':
+          wake();
+          controls?.querySelector<HTMLElement>('.buttons button')?.focus();
+          break;
+        default: return;
+      }
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') wake();
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  $effect(() => {
+    if (onTV && !shown) letGo();
+  });
+
   // The keys, whatever has the focus: caught before anything focused sees
   // them. Other keys go on as usual (Tab, Enter in a menu, Escape).
   function key(event: KeyboardEvent) {
     if (event.ctrlKey || event.metaKey || event.altKey || notice) return;
+    if (onTV && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' ', 'Spacebar', 'Escape'].includes(event.key)) return tvKey(event);
     const long = event.shiftKey ? 60 : 10;
     switch (event.key) {
       case 'ArrowLeft': jump(-long); break;
@@ -727,7 +779,7 @@
     </aside>
   {/if}
 
-  <div class="bottom controls" role="toolbar" tabindex="-1"
+  <div class="bottom controls" role="toolbar" tabindex="-1" bind:this={controls}
     onpointerenter={() => (overControls = true)} onpointerleave={() => (overControls = false)}>
     <SeekBar {positionMs} {durationMs} {bufferedMs} trickplay={playback?.trickplay} seek={seekTo} bind:scrubbing />
     <div class="buttons">
@@ -751,7 +803,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" /></svg>
           {/if}
         </button>
-        <input type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume} aria-label={t('player.volume')}
+        <!-- The arrows pass it by: a remote has its own volume. -->
+        <input type="range" min="0" max="1" step="0.05" value={muted ? 0 : volume} aria-label={t('player.volume')} data-arrows="skip"
           oninput={(e) => setVolume(Number((e.currentTarget as HTMLInputElement).value))} />
       </div>
       <span class="clock">{clock(positionMs)} / {clock(durationMs)}</span>
