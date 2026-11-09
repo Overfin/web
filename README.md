@@ -12,17 +12,19 @@ TypeScript, on Overfin's
 - **Profiles and devices**: renaming, a kids profile's age, the categories,
   libraries and hidden tags per profile, "Content for children" in a
   profile's recommendations, setting, changing and removing PINs, each
-  profile's look, deleting profiles, signed-in devices; the site asks for a
-  PIN or a fresh login when the server wants one.
+  profile's look, deleting profiles, signed-in devices, the account's limits
+  (profiles, streams at once, how they're shared); the site asks for a PIN
+  or a fresh login when the server wants one.
 - **Account**: how one signs in, the account's language, downloading your
   data, bringing a history over, deleting your account.
 - **Home**: a slideshow of featured titles, continue watching (next episodes
   included), the profile's list, recommendations for the profile (all, and
   among the newest), what's trending (when the server offers discovery),
   the latest per home category and per library.
-- **Categories**: those the operator made, each in the menu with its page;
-  the libraries leave the menu when the operator says so.
-- **My list**: a page of the profile's list.
+- **Categories**: those the operator made, each in the menu with its page,
+  its genres behind one button; the libraries leave the menu when the
+  operator says so.
+- **My list** and **Favorites**: a page each.
 - **Discover**, when the server offers it: trending, popular and upcoming
   films and series the libraries don't have (to wish for, when the server
   offers wishlists).
@@ -43,6 +45,11 @@ TypeScript, on Overfin's
   previews while seeking, "Skip intro", the next episode, progress, resume,
   taking playback back from another device, and the same keys whatever has
   the focus (arrows seek and change the volume, Space plays and pauses).
+- **Keyboards and remotes**: once something has the focus, the arrows go from
+  item to item (`src/lib/spatial.ts`).
+- **TVs** (`src/lib/tv.ts`: their browsers, or `?tv=1` to try it): the player
+  takes a remote's keys, and the site drops its blur, shadows and fades and
+  reads nothing ahead.
 - **English and French**: the account's language, the browser's until it's
   known.
 
