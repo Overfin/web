@@ -80,17 +80,6 @@
 
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
-  let episodeFavorites = $state<Record<string, boolean>>({});
-  async function toggleEpisodeFavorite(e: TitleSummary) {
-    homeChanged();
-    const now = episodeFavorites[e.id] ?? e.userState?.favorite ?? false;
-    try {
-      episodeFavorites[e.id] = (await overfin.setFavorite(e.id, !now)).favorite;
-    } catch (err) {
-      await notice(explain(err));
-    }
-  }
-
   async function toggleEpisode(e: TitleSummary) {
     homeChanged();
     const now = episodeMarks[e.id] ?? e.userState?.played ?? false;
@@ -219,8 +208,9 @@
               <button class="primary" onclick={() => play(title.id, 0)}><ButtonIcon name="play" />{t('item.play')}</button>
             {/if}
           {/if}
-          <!-- My list, watched, favorite: icons that fill in when on. -->
-          <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite} />
+          <!-- My list, watched, favorite: icons that fill in when on (no
+               heart on an episode: favorites are films and series). -->
+          <Marks id={title.id} played={title.userState?.played} favorite={title.userState?.favorite} heart={title.kind !== 'episode'} />
           {#if title.collection}
             <a class="button toggle" href={collectionPath(title.collection.id, title.collection.name)} aria-label={t('title.seeCollection')} title={t('title.seeCollection')}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3.5" width="12" height="15" rx="1.5" /><path d="M4.5 7v12a1.5 1.5 0 0 0 1.5 1.5h10" /></svg>
@@ -308,7 +298,6 @@
       {#each season.episodes as e (e.id)}
         {@const seen = episodeMarks[e.id] ?? e.userState?.played ?? false}
         {@const at = e.userState?.positionMs ?? 0}
-        {@const loved = episodeFavorites[e.id] ?? e.userState?.favorite ?? false}
         <li class:missing={e.availability === 'missing'}>
           <div class="still">
             {#if e.images?.primary}
@@ -325,17 +314,13 @@
             <!-- One stop per episode for the arrows (lib/spatial): its play
                  button, else its name; the rest is Tab's. -->
             <a href={titlePathOf(e)} data-arrows={e.playable ? 'skip' : undefined}><span class="number">{e.episodeNumber}.</span> {e.name}</a>
-            <!-- Watched and favorite, as on a title's page. -->
+            <!-- Watched, as on a title's page (no heart: favorites are films
+                 and series). -->
             <div class="marks actions" data-arrows="skip">
               <button class="toggle" class:on={seen} type="button" aria-pressed={seen}
                 aria-label={seen ? t('item.markUnwatched') : t('item.markWatched')} title={seen ? t('item.markUnwatched') : t('item.markWatched')}
                 onclick={() => toggleEpisode(e)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path class="mark" d="M7.8 12.3l2.8 2.8 5.6-5.8" /></svg>
-              </button>
-              <button class="toggle heart" class:on={loved} type="button" aria-pressed={loved}
-                aria-label={loved ? t('item.favoriteRemove') : t('item.favoriteAdd')} title={loved ? t('item.favoriteRemove') : t('item.favoriteAdd')}
-                onclick={() => toggleEpisodeFavorite(e)}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
               </button>
             </div>
           </div>
