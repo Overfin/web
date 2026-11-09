@@ -494,7 +494,8 @@ test('favorites: a heart on a title shows on its page, its button takes it off',
   const p = await page();
   await pick(p);
   await p.goto(`${base}/`);
-  const href = await p.locator('main .row a.card').first().getAttribute('href');
+  // A film: Continue Watching's first may be an episode, which the page leaves out.
+  const href = await p.locator('main .row a.card[href^="/title/m"]').first().getAttribute('href');
   await p.goto(`${base}${href}`);
   const heart = p.locator('.hero .heart').first();
   await heart.waitFor();
