@@ -286,6 +286,9 @@ export default {
   'notice.kidsNeedLimits': 'A kids profile shows nothing until its age is chosen.',
   'notice.chooseLimits': 'Choose it',
   'notice.noLimits': "This profile's age hasn't been chosen yet: it shows nothing until the account's owner chooses it.",
+  'address.confirm': 'Confirm your email address, {email}: a link sent there proves it\'s yours. If it isn\'t, tell the person who made your account.',
+  'address.send': 'Send the link',
+  'address.sent': 'A link is on its way to {email}. Open it to confirm your address.',
   'profiles.new': 'New profile',
 
   'player.back': 'Back',
