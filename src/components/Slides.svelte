@@ -7,7 +7,7 @@
      the system asks for less motion. Arrows, dots, swipes and the arrow
      keys move it too. -->
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { tick, untrack } from 'svelte';
   import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { backdropOf } from '../lib/backdrop.svelte';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
@@ -113,7 +113,32 @@
     if (Math.abs(dx) > 50) show(index + (dx < 0 ? 1 : -1));
   }
 
-  function keydown(event: KeyboardEvent) {
+  // On a slide's buttons the arrow keys go from button to button, as
+  // everywhere (lib/spatial); past the first or the last, to the slide
+  // before or after, on its first or last button (the focus would be lost
+  // with the slide). On its arrows and dots, they move it.
+  async function keydown(event: KeyboardEvent) {
+    const slide = (event.target as Element).closest('.slide');
+    if (slide) {
+      const buttons = [...slide.querySelectorAll<HTMLElement>('.actions a[href], .actions button')];
+      const at = buttons.indexOf(event.target as HTMLElement);
+      const back = event.key === 'ArrowLeft' && at === 0;
+      if (!back && !(event.key === 'ArrowRight' && at === buttons.length - 1)) return;
+      event.preventDefault();
+      const section = slide.parentElement;
+      show(index + (back ? -1 : 1));
+      await tick();
+      // The new slide's buttons take the focus once it's no longer inert:
+      // a few frames at most.
+      for (let frame = 0; frame < 10; frame++) {
+        const now = [...(section?.querySelectorAll<HTMLElement>('.slide.current:not([inert]) .actions a[href], .slide.current:not([inert]) .actions button') ?? [])];
+        const to = back ? now.at(-1) : now[0];
+        to?.focus({ preventScroll: true });
+        if (to && document.activeElement === to) return;
+        await new Promise(requestAnimationFrame);
+      }
+      return;
+    }
     if (event.key === 'ArrowRight') show(index + 1);
     else if (event.key === 'ArrowLeft') show(index - 1);
     else return;
@@ -203,14 +228,14 @@
     {#if slides.length > 1}
       <!-- Under the text's level, at the right: never over the text. -->
       <div class="controls">
-        <button class="nav prev" type="button" aria-label={t('home.previous')} onclick={() => show(index - 1)}><Arrow left /></button>
+        <button class="nav prev" type="button" data-arrows="skip" aria-label={t('home.previous')} onclick={() => show(index - 1)}><Arrow left /></button>
         <div class="dots">
           {#each slides as item, i (item.id)}
-            <button type="button" class:current={i === index} aria-label={t('home.slide', { n: i + 1, total: slides.length })}
+            <button type="button" data-arrows="skip" class:current={i === index} aria-label={t('home.slide', { n: i + 1, total: slides.length })}
               aria-current={i === index} onclick={() => show(i)}></button>
           {/each}
         </div>
-        <button class="nav next" type="button" aria-label={t('home.next')} onclick={() => show(index + 1)}><Arrow /></button>
+        <button class="nav next" type="button" data-arrows="skip" aria-label={t('home.next')} onclick={() => show(index + 1)}><Arrow /></button>
       </div>
     {/if}
   </section>
