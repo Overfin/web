@@ -2,6 +2,7 @@
      watching?"), then the screen the address names. -->
 <script lang="ts">
   import { warmLater } from './lib/warm';
+  import { arrows } from './lib/spatial';
   import { tabTitle } from './lib/tabtitle';
   import { brand } from './lib/brand.svelte';
   import { explain, isError, overfin } from './lib/client';
@@ -139,6 +140,9 @@
     rememberTheme(theme);
   });
 </script>
+
+<!-- The arrows move between items once one has the focus (a TV's remote). -->
+<svelte:window onkeydown={arrows} />
 
 {#if phase.kind === 'loading'}
   <!-- The page's own shape while the session loads, under a header with
