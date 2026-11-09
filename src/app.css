@@ -805,7 +805,7 @@ dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1p
    or the focus is outlined, not lit by a shadow. The player's spinner keeps
    turning (only the page's animations stop). */
 html.tv *, html.tv *::before, html.tv *::after {
-  transition: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  transition: none !important; backdrop-filter: none !important;
   box-shadow: none !important; text-shadow: none !important; filter: none !important;
 }
 html.tv .dropdown, html.tv .poster, html.tv .skeleton .line, html.tv .slides.loading .line { animation: none; }

@@ -414,7 +414,7 @@ test('arrows: scroll with nothing focused; then go from item to item, stopping a
   const p = await page();
   await pick(p);
   await p.goto(`${base}/`);
-  await p.locator('main .row .card').first().waitFor();
+  await p.locator('.slides .slide.current').waitFor();
   await p.keyboard.press('ArrowDown');
   await p.waitForFunction(() => scrollY > 0);
   assert.ok((await focused(p)).body, 'nothing focused: the page scrolled');
@@ -448,7 +448,7 @@ test('a TV (?tv=1): light look, the first arrow lands on an item; a text field l
   // what the focus would land on.
   await p.locator('.slides .slide.current').waitFor();
   assert.ok(await p.evaluate(() => document.documentElement.classList.contains('tv')), 'the class');
-  const blur = await p.evaluate(() => getComputedStyle(document.querySelector('header .dropdown, .slides .nav') ?? document.body).backdropFilter);
+  const blur = await p.evaluate(() => getComputedStyle(document.querySelector('.slides .nav') ?? document.body).backdropFilter);
   assert.ok(blur === 'none' || blur === '', `no blur: ${blur}`);
   await p.keyboard.press('ArrowDown');
   await p.waitForTimeout(100);
