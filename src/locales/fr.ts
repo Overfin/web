@@ -287,6 +287,9 @@ const fr: Record<keyof typeof en, string> = {
   'notice.kidsNeedLimits': 'Un profil enfants n’affiche rien tant que son âge n’est pas choisi.',
   'notice.chooseLimits': 'Le choisir',
   'notice.noLimits': 'L’âge de ce profil n’a pas encore été choisi : il n’affiche rien tant que le propriétaire du compte ne l’a pas choisi.',
+  'address.confirm': 'Confirmez votre adresse courriel, {email} : un lien envoyé à cette adresse prouve qu’elle est à vous. Si ce n’est pas la vôtre, dites-le à la personne qui a créé votre compte.',
+  'address.send': 'Envoyer le lien',
+  'address.sent': 'Un lien est en route vers {email}. Ouvrez-le pour confirmer votre adresse.',
   'profiles.new': 'Nouveau profil',
 
   'player.back': 'Retour',

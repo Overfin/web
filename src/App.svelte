@@ -16,6 +16,7 @@
   import { categoryIdOf, collectionIdOf, personIdOf, titleIdOf } from './lib/paths';
   import PageBackdrop from './components/PageBackdrop.svelte';
   import Header from './components/Header.svelte';
+  import ConfirmAddress from './components/ConfirmAddress.svelte';
   import PageError from './components/PageError.svelte';
   import Skeleton from './components/Skeleton.svelte';
   import Account from './pages/Account.svelte';
@@ -181,6 +182,7 @@
     {:else if !bare && session.kidsNeedLimits && route.parts[0] !== 'manage'}
       <p class="notice">{t('notice.kidsNeedLimits')} <a href="/manage">{t('notice.chooseLimits')}</a></p>
     {/if}
+    {#if !bare}<ConfirmAddress />{/if}
     {#key key}
       {#if route.parts.length === 0}
         <Home />
