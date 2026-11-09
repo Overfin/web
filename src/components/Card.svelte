@@ -3,7 +3,8 @@
      that can play (a series a library has too) shows a play button in its
      corner, and a film or a season no library has whole a wishlist button
      (when the server offers wishlists); the rest of the card opens the
-     title's page. One on the wishlist says so. One not out yet (a
+     title's page (an episode not here yet, its series': its own page would
+     have nothing to play). One on the wishlist says so. One not out yet (a
      collection's) says so, and has neither. -->
 <script lang="ts">
   import type { TitleSummary } from '../lib/sdk/overfin.js';
@@ -50,11 +51,16 @@
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 
+  // Where the card leads: an episode not here yet (Continue Watching's
+  // next one) opens its series, whose page lists what's coming.
+  const target = $derived(item.kind === 'episode' && item.availability === 'missing' && item.series
+    ? { id: item.series.id, name: item.series.name } : item);
+
   // Its page read ahead: once the pointer rests on it a moment, or a finger
   // touches it, so opening it shows at once.
   let timer: ReturnType<typeof setTimeout> | undefined;
   function soon() {
-    timer = setTimeout(() => prefetchTitle(item.id), 120);
+    timer = setTimeout(() => prefetchTitle(target.id), 120);
   }
   function cancel() {
     clearTimeout(timer);
@@ -64,9 +70,9 @@
 </script>
 
 <div class="cardbox" class:wide>
-  <svelte:element this={item.upcoming ? 'div' : 'a'} class="card" class:wide href={item.upcoming ? undefined : titlePathOf(item)}
+  <svelte:element this={item.upcoming ? 'div' : 'a'} class="card" class:wide href={item.upcoming ? undefined : titlePathOf(target)}
     onpointerenter={item.upcoming ? undefined : soon} onpointerleave={cancel} role={item.upcoming ? 'group' : undefined}
-    ontouchstart={() => !item.upcoming && prefetchTitle(item.id)} onfocus={() => !item.upcoming && prefetchTitle(item.id)}>
+    ontouchstart={() => !item.upcoming && prefetchTitle(target.id)} onfocus={() => !item.upcoming && prefetchTitle(target.id)}>
     <div class="poster" class:wide>
       {#if image}
         <img src={overfin.imageUrl(image, 'small')} srcset={srcset(image, wide ? 'backdrop' : 'poster')} sizes={wide ? sizes.wideCard : sizes.card} alt="" loading="lazy" use:loaded />

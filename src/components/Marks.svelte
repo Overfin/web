@@ -2,15 +2,16 @@
      that fill in when on. What the server says back replaces what was
      loaded; a failure is said, and changes nothing. The list's icon shows
      once the server says whether the title is on it (and not at all where
-     there's no watchlist). -->
+     there's no watchlist). The heart only where favorites are kept: films
+     and series (the Favorites page lists nothing else). -->
 <script lang="ts">
   import { homeChanged } from '../lib/homecache';
   import { explain, overfin } from '../lib/client';
   import { notice } from '../lib/dialog.svelte';
   import { t } from '../lib/i18n.svelte';
 
-  let { id, played: loadedPlayed = false, favorite: loadedFavorite = false }: {
-    id: string; played?: boolean; favorite?: boolean;
+  let { id, played: loadedPlayed = false, favorite: loadedFavorite = false, heart = true }: {
+    id: string; played?: boolean; favorite?: boolean; heart?: boolean;
   } = $props();
 
   let onList = $state<boolean | null>(null);
@@ -65,8 +66,10 @@
   title={played ? t('item.markUnwatched') : t('item.markWatched')} onclick={togglePlayed}>
   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path class="mark" d="M7.8 12.3l2.8 2.8 5.6-5.8" /></svg>
 </button>
+{#if heart}
 <button class="toggle heart" class:on={favorite} aria-pressed={favorite}
   aria-label={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')} title={favorite ? t('item.favoriteRemove') : t('item.favoriteAdd')}
   onclick={toggleFavorite}>
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
 </button>
+{/if}
