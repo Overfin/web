@@ -794,3 +794,14 @@ dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1p
 .row-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
 .profiles-list .avatar.small { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; flex: none; }
 .page-backdrop.tall img { object-position: center top; }
+
+/* A TV's light look (lib/tv): its processor can't afford blur, shadows and
+   fades on every frame. What they showed stays: the card under the cursor
+   or the focus is outlined, not lit by a shadow. The player's spinner keeps
+   turning (only the page's animations stop). */
+html.tv *, html.tv *::before, html.tv *::after {
+  transition: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  box-shadow: none !important; text-shadow: none !important; filter: none !important;
+}
+html.tv .dropdown, html.tv .poster, html.tv .skeleton .line, html.tv .slides.loading .line { animation: none; }
+html.tv .card:hover .poster { transform: none; outline: 3px solid var(--accent); }
