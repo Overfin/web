@@ -560,6 +560,7 @@
     try {
       // Playing takes the whole ID.
       if (id.startsWith('title_episode_tmdb_')) await titled;
+      if (left) return; // left meanwhile: nothing started, and the next one's start stays its own
       player = await overfin.play(video, fullId, {
         startMs: takeStart(),
         Hls: await hls(),
