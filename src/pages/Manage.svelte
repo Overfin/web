@@ -192,6 +192,11 @@
         </ul>
       </div>
       {#if listMessage}<p class="error">{listMessage}</p>{/if}
+      <!-- With a stream reserved for each profile: how it works, and that an
+           unused profile keeps one; for the owner, who can delete it. -->
+      {#if me.owner && session.me?.limits?.reservedStreams}
+        <p class="muted small">{session.me.limits.sharedStreams ? tn('manage.reserved', session.me.limits.sharedStreams) : t('manage.reservedOnly')}</p>
+      {/if}
       <!-- Devices signed in: the owner sees all of the account's, others
            their own; the first few, then the rest on demand. -->
       <div class="panel">
