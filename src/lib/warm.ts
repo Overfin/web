@@ -8,6 +8,7 @@
 // the menu shows them.
 
 import { overfin } from './client';
+import { onTV } from './tv';
 import { keepHome, keepSlides, keptHome, keptSlides } from './homecache';
 import { homeAvailability, loadHome, type HomeData } from './homeload';
 import { lastLibraryId, lastSort } from './lastlibrary';
@@ -95,7 +96,7 @@ export function warmLater() {
 
 async function warm() {
   const profile = session.me?.activeProfile?.id;
-  if (!profile || warmed === profile || saveData()) return;
+  if (!profile || warmed === profile || saveData() || onTV) return;
   const where = router.route.parts[0];
   if (where === 'play' || where === 'profiles') return; // once one's chosen, or the video's over
   warmed = profile;

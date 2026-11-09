@@ -5,6 +5,7 @@ import { preload, screenWidth, sized, sizes } from './images';
 import { overfin } from './client';
 import { cached, prefetch } from './pagecache';
 import { session } from './session.svelte';
+import { onTV } from './tv';
 
 const who = () => session.me?.activeProfile?.id ?? '';
 
@@ -24,6 +25,7 @@ const pictured = new Set<string>();
 /** prefetchTitle reads a title's page ahead, for its card's link, and the
  * pictures its top shows (the browser keeps them for the page). */
 export function prefetchTitle(id: string) {
+  if (onTV) return; // a cursor passing over cards would keep a TV busy
   prefetch(`${who()}:similar:${id}`, () => overfin.similar(id));
   if (pictured.has(id)) {
     prefetch(`${who()}:title:${id}`, () => overfin.title(id));
