@@ -2,12 +2,15 @@
 // focus, an arrow gives it to the nearest item that way. Left and right go
 // along a row (scrolling it), up and down to the row above or below, the
 // item nearest across. With nothing focused the arrows scroll the page as
-// usual; in a text field, a list or a slider they do what they do there;
+// usual (on a TV, they start on the first item on the screen); in a text
+// field, a list or a slider they do what they do there;
 // a part that handles them itself (the seasons, the slideshow, the player)
 // keeps them. Inside an open menu or window, only its items are reached;
 // what Tab skips (tabindex -1: a row's arrows, the seasons but the chosen
 // one) or what's in data-arrows="skip" (the slideshow's own arrows, an
 // episode's marks) never is.
+
+import { onTV } from './tv';
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -44,11 +47,11 @@ export function pick(from: Box, direction: Direction, boxes: Box[]): number {
   const ahead = boxes.map((b, i) => ({ b, i, gap: gap(from, b, direction) })).filter((c) => c.gap >= -4);
   if (!ahead.length) return -1;
   if (horizontal) {
-    // Along the same row first, the nearest; else whatever is nearest.
+    // Along the same row, the nearest; at its end, nowhere: another row's
+    // card off the screen, or the menu bar, isn't where right leads.
     const row = ahead.filter((c) => across(c.b, from, true));
-    const pool = row.length ? row : ahead;
-    const score = (c: (typeof ahead)[number]) => c.gap + (row.length ? 0 : 2 * Math.abs(middle(c.b, true) - middle(from, true)));
-    return pool.reduce((best, c) => (score(c) < score(best) ? c : best)).i;
+    if (!row.length) return -1;
+    return row.reduce((best, c) => (c.gap < best.gap ? c : best)).i;
   }
   // The nearest row that way, then its item nearest across.
   const nearest = ahead.reduce((best, c) => (c.gap < best.gap ? c : best));
@@ -66,20 +69,52 @@ function onTop(box: Box, others: Box[]) {
   return others.some((o) => o !== box && (o.right - o.left) * (o.bottom - o.top) > area && x > o.left && x < o.right && y > o.top && y < o.bottom);
 }
 
-function keepsArrows(element: Element) {
-  if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) return true;
-  if (element instanceof HTMLInputElement) return !['button', 'submit', 'reset', 'checkbox', 'radio', 'image'].includes(element.type);
+// keepsArrows says whether a field uses this arrow itself. On a TV, where
+// the arrows are the only way out, a list (OK opens it) keeps none, and a
+// text field only left and right.
+function keepsArrows(element: Element, direction: Direction) {
+  const across = direction === 'left' || direction === 'right';
+  if (element instanceof HTMLTextAreaElement) return true;
+  if (element instanceof HTMLSelectElement) return !onTV;
+  if (element instanceof HTMLInputElement) {
+    if (['button', 'submit', 'reset', 'checkbox', 'radio', 'image'].includes(element.type)) return false;
+    return !onTV || across;
+  }
   return (element as HTMLElement).isContentEditable;
 }
+
+// firstItem gives a TV's remote somewhere to start: with nothing focused
+// (the page just changed), the first item on the screen, the page's own
+// before the menu bar's.
+function firstItem(): HTMLElement | undefined {
+  const scope = document.querySelector('dialog[open]') ?? document;
+  const items = [...scope.querySelectorAll<HTMLElement>(focusable)].filter(usable);
+  const boxes = items.map((e) => e.getBoundingClientRect());
+  const inView = items.filter((_, i) => {
+    const b = boxes[i];
+    return b.right > b.left && b.bottom > 0 && b.top < innerHeight && b.right > 0 && b.left < innerWidth && !onTop(b, boxes);
+  });
+  return inView.find((e) => !e.closest('header')) ?? inView[0];
+}
+
+const usable = (e: HTMLElement) => !e.closest('[inert]') && !e.closest('[data-arrows=skip]') && e.tabIndex >= 0 && getComputedStyle(e).visibility !== 'hidden';
 
 /** arrows handles an arrow key for the page: true when it moved the focus. */
 export function arrows(event: KeyboardEvent): boolean {
   const direction = directions[event.key];
   if (!direction || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return false;
   const current = document.activeElement;
-  if (!current || current === document.body || keepsArrows(current)) return false;
+  if (!current || current === document.body) {
+    if (!onTV) return false;
+    const first = firstItem();
+    if (!first) return false;
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+    return true;
+  }
+  if (keepsArrows(current, direction)) return false;
   const scope = current.closest('dialog[open], [role=dialog], .dropdown') ?? document;
-  const elements = [...scope.querySelectorAll<HTMLElement>(focusable)].filter((e) => e !== current && !e.closest('[inert]') && !e.closest('[data-arrows=skip]') && e.tabIndex >= 0);
+  const elements = [...scope.querySelectorAll<HTMLElement>(focusable)].filter((e) => e !== current && usable(e));
   // The menu bar stays on top of the screen while the page scrolls: it's
   // taken where it belongs, at the page's top, so up reaches what's above
   // first.
@@ -89,7 +124,7 @@ export function arrows(event: KeyboardEvent): boolean {
     return { left: b.left, right: b.right, top: b.top - scrollY, bottom: b.bottom - scrollY };
   };
   const boxes = elements.map(placed);
-  const shown = elements.map((e, i) => ({ e, b: boxes[i] })).filter(({ e, b }) => b.right > b.left && b.bottom > b.top && getComputedStyle(e).visibility !== 'hidden');
+  const shown = elements.map((e, i) => ({ e, b: boxes[i] })).filter(({ b }) => b.right > b.left && b.bottom > b.top);
   const reachable = shown.filter(({ b }) => !onTop(b, boxes));
   const to = pick(placed(current), direction, reachable.map(({ b }) => b));
   // Nothing that way: the page scrolls as it would (its top, its end).
@@ -101,7 +136,8 @@ export function arrows(event: KeyboardEvent): boolean {
   const behavior = smooth ? 'smooth' : 'auto';
   // Along a row, it scrolls only as far as needed.
   target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior });
-  if (direction === 'left' || direction === 'right') return true;
+  // In a menu or a window, the page behind stays where it is.
+  if (direction === 'left' || direction === 'right' || scope !== document) return true;
   // Up and down: an item the first screen has brings the page back to its
   // top (the slideshow whole); one already in full view stays where it is;
   // any other comes to the middle, with what's around it.

@@ -17,6 +17,11 @@ describe('titles', () => {
     expect(titlePath('title_movie_tmdb_550988', 'Free Guy')).toBe('/title/m550988/free-guy');
     expect(titlePath('title_series_tmdb_38527_s1_e3', '19-2')).toBe('/title/s38527/19-2/season-1/episode-3');
     expect(titlePath('title_series_tmdb_38527_s2')).toBe('/title/s38527/season-2');
+    // A name that looks like an episode or a season stays a name.
+    for (const name of ['E5', 'Season 1', 'Episode 2']) {
+      const parts = titlePath('title_series_tmdb_38527', name).split('/').slice(2);
+      expect(titleIdOf(parts)).toBe('title_series_tmdb_38527');
+    }
     expect(titlePath('title_series_tmdb_38527_e63056', '19-2')).toBe('/title/s38527/19-2/e63056');
     expect(titlePath('title_item_0123abc', 'x')).toBe('/title/title_item_0123abc');
     for (const id of ['title_movie_tmdb_550988', 'title_series_tmdb_38527', 'title_series_tmdb_38527_s1', 'title_series_tmdb_38527_s0_e12']) {

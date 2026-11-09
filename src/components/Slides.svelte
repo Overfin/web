@@ -132,7 +132,7 @@
       // a few frames at most.
       for (let frame = 0; frame < 10; frame++) {
         const now = [...(section?.querySelectorAll<HTMLElement>('.slide.current:not([inert]) .actions a[href], .slide.current:not([inert]) .actions button') ?? [])];
-        const to = back ? now.at(-1) : now[0];
+        const to = back ? now[now.length - 1] : now[0];
         to?.focus({ preventScroll: true });
         if (to && document.activeElement === to) return;
         await new Promise(requestAnimationFrame);
@@ -173,7 +173,7 @@
     onpointerdown={swipeStart} onpointerup={swipeEnd} onkeydown={keydown}>
     {#each slides as item, i (item.id)}
       {@const position = item.userState?.positionMs ?? 0}
-      <div class="slide" class:current={i === index} aria-roledescription="slide" aria-hidden={i !== index} inert={i !== index}
+      <div class="slide" class:current={i === index} aria-roledescription="slide" aria-hidden={i !== index} inert={i !== index} data-arrows={i !== index ? 'skip' : undefined}
         aria-label={t('home.slide', { n: i + 1, total: slides.length })}>
         <div class="content">
           {#if item.images?.logo}

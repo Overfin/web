@@ -31,8 +31,9 @@ export function titlePath(id: string, name?: string): string {
   const m = titleId.exec(id);
   if (!m) return `/title/${encodeURIComponent(id)}`;
   const parts = [`${m[1] === 'movie' ? 'm' : 's'}${m[2]}`];
+  // A series named "E5" or "Season 1" doesn't read as an episode or a season.
   const s = slug(name);
-  if (s) parts.push(s);
+  if (s) parts.push(/^(e\d+|season-\d+|episode-\d+)$/.test(s) ? `${s}-` : s);
   if (m[3] !== undefined) parts.push(`season-${m[3]}`);
   if (m[4] !== undefined) parts.push(`episode-${m[4]}`);
   if (m[5] !== undefined) parts.push(`e${m[5]}`);

@@ -32,9 +32,9 @@ describe('pick', () => {
     expect(pick(far, 'down', all)).toBe(-1);
   });
 
-  it('goes sideways to the nearest thing when nothing is level with it', () => {
+  it('stops at a row\'s end, whatever is further off', () => {
     const lone = box(0, 1000, 50, 50);
     const above = box(300, 600, 50, 50);
-    expect(pick(lone, 'right', [above])).toBe(0);
+    expect(pick(lone, 'right', [above])).toBe(-1);
   });
 });
