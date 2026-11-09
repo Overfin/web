@@ -266,6 +266,11 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
 .center { max-width: 26rem; margin: 2.5rem auto; text-align: center; }
 .center.wide { max-width: 44rem; text-align: left; margin-top: 0; }
 .panel h2 { margin-top: 0; font-size: 1.05rem; }
+/* An account's limits: each with its number at the row's end. */
+.limits { display: grid; grid-template-columns: 1fr auto; gap: .35rem 1rem; margin: 0 0 .6rem; }
+.limits dd { margin: 0; font-weight: 650; text-align: right; }
+.limits + p + p { margin-top: .4rem; }
+.panel > .limits:last-child { margin-bottom: 0; }
 form.stack { display: grid; gap: .6rem; text-align: left; }
 .panel {
   background: linear-gradient(180deg, rgba(var(--text-rgb), .035), rgba(var(--text-rgb), 0) 60%) var(--panel);
