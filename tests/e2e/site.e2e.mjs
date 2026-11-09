@@ -444,7 +444,9 @@ test('a TV (?tv=1): light look, the first arrow lands on an item; a text field l
   const p = await page();
   await pick(p);
   await p.goto(`${base}/?tv=1`);
-  await p.locator('main .row .card').first().waitFor();
+  // The page itself, not its loading shape: the session's arrival replaces
+  // what the focus would land on.
+  await p.locator('.slides .slide.current').waitFor();
   assert.ok(await p.evaluate(() => document.documentElement.classList.contains('tv')), 'the class');
   const blur = await p.evaluate(() => getComputedStyle(document.querySelector('header .dropdown, .slides .nav') ?? document.body).backdropFilter);
   assert.ok(blur === 'none' || blur === '', `no blur: ${blur}`);
