@@ -147,6 +147,14 @@
   $effect(() => {
     if (!me) replace('/profiles');
   });
+
+  // How many profiles the account may have, 0 for no limit: with a stream
+  // reserved for each, never more than its streams.
+  const limits = $derived(session.me?.limits);
+  function mostProfiles(l: NonNullable<typeof limits>) {
+    if (!l.reservedStreams || !l.maxStreams) return l.maxProfiles;
+    return l.maxProfiles ? Math.min(l.maxProfiles, l.maxStreams) : l.maxStreams;
+  }
 </script>
 
 {#if me}
@@ -192,10 +200,28 @@
         </ul>
       </div>
       {#if listMessage}<p class="error">{listMessage}</p>{/if}
-      <!-- With a stream reserved for each profile: how it works, and that an
-           unused profile keeps one; for the owner, who can delete it. -->
-      {#if me.owner && session.me?.limits?.reservedStreams}
-        <p class="muted small">{session.me.limits.sharedStreams ? tn('manage.reserved', session.me.limits.sharedStreams) : t('manage.reservedOnly')}</p>
+      <!-- What the account may have (its template's): the numbers, then how
+           profiles share the streams, when several can. Only the owner sees
+           how many profiles there are, and can delete one. -->
+      {#if limits && (limits.maxProfiles > 0 || limits.maxStreams > 0)}
+        {@const most = mostProfiles(limits)}
+        <div class="panel">
+          <h2>{t('manage.accountLimits')}</h2>
+          <dl class="limits">
+            <dt>{t('manage.limitProfiles')}</dt>
+            <dd>{most === 0 ? t('manage.noLimit') : me.owner ? t('manage.limitOf', { n: profiles.length, most }) : most}</dd>
+            <dt>{t('manage.limitStreams')}</dt>
+            <dd>{limits.maxStreams > 0 ? limits.maxStreams : t('manage.noLimit')}</dd>
+          </dl>
+          {#if limits.maxStreams > 0 && most !== 1}
+            {#if !limits.reservedStreams}
+              <p class="muted small">{t('manage.limitShared')}</p>
+            {:else}
+              <p class="muted small">{limits.sharedStreams ? tn('manage.limitReserved', limits.sharedStreams) : t('manage.limitReservedOnly')}</p>
+              {#if me.owner}<p class="muted small">{t('manage.limitUnused')}</p>{/if}
+            {/if}
+          {/if}
+        </div>
       {/if}
       <!-- Devices signed in: the owner sees all of the account's, others
            their own; the first few, then the rest on demand. -->
