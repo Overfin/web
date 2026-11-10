@@ -19,7 +19,7 @@
    fade hides the picture, dark text doesn't read over it. data-theme="dark"
    gives them the dark colors (theme.css); these are the site's own. */
 [data-theme="dark"] { --title-shadow: 0 2px 12px rgba(0, 0, 0, .6); --logo-shadow: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
-.hero[data-theme], .slides[data-theme] { color: var(--text); }
+.hero[data-theme], .slides[data-theme], .sheet[data-theme] { color: var(--text); }
 /* Under logos drawn over pictures: light pages fade them into white, so a
    white logo needs a dark edge there. */
 :root { --logo-shadow: drop-shadow(0 2px 10px rgba(0, 0, 0, .5)); }
