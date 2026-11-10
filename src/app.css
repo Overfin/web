@@ -135,7 +135,9 @@ header {
 footer.site-foot { margin-top: auto; display: grid; justify-items: center; gap: .6rem; padding: 1.5rem var(--gutter) 1.5rem; text-align: center; }
 footer.site-foot p { margin: 0; }
 .powered { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--muted); }
-.powered svg { display: block; height: 1.2rem; width: auto; color: var(--text); }
+/* The banner only: the logo inside it is an svg of its own, sized by its
+   attributes, which a rule for every svg here shrank to nothing. */
+.powered svg.overfin-banner { display: block; height: 1.2rem; width: auto; color: var(--text); }
 .tmdb { max-width: 48rem; font-size: .65rem; line-height: 1.5; color: var(--faint); }
 .tmdb img { display: inline; height: 7px; width: auto; margin-right: .4rem; vertical-align: 0; opacity: .8; }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
