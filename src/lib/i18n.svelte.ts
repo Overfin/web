@@ -24,14 +24,22 @@ function initial(): Locale {
 
 const first = initial();
 let current = $state<Locale>(first);
+// Dates and numbers follow the account's language with its region ("fr-CA"),
+// not the browser's: a French account on an English browser reads French.
+let region = $state<string>(first);
 if (typeof document !== 'undefined') document.documentElement.lang = first;
 
 export const i18n = {
   get locale(): Locale {
     return current;
   },
+  /** formats is the locale dates and numbers are written in. */
+  get formats(): string {
+    return region;
+  },
   set(locale: Locale) {
     current = locale;
+    region = locale;
     if (typeof document !== 'undefined') document.documentElement.lang = locale;
   },
   /** follow sets the site's language from the account's ("fr-CA"): its
@@ -39,6 +47,12 @@ export const i18n = {
   follow(tag: string) {
     const code = tag.slice(0, 2).toLowerCase();
     this.set(code in catalogs ? (code as Locale) : 'en');
+    // The region too, when it's a tag Intl knows and in the same language.
+    try {
+      if (code in catalogs && Intl.DateTimeFormat.supportedLocalesOf([tag]).length) region = tag;
+    } catch {
+      // Not a valid tag: the language alone.
+    }
   },
 };
 
@@ -57,7 +71,17 @@ export function has(key: string): key is Key {
 }
 
 /** tn picks the singular or plural form: base + ".one" or ".other". */
+/** date writes a date (a Date or an ISO string) in the site's language. */
+export function date(d: Date | string, style: 'medium' | 'long' = 'medium'): string {
+  return (typeof d === 'string' ? new Date(d) : d).toLocaleDateString(region, { dateStyle: style });
+}
+
+/** num writes a number in the site's language. */
+export function num(n: number, options?: Intl.NumberFormatOptions): string {
+  return n.toLocaleString(region, options);
+}
+
 export function tn(base: 'library.count' | 'manage.limitReserved' | 'manage.moreDevices', count: number): string {
   const form = new Intl.PluralRules(current).select(count) === 'one' ? 'one' : 'other';
-  return t(`${base}.${form}`, { count: count.toLocaleString(current) });
+  return t(`${base}.${form}`, { count: count.toLocaleString(region) });
 }

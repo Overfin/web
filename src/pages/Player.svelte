@@ -481,7 +481,7 @@
     maxBitrate = kbps;
     player?.setMaxBitrate(kbps);
   }
-  const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} Mb/s`;
+  const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(i18n.formats, { maximumFractionDigits: 1 })} Mb/s`;
   const rangeName = (r?: string) => !r ? '' : r === 'SDR' ? 'SDR' : r === 'HDR10Plus' ? 'HDR10+'
     : r.startsWith('DOVI') ? `Dolby Vision${r.includes('HDR10Plus') ? ' (HDR10+)' : r.includes('HDR10') ? ' (HDR10)' : r.includes('HLG') ? ' (HLG)' : ''}` : r;
   // Channels as people say them: stereo, 5.1, 7.1.

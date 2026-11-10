@@ -234,7 +234,7 @@
                 <strong>{s.device || t('manage.unknownDevice')}</strong>
                 {#if s.current}<span class="chip">{t('manage.thisOne')}</span>{/if}
                 <div class="muted small">
-                  {s.profileName ?? ''}{s.profileName && s.lastActiveAt ? ' · ' : ''}{s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleString(i18n.locale, { dateStyle: 'medium', timeStyle: 'short' }) : ''}
+                  {s.profileName ?? ''}{s.profileName && s.lastActiveAt ? ' · ' : ''}{s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleString(i18n.formats, { dateStyle: 'medium', timeStyle: 'short' }) : ''}
                 </div>
               </div>
               {#if !s.current}

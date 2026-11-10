@@ -7,7 +7,7 @@
   import { sizes, srcset } from '../lib/images';
   import { explain, overfin } from '../lib/client';
   import { notice } from '../lib/dialog.svelte';
-  import { t } from '../lib/i18n.svelte';
+  import { date, t } from '../lib/i18n.svelte';
   import { loaded } from '../lib/loaded';
   import { titlePathOf } from '../lib/paths';
   import { wishes } from '../lib/wishlist.svelte';
@@ -18,7 +18,7 @@
   let error = $state<unknown>();
   overfin.wishlist().then((w) => (list = w), (err) => (error = err));
 
-  const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
+  const day = (iso: string) => date(iso);
   function stateText(w: Wish): string {
     switch (w.state) {
       case 'unreleased':

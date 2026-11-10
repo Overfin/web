@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ageText, clock, duration } from './format';
-import { i18n, t, tn, type Key } from './i18n.svelte';
+import { date, i18n, num, t, tn, type Key } from './i18n.svelte';
 
 describe('format', () => {
   it('shows positions as a clock', () => {
@@ -42,5 +42,19 @@ describe('t', () => {
     // French counts 0 and 1 as singular.
     expect(tn('library.count', 0)).toBe('0 titre');
     expect(tn('library.count', 2)).toBe('2 titres');
+  });
+  it("writes dates and numbers in the account's language, not the browser's", () => {
+    i18n.follow('fr-CA');
+    expect(i18n.formats).toBe('fr-CA');
+    expect(date('2011-04-16T12:00:00Z')).toBe(new Date('2011-04-16T12:00:00Z').toLocaleDateString('fr-CA', { dateStyle: 'medium' }));
+    expect(date('2011-04-16T12:00:00Z')).toMatch(/avr/);
+    expect(num(8.5, { minimumFractionDigits: 1 })).toBe('8,5');
+    i18n.follow('en-US');
+    expect(num(8.5, { minimumFractionDigits: 1 })).toBe('8.5');
+    // A language the site has no texts in: English, and English formats.
+    i18n.follow('de-DE');
+    expect(i18n.locale).toBe('en');
+    expect(i18n.formats).toBe('en');
+    i18n.set('en');
   });
 });

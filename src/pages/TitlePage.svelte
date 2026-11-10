@@ -13,7 +13,7 @@
   import { backdropOf } from '../lib/backdrop.svelte';
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
   import { ageText, clock, duration } from '../lib/format';
-  import { t, tn, type Key } from '../lib/i18n.svelte';
+  import { date, num, t, tn, type Key } from '../lib/i18n.svelte';
   import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
@@ -173,13 +173,13 @@
           <h1>{title.name}</h1>
         {/if}
         <div class="meta">
-          {#if title.airDate}<span>{new Date(title.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
+          {#if title.airDate}<span>{date(title.airDate)}</span>
           {:else if title.year}<span>{title.year}</span>{/if}
           {#if ageText(title.age)}<span class="age">{ageText(title.age)}</span>{/if}
           {#if score(title)}{@const s = score(title)!}
-            <span class="score" title={t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}>
+            <span class="score" title={t('item.score', { value: s.value, votes: num(s.votes) })}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}
-              <span class="sr-only">{t('item.score', { value: s.value, votes: s.votes.toLocaleString() })}</span>
+              <span class="sr-only">{t('item.score', { value: s.value, votes: num(s.votes) })}</span>
             </span>
           {/if}
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
@@ -325,7 +325,7 @@
             </div>
           </div>
           <div class="muted small">
-            {#if e.airDate}{new Date(e.airDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}{/if}
+            {#if e.airDate}{date(e.airDate)}{/if}
             {#if e.durationMs} · {duration(e.durationMs)}{/if}
             {#if e.availability === 'missing'}<span class="chip unavailable">{t('title.unavailable')}</span>{/if}
           </div>

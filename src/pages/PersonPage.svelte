@@ -4,7 +4,7 @@
   import { overfin } from '../lib/client';
   import { sizes, srcset } from '../lib/images';
   import { loaded } from '../lib/loaded';
-  import { has, t } from '../lib/i18n.svelte';
+  import { date, has, t } from '../lib/i18n.svelte';
   import { correct, personIdOf, personPath } from '../lib/paths';
   import Card from '../components/Card.svelte';
   import PageError from '../components/PageError.svelte';
@@ -15,7 +15,7 @@
   // Titles no library has: folded until asked for.
   let showElsewhere = $state(false);
 
-  const day = (d: string) => new Date(d).toLocaleDateString(undefined, { dateStyle: 'long' });
+  const day = (d: string) => date(d, 'long');
 
   // svelte-ignore state_referenced_locally
   const person = overfin.person(id);
