@@ -810,3 +810,23 @@ html.tv *, html.tv *::before, html.tv *::after {
 }
 html.tv .dropdown, html.tv .poster, html.tv .skeleton .line, html.tv .slides.loading .line { animation: none; }
 html.tv .card:hover .poster { transform: none; outline: 3px solid var(--accent); }
+
+/* Browsers without aspect-ratio (Chromium before 88, as in older LG webOS
+   and Samsung TV browsers): picture boxes keep their shape by padding,
+   their picture laid over it. Without this, a person's round photo takes
+   the photo's own portrait height and turns oval, and a box whose picture
+   is missing has no height at all. Padding counts in the parent's width:
+   boxes that fill their parent use it; those with a width of their own
+   get a height. These browsers lack `inset` too. */
+@supports not (aspect-ratio: 1) {
+  .poster, .season-poster, ol.episodes .still { height: 0; padding-top: 150%; }
+  .poster.wide, ol.episodes .still { padding-top: 56.25%; }
+  .poster.round { padding-top: 100%; }
+  .hero .poster { height: 16.5rem; padding-top: 0; }
+  .list.wishes .thumb { position: relative; height: 5.25rem; }
+  .poster > img, .season-poster > img, ol.episodes .still > img, .list.wishes .thumb > img { position: absolute; top: 0; left: 0; }
+  .poster::after, .poster .fallback { top: 0; right: 0; bottom: 0; left: 0; }
+}
+@supports not (aspect-ratio: 1) {
+  @media (max-width: 600px) { .hero .poster { height: 12rem; } }
+}
