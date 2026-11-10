@@ -439,7 +439,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides .dots button { width: .6rem; height: .6rem; min-height: 0; padding: 0; border: none; box-shadow: none; border-radius: 999px; background: rgba(var(--text-rgb), .35); transition: width .3s, background-color .3s; }
 .slides .dots button.current { width: 1.6rem; background: var(--text); }
 @media (max-width: 600px) {
-  .slides { --under: 5rem; height: calc(86svh + var(--under)); min-height: calc(30rem + var(--under)); }
+  .slides { --under: 5rem; height: calc(86vh + var(--under)); height: calc(86svh + var(--under)); min-height: calc(30rem + var(--under)); }
   .slide::before { background: linear-gradient(to top, var(--bg) 25%, rgba(var(--bg-rgb), .6) 60%, rgba(var(--bg-rgb), .15) 100%); }
   .slide .content { padding-bottom: calc(3.2rem + var(--under)); }
   /* Small buttons side by side, from the text's edge: not a full-width
