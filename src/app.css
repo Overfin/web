@@ -141,6 +141,16 @@ footer.site-foot p { margin: 0; }
 .tmdb { max-width: 48rem; font-size: .65rem; line-height: 1.5; color: var(--faint); }
 .tmdb img { display: inline; height: 7px; width: auto; margin-right: .4rem; vertical-align: 0; opacity: .8; }
 header nav { grid-area: nav; display: flex; gap: 1.4rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+/* Sections cut by the line's end fade out there, so a cut word doesn't
+   read as a word (Header.svelte sets which ends have more). */
+@media (min-width: 721px) {
+  header nav.more-right { -webkit-mask-image: linear-gradient(to left, transparent, #000 2.5rem); mask-image: linear-gradient(to left, transparent, #000 2.5rem); }
+  header nav.more-left { -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem); mask-image: linear-gradient(to right, transparent, #000 2.5rem); }
+  header nav.more-left.more-right {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+  }
+}
 header nav a { color: var(--muted); white-space: nowrap; padding: .4rem 0; display: inline-flex; flex-direction: column; align-items: center; border-bottom: 2px solid transparent; }
 /* Each keeps its bold width, so the menu doesn't move when the page
    changes. */
