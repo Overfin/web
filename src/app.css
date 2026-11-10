@@ -602,6 +602,14 @@ ol.list.wishes > li { align-items: flex-start; }
 }
 .notice.arrived { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .notice.arrived p { margin: 0; }
+/* The address to confirm: one compact line, the button at its end. */
+.notice.address { padding: .45rem .5rem .45rem 1rem; font-size: .9rem; flex-wrap: nowrap; gap: .75rem 1rem; }
+.notice.address p { flex: 1 1 auto; min-width: 0; }
+.notice.address button { flex: none; min-height: 2.1rem; padding: .2rem .9rem; font-size: .9rem; }
+@media (max-width: 600px) {
+  .notice.address { flex-wrap: wrap; padding: .6rem .8rem; }
+  .notice.address button { margin-left: auto; }
+}
 .chip.unavailable { margin-left: .4rem; }
 /* The age a title is for, as a small framed label. */
 .meta .age { border: 1px solid rgba(var(--text-rgb), .45); border-radius: 3px; padding: 0 .35em; font-size: .85em; line-height: 1.5; }

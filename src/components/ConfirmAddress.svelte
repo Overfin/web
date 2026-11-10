@@ -28,7 +28,7 @@
 </script>
 
 {#if address && session.me?.activeProfile?.owner}
-  <div class="notice arrived" role="status">
+  <div class="notice arrived address" role="status">
     {#if sent}
       <p>{t('address.sent').replace('{email}', address)}</p>
     {:else}
