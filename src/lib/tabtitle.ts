@@ -1,5 +1,5 @@
 // An action giving the tab the page's heading, then the site's name ("Inception
-// · example"), so history, tabs and bookmarks tell pages apart. It follows
+// · My server"), so history, tabs and bookmarks tell pages apart. It follows
 // the page's h1 as it's drawn and changes (its text, or a logo's alt); a page
 // without one, like home, is the site's name alone.
 export function tabTitle(main: HTMLElement, site: string) {
