@@ -82,7 +82,7 @@
     <div class="peek" style:left="clamp({width / 2}px, {at * 100}%, calc(100% - {width / 2}px))">
       {#if preview}
         <div class="picture" style:width="{width}px" style:height="{preview.height}px"
-          style:background-image="url({preview.url})" style:background-size={preview.size}
+          style:background-image={`url("${preview.url.replace(/["\\\n]/g, (c) => encodeURIComponent(c))}")`} style:background-size={preview.size}
           style:background-position={preview.position}></div>
       {/if}
       <span class="time">{clock(at * durationMs)}</span>
