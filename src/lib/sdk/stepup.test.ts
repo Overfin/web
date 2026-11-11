@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Overfin } from './overfin.js';
+import { Overfin, type OverfinError } from './overfin.js';
 
 describe('stepUp', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -8,7 +8,8 @@ describe('stepUp', () => {
     vi.stubGlobal('location', loc);
     return loc;
   };
-  const err = (stepUpUrl: string) => ({ problem: { stepUpUrl } });
+  // Only the problem's stepUpUrl is read.
+  const err = (stepUpUrl: string) => ({ problem: { stepUpUrl } }) as unknown as OverfinError;
 
   it('goes to this site’s step-up page, with where to come back', () => {
     const loc = at();
