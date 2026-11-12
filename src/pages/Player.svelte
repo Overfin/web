@@ -387,7 +387,7 @@
     drawn = shownNow;
     captions.replaceChildren(...lines.map((cue) => {
       const line = document.createElement('span');
-      line.append(cue.getCueAsHTML()); // the server sanitized it (WebVTT, rule 11)
+      line.append(cue.getCueAsHTML()); // the server sanitized it (WebVTT, rule 17)
       return line;
     }));
   }
