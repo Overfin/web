@@ -3,7 +3,6 @@ import { addMissing } from './lib/older';
 import { mount } from 'svelte';
 import App from './App.svelte';
 import './app.css';
-import { quietScrollbar } from './lib/scrollbar';
 import { loadBrand } from './lib/brand.svelte';
 import { applyTheme, rememberedTheme } from './lib/theme';
 import { onTV } from './lib/tv';
@@ -19,4 +18,3 @@ applyTheme(rememberedTheme());
 loadBrand();
 
 mount(App, { target: document.getElementById('app')! });
-quietScrollbar();

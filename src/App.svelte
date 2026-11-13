@@ -13,6 +13,7 @@
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
   import SiteFooter from './components/SiteFooter.svelte';
+  import PageScrollbar from './components/PageScrollbar.svelte';
   import { categoryIdOf, collectionIdOf, personIdOf, titleIdOf } from './lib/paths';
   import PageBackdrop from './components/PageBackdrop.svelte';
   import Header from './components/Header.svelte';
@@ -225,4 +226,5 @@
   </main>
 {/if}
 {#if route.parts[0] !== 'play'}<SiteFooter tmdb={route.parts.length === 0} />{/if}
+<PageScrollbar />
 <Dialog />
