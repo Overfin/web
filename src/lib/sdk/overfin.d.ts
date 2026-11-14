@@ -388,6 +388,8 @@ export interface PlayerOptions {
   onTakenOver?: (device: string) => void;
   /** The playback can't go on. */
   onError?: (error: Error) => void;
+  /** The server can't be reached: the player waits for it, its place kept (true), then starts over there (false). */
+  onReconnecting?: (on: boolean) => void;
   /** Played to the end. */
   onEnded?: () => void;
   /** The hls.js constructor; globalThis.Hls by default. */

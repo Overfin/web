@@ -50,6 +50,8 @@
   // The video's state, as its events tell it.
   let paused = $state(true);
   let waiting = $state(true);
+  // The server can't be reached: the player waits for it (onReconnecting).
+  let reconnecting = $state(false);
   let positionMs = $state(0);
   let bufferedMs = $state(0);
   let volume = $state(1);
@@ -586,6 +588,9 @@
         onError(err) {
           notice = { text: explain(err), takenOver: false };
         },
+        onReconnecting(on) {
+          reconnecting = on;
+        },
         // At the end of an episode, the next one, unless cancelled.
         onEnded() {
           if (next && !dismissed) goNext();
@@ -694,8 +699,11 @@
       </div>
     </div>
   {/if}
-  {#if waiting && started && !notice}
+  {#if (waiting || reconnecting) && started && !notice}
     <div class="spinner" aria-label={t('app.loading')}></div>
+  {/if}
+  {#if reconnecting && !notice}
+    <p class="reconnecting" role="status">{t('player.reconnecting')}</p>
   {/if}
   <div class="captions" class:raised={shown} bind:this={captions} aria-live="off"></div>
   {#if osd}
@@ -1029,6 +1037,7 @@
   .spinner.inline { position: relative; top: auto; left: auto; margin: 1.4rem auto 0; display: block; }
   .notice { position: absolute; z-index: 4; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .8); text-align: center; padding: 2rem; }
   .notice .actions button + button { margin-left: .6rem; }
+  .reconnecting { position: absolute; z-index: 3; left: 0; right: 0; top: calc(50% + 3rem); margin: 0; text-align: center; color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .8); }
   @media (max-width: 40rem) {
     /* Phones: 2.5rem buttons that never shrink, close together, so a full
        row (a series' episode, all its buttons) still fits. */

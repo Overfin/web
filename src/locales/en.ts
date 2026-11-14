@@ -358,6 +358,7 @@ export default {
   'player.skip.outro': 'Skip credits',
   'player.skip.preview': 'Skip preview',
   'player.skip.commercial': 'Skip ad',
+  'player.reconnecting': 'Connection lost. Trying again…',
   'player.takenOver': 'Playback continued on {device}.',
   'player.anotherDevice': 'another device',
   'player.continueHere': 'Continue here',

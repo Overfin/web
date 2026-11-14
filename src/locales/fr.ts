@@ -359,6 +359,7 @@ const fr: Record<keyof typeof en, string> = {
   'player.skip.outro': 'Passer le générique de fin',
   'player.skip.preview': 'Passer l’aperçu',
   'player.skip.commercial': 'Passer la publicité',
+  'player.reconnecting': 'Connexion perdue. Nouvel essai…',
   'player.takenOver': 'La lecture continue sur {device}.',
   'player.anotherDevice': 'un autre appareil',
   'player.continueHere': 'Continuer ici',
