@@ -24,14 +24,11 @@
   import ButtonIcon from './ButtonIcon.svelte';
   import Marks from './Marks.svelte';
 
-  // missing: trending titles no library has may be shown too, to be
-  // requested from their page.
-  let { trending, latest, random, acclaimed, recommended = [], missing = false, profile = '' }: {
-    trending: { movie: TitleSummary[]; series: TitleSummary[] };
-    latest: TitleSummary[]; random: TitleSummary[]; acclaimed: TitleSummary[]; recommended?: TitleSummary[];
+  // random: the library at random, which the slides are picked from.
+  let { random, profile = '' }: {
+    random: TitleSummary[];
     /** profile keeps the slideshow as it was left, for this tab. */
     profile?: string;
-    missing?: boolean;
   } = $props();
 
   const every = 8000;
@@ -70,7 +67,7 @@
     }
     // Each title's page, for its overview and genres; those that fail are
     // left out (slides).
-    pickSlides({ trending, latest, random, acclaimed, recommended, missing }).then((picked) => {
+    pickSlides({ random }).then((picked) => {
       slides = picked;
       keepSlides(profile, slides, 0);
       pending = false;

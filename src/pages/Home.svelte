@@ -60,7 +60,7 @@
     && !home.trending.movie.length && !home.trending.series.length}
   <!-- Without discovery, the slideshow shows the newest, from every
        library in turn. -->
-  <Slides {...slideSources(slides, availability === 'all')} {profile} />
+  <Slides {...slideSources(slides)} {profile} />
   <!-- The rows scroll up over the slideshow's backdrop. -->
   <div class="sheet">
   {#if empty}

@@ -44,17 +44,16 @@ export async function loadHome() {
     // What fits the profile: among everything, and among the newest.
     ['/titles/recommended', { scope: 'all', limit: 20 }],
     ['/titles/recommended', { scope: 'recent', limit: 20 }],
-    // For the slideshow: the library at random, and its best rated.
+    // For the slideshow: the library at random.
     ['/titles', { kind: ['movie', 'series'], sort: 'random', seed, limit: 30 }],
-    ['/titles', { kind: ['movie', 'series'], sort: 'communityRating', order: 'desc', limit: 40 }],
   ]);
   // A row that failed is empty; Continue Watching failing fails the page.
   const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
   if (answers[0] instanceof Error) throw answers[0];
   const rest = answers.slice(1 + trending.length, 1 + trending.length + latest.length);
-  const [leaving, recommended, recent, random, acclaimed] = answers.slice(-5).map(items);
+  const [leaving, recommended, recent, random] = answers.slice(-4).map(items);
   return {
-    random, acclaimed, recommended, recent, leaving,
+    random, recommended, recent, leaving,
     resume: items(answers[0]),
     trending: trending.length ? { movie: items(answers[1]), series: items(answers[2]) } : { movie: [], series: [] },
     latest: latest.map((section, i) => ({ section, items: items(rest[i]) })),

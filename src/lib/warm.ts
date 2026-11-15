@@ -10,7 +10,7 @@
 import { overfin } from './client';
 import { onTV } from './tv';
 import { keepHome, keepSlides, keptHome, keptSlides } from './homecache';
-import { homeAvailability, loadHome, type HomeData } from './homeload';
+import { loadHome, type HomeData } from './homeload';
 import { lastLibraryId, lastSort } from './lastlibrary';
 import { listKey, listQuery, listSort } from './lists';
 import { categoryPath } from './paths';
@@ -68,7 +68,7 @@ async function warmSlides(profile: string) {
   if (!slides) {
     const home = keptHome<HomeData>(profile)?.data;
     if (!home) return;
-    slides = await pickSlides(slideSources(home, homeAvailability() === 'all'));
+    slides = await pickSlides(slideSources(home));
     if (!keptSlides(profile)) keepSlides(profile, slides, 0);
   }
   await preloadSlides(slides, () => session.me?.activeProfile?.id === profile && router.route.parts[0] !== 'play');
