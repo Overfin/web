@@ -39,6 +39,8 @@ export async function loadHome() {
     ['/titles/continue', { limit: 20 }],
     ...trending.map((kind): Call => ['/discover', { list: 'trending', mediaKind: kind, availability, limit: 20 }]),
     ...latest.map((x) => x.call),
+    // What leaves the server soon, for this profile: Last chance.
+    ['/titles/leaving', {}],
     // What fits the profile: among everything, and among the newest.
     ['/titles/recommended', { scope: 'all', limit: 20 }],
     ['/titles/recommended', { scope: 'recent', limit: 20 }],
@@ -50,9 +52,9 @@ export async function loadHome() {
   const items = (a: unknown): TitleSummary[] => (a instanceof Error ? [] : (a as { items: TitleSummary[] }).items);
   if (answers[0] instanceof Error) throw answers[0];
   const rest = answers.slice(1 + trending.length, 1 + trending.length + latest.length);
-  const [recommended, recent, random, acclaimed] = answers.slice(-4).map(items);
+  const [leaving, recommended, recent, random, acclaimed] = answers.slice(-5).map(items);
   return {
-    random, acclaimed, recommended, recent,
+    random, acclaimed, recommended, recent, leaving,
     resume: items(answers[0]),
     trending: trending.length ? { movie: items(answers[1]), series: items(answers[2]) } : { movie: [], series: [] },
     latest: latest.map((section, i) => ({ section, items: items(rest[i]) })),

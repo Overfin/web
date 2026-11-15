@@ -68,6 +68,7 @@
   {/if}
   <!-- Started titles and next episodes together; any can be taken out
        (a series' until it's watched again). -->
+  <Row title={t('home.lastChance')} items={home.leaving} help={t('home.lastChanceHelp')} />
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
   <Row title={t('home.recommended')} items={home.recommended} />
   <Row title={t('home.recentForYou')} items={home.recent} />

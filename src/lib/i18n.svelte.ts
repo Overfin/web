@@ -2,6 +2,7 @@
 // the account's, from the server; before it's known, the browser's.
 import en from '../locales/en';
 import fr from '../locales/fr';
+import { setLanguage as kitLanguage } from '@overfin/ui';
 
 export type Key = keyof typeof en;
 
@@ -40,6 +41,7 @@ export const i18n = {
   set(locale: Locale) {
     current = locale;
     region = locale;
+    kitLanguage(locale); // the kit's own few words (its "?", say)
     if (typeof document !== 'undefined') document.documentElement.lang = locale;
   },
   /** follow sets the site's language from the account's ("fr-CA"): its

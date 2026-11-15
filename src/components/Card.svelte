@@ -7,6 +7,7 @@
      have nothing to play). One on the wishlist says so. One not out yet (a
      collection's) says so, and has neither. -->
 <script lang="ts">
+  import { leavingText } from '../lib/leaving';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { sizes, srcset } from '../lib/images';
   import { overfin } from '../lib/client';
@@ -46,7 +47,10 @@
   loadWishes();
   const wishing = $derived(!series && !item.upcoming && (item.kind === 'movie' || item.kind === 'season') && wishable(item));
   const wished = $derived(!!wishes.ids[item.id]);
-  const flag = $derived(item.upcoming ? t('item.upcoming')
+  // Leaving soon (for this profile, which wants it) comes before the rest.
+  const leaving = $derived(leavingText(item.leavesAt, item.kind));
+  const flag = $derived(leaving ? leaving
+    : item.upcoming ? t('item.upcoming')
     : wished ? t('wish.on')
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');

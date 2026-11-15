@@ -4,6 +4,7 @@
      posters, with the chosen season's episodes, those no library has too;
      an episode shows its season's poster. -->
 <script lang="ts">
+  import { leavingText } from '../lib/leaving';
   import { homeChanged } from '../lib/homecache';
   import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { similarOf, titleOf } from '../lib/titlecache';
@@ -185,6 +186,7 @@
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
           {#if title.genres?.length}<span>{title.genres.join(', ')}</span>{/if}
           {#if availabilityText(title)}<span class="availability">{availabilityText(title)}</span>{/if}
+          {#if leavingText(title.leavesAt, title.kind)}<span class="leaving">{leavingText(title.leavesAt, title.kind)}</span>{/if}
         </div>
         {#if title.tagline}<p class="tagline">{title.tagline}</p>{/if}
         <div class="actions">
