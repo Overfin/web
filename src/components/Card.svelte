@@ -56,8 +56,9 @@
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 
-  // TMDB users' score, from enough votes, on films' and series' posters.
-  const rated = $derived(item.kind === 'movie' || item.kind === 'series' ? score(item) : null);
+  // TMDB users' score, from enough votes, on films' and series' posters
+  // (not on wide cards: those show a picture of it, not its poster).
+  const rated = $derived(!wide && (item.kind === 'movie' || item.kind === 'series') ? score(item) : null);
 
   // Where the card leads: an episode not here yet (Continue Watching's
   // next one) opens its series, whose page lists what's coming.
