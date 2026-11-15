@@ -656,6 +656,9 @@ header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand 
 .card.person { width: calc(var(--card) * .85); text-align: center; }
 ol.episodes .about { margin: .3rem 0 0; font-size: .9rem; color: var(--muted); }
 ol.episodes .about.folded { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* A file holding several episodes: each one's title and what it's about. */
+ol.episodes div.about p { margin: 0 0 .35rem; }
+ol.episodes div.about strong { color: var(--text); font-weight: 600; }
 button.link.about-toggle { align-self: flex-start; min-height: 0; padding: .1rem 0; font-size: .85rem; }
 .season-overview + .about-toggle { margin-bottom: .8rem; }
 

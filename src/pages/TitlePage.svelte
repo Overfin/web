@@ -315,7 +315,7 @@
           <div class="head">
             <!-- One stop per episode for the arrows (lib/spatial): its play
                  button, else its name; the rest is Tab's. -->
-            <a href={titlePathOf(e)} data-arrows={e.playable ? 'skip' : undefined}><span class="number">{e.episodeNumber}.</span> {e.name}</a>
+            <a href={titlePathOf(e)} data-arrows={e.playable ? 'skip' : undefined}><span class="number">{e.episodeNumber}{#if e.episodeEnd}–{e.episodeEnd}{/if}.</span> {e.name}</a>
             <!-- Watched, as on a title's page (no heart: favorites are films
                  and series). -->
             <div class="marks actions" data-arrows="skip">
@@ -331,7 +331,19 @@
             {#if e.durationMs} · {duration(e.durationMs)}{/if}
             {#if e.availability === 'missing'}<span class="chip unavailable">{t('title.unavailable')}</span>{/if}
           </div>
-          {#if e.overview}
+          {#if e.parts?.length}
+            <!-- A file holding several episodes: each one's title, then
+                 what it's about. -->
+            <div class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>
+              {#each e.parts as part, i (i)}<p><strong>{part.name}</strong>{#if part.overview}<br />{part.overview}{/if}</p>{/each}
+            </div>
+            {#if longAbout[e.id] || unfolded[e.id]}
+              <button class="link about-toggle" type="button" data-arrows="skip" aria-expanded={!!unfolded[e.id]}
+                onclick={() => (unfolded[e.id] = !unfolded[e.id])}>
+                {unfolded[e.id] ? t('common.readLess') : t('common.readMore')}
+              </button>
+            {/if}
+          {:else if e.overview}
             <p class="about" class:folded={!unfolded[e.id]} use:overflows={(long) => (longAbout[e.id] = long)}>{e.overview}</p>
             {#if longAbout[e.id] || unfolded[e.id]}
               <button class="link about-toggle" type="button" data-arrows="skip" aria-expanded={!!unfolded[e.id]}
