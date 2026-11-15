@@ -82,6 +82,20 @@
 
   // An episode marked from the list.
   let episodeMarks = $state<Record<string, boolean>>({});
+  // "Not interested" taken back here: shown at once (the title kept in the
+  // cache changes too, for the next visit).
+  let wantedAgain = $state<Record<string, boolean>>({});
+  async function interestedAgain(title: Title) {
+    wantedAgain[title.id] = true;
+    try {
+      await overfin.setNotInterested(title.id, false);
+      title.notInterested = false;
+      homeChanged();
+    } catch (err) {
+      wantedAgain[title.id] = false;
+      await notice(explain(err));
+    }
+  }
   async function toggleEpisode(e: TitleSummary) {
     homeChanged();
     const now = episodeMarks[e.id] ?? e.userState?.played ?? false;
@@ -236,6 +250,10 @@
             </button>
           {/if}
         </div>
+        {#if title.notInterested && !wantedAgain[title.id]}
+          <p class="not-interested">{t('title.notInterested')}
+            · <button class="link" type="button" onclick={() => interestedAgain(title)}>{t('title.interestedAgain')}</button></p>
+        {/if}
         {#if title.overview}
           <p class="overview" id="title-overview" class:folded={!unfolded.title} use:overflows={(long) => (longAbout.title = long)}>{title.overview}</p>
           {#if longAbout.title || unfolded.title}

@@ -12,6 +12,7 @@
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
+  import UndoBar from './components/UndoBar.svelte';
   import SiteFooter from './components/SiteFooter.svelte';
   import PageScrollbar from './components/PageScrollbar.svelte';
   import { categoryIdOf, collectionIdOf, personIdOf, titleIdOf } from './lib/paths';
@@ -228,3 +229,4 @@
 {#if route.parts[0] !== 'play'}<SiteFooter tmdb={route.parts.length === 0} />{/if}
 <PageScrollbar />
 <Dialog />
+<UndoBar />

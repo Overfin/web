@@ -7,8 +7,10 @@
   import Card from './Card.svelte';
   import ScrollRow from './ScrollRow.svelte';
 
-  let { title, items, wide = false, remove, removable, help = '' }: {
+  let { title, items, wide = false, remove, removable, removeLabel, help = '' }: {
     title: string; items: TitleSummary[]; wide?: boolean; remove?: (item: TitleSummary) => void;
+    /** removeLabel names the remove button (Continue Watching's otherwise). */
+    removeLabel?: string;
     removable?: (item: TitleSummary) => boolean;
     /** help: what the row is, behind a "?" beside its title. */
     help?: string;
@@ -19,7 +21,7 @@
   <h2>{title}{#if help}<HelpTip text={help} />{/if}</h2>
   <ScrollRow>
     {#each items as item (item.id)}
-      <Card {item} {wide} remove={remove && (!removable || removable(item)) ? () => remove(item) : undefined} />
+      <Card {item} {wide} {removeLabel} remove={remove && (!removable || removable(item)) ? () => remove(item) : undefined} />
     {/each}
   </ScrollRow>
 {/if}

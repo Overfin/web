@@ -10,6 +10,8 @@
   import { homeAvailability, loadHome, type HomeData } from '../lib/homeload';
   import { session } from '../lib/session.svelte';
   import { slideSources } from '../lib/slides';
+  import { offerUndo } from '../lib/undo.svelte';
+  import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { landed } from '../lib/warm';
   import PageError from '../components/PageError.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
@@ -45,6 +47,25 @@
   if (!kept || kept.old) read();
   else landed();
 
+  // Titles the profile isn't interested in, said here: out of its
+  // recommendations at once, back with Undo.
+  let unwanted = $state<string[]>([]);
+  async function notInterested(item: TitleSummary) {
+    homeChanged();
+    unwanted = [...unwanted, item.id];
+    const back = async () => {
+      homeChanged();
+      unwanted = unwanted.filter((id) => id !== item.id);
+      await overfin.setNotInterested(item.id, false).catch(() => {});
+    };
+    try {
+      await overfin.setNotInterested(item.id);
+      offerUndo(t('item.notInterestedDone', { name: item.name }), back);
+    } catch {
+      unwanted = unwanted.filter((id) => id !== item.id);
+    }
+  }
+
   // Titles taken out of Continue Watching here, hidden at once.
   let removed = $state<string[]>([]);
   async function forget(item: { id: string }) {
@@ -70,8 +91,10 @@
        (a series' until it's watched again). -->
   <Row title={t('home.lastChance')} items={home.leaving} help={t('home.lastChanceHelp')} />
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
-  <Row title={t('home.recommended')} items={home.recommended} />
-  <Row title={t('home.recentForYou')} items={home.recent} />
+  <Row title={t('home.recommended')} items={home.recommended.filter((i) => !unwanted.includes(i.id))}
+    remove={notInterested} removeLabel={t('item.notInterested')} />
+  <Row title={t('home.recentForYou')} items={home.recent.filter((i) => !unwanted.includes(i.id))}
+    remove={notInterested} removeLabel={t('item.notInterested')} />
   {#if session.discovery}
     <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" {availability} flags={availability === 'all'}
       items={home.trending.movie} />
