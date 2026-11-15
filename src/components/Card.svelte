@@ -12,11 +12,12 @@
   import { sizes, srcset } from '../lib/images';
   import { overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
-  import { t } from '../lib/i18n.svelte';
+  import { num, t } from '../lib/i18n.svelte';
   import { play } from '../lib/play';
   import { loadWishes, toggleWish, wishable, wishes } from '../lib/wishlist.svelte';
   import { titlePathOf } from '../lib/paths';
   import { prefetchTitle } from '../lib/titlecache';
+  import { score } from '../lib/score';
 
   let { item, wide = false, flags = true, note = '', remove, removeLabel }: {
     item: TitleSummary; wide?: boolean; flags?: boolean; note?: string; remove?: () => void; removeLabel?: string;
@@ -55,6 +56,9 @@
     : !flags ? '' : item.availability === 'missing' ? t('title.notHere')
     : item.availability === 'partiallyAvailable' ? t('discover.partly') : '');
 
+  // TMDB users' score, from enough votes, on films' and series' posters.
+  const rated = $derived(item.kind === 'movie' || item.kind === 'series' ? score(item) : null);
+
   // Where the card leads: an episode not here yet (Continue Watching's
   // next one) opens its series, whose page lists what's coming.
   const target = $derived(item.kind === 'episode' && item.availability === 'missing' && item.series
@@ -88,6 +92,12 @@
       {/if}
       {#if flag}<span class="flag">{flag}</span>{/if}
       {#if item.userState?.played}<span class="seen" role="img" aria-label={t('title.watched')}>✓</span>{/if}
+      {#if rated}
+        <span class="rating" title={t('item.score', { value: rated.value, votes: num(rated.votes) })}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{rated.value}
+          <span class="sr-only">{t('item.score', { value: rated.value, votes: num(rated.votes) })}</span>
+        </span>
+      {/if}
     </div>
     <div class="title">{item.name}</div>
     <div class="sub">{sub}</div>
