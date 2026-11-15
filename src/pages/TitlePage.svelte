@@ -24,6 +24,7 @@
   import Marks from '../components/Marks.svelte';
   import Row from '../components/Row.svelte';
   import ScrollRow from '../components/ScrollRow.svelte';
+  import { HelpTip } from '@overfin/ui';
   import PageError from '../components/PageError.svelte';
   import Skeleton from '../components/Skeleton.svelte';
 
@@ -182,6 +183,9 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>{s.value}
               <span class="sr-only">{t('item.score', { value: s.value, votes: num(s.votes) })}</span>
             </span>
+          {/if}
+          {#if title.rank && (title.kind === 'movie' || title.kind === 'series')}
+            <span class="rank">#{num(title.rank)}<HelpTip text={t(title.kind === 'series' ? 'title.rank.series' : 'title.rank.movie')} /></span>
           {/if}
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
           {#if title.genres?.length}<span>{title.genres.join(', ')}</span>{/if}

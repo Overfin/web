@@ -9,7 +9,7 @@ import type { TitlePage, TitleQuery, TitleSummary } from './sdk/overfin.js';
 export type ListKept = { items: TitleSummary[]; total?: number; finished: boolean; pages?: AsyncGenerator<TitlePage> };
 
 /** listSorts are the ways a list can be sorted. */
-export const listSorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'lastPlayed', 'random'] as const;
+export const listSorts = ['name', 'addedAt', 'premiereDate', 'communityRating', 'rank', 'lastPlayed', 'random'] as const;
 
 /** listSort is value when it's one of them, else by name. */
 export function listSort(value: string | null | undefined): NonNullable<TitleQuery['sort']> {

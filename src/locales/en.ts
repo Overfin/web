@@ -113,6 +113,7 @@ export default {
   'library.sort.addedAt': 'Recently added',
   'library.sort.premiereDate': 'Release date',
   'library.sort.communityRating': 'Rating',
+  'library.sort.rank': 'Rank',
   'library.sort.lastPlayed': 'Recently watched',
   'library.sort.random': 'Shuffle',
   'library.count.one': '{count} item',
@@ -137,6 +138,8 @@ export default {
 
   'item.play': 'Play',
   'item.score': 'TMDB users: {value} out of 10, from {votes} votes',
+  'title.rank.movie': 'Rank among this server\'s films: how much the people here watch, like and want it.',
+  'title.rank.series': 'Rank among this server\'s series: how much the people here watch, like and want it.',
   'item.listAdd': 'Add to my list',
   'item.listRemove': 'Remove from my list',
   'item.favoriteRemove': 'Remove from favorites',

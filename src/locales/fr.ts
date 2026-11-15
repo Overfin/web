@@ -114,6 +114,7 @@ const fr: Record<keyof typeof en, string> = {
   'library.sort.addedAt': 'Ajouts récents',
   'library.sort.premiereDate': 'Date de sortie',
   'library.sort.communityRating': 'Note',
+  'library.sort.rank': 'Rang',
   'library.sort.lastPlayed': 'Vus récemment',
   'library.sort.random': 'Au hasard',
   'library.count.one': '{count} titre',
@@ -138,6 +139,8 @@ const fr: Record<keyof typeof en, string> = {
 
   'item.play': 'Lecture',
   'item.score': 'Utilisateurs de TMDB : {value} sur 10, d’après {votes} votes',
+  'title.rank.movie': 'Rang parmi les films de ce serveur : à quel point les gens d’ici le regardent, l’aiment et le veulent.',
+  'title.rank.series': 'Rang parmi les séries de ce serveur : à quel point les gens d’ici la regardent, l’aiment et la veulent.',
   'item.listAdd': 'Ajouter à ma liste',
   'item.listRemove': 'Retirer de ma liste',
   'item.favoriteRemove': 'Retirer des favoris',

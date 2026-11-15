@@ -689,6 +689,7 @@ svg.arrow { display: block; width: 1.4rem; height: 1.4rem; fill: none; stroke: c
 /* Users' score, with a small star. */
 .meta .score { display: inline-flex; align-items: center; gap: .3em; color: var(--warn); font-weight: 600; }
 .meta .score svg { width: 1em; height: 1em; fill: currentColor; }
+.meta .rank { display: inline-flex; align-items: center; font-weight: 600; }
 
 /* A title's and a slide's text buttons: pills, beside the round icons, each
    with its icon first, in the text's color. */
