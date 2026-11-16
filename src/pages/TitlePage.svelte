@@ -41,7 +41,8 @@
   let similar = $state<TitleSummary[]>([]);
   $effect(() => {
     similar = [];
-    similarOf(pageId).then((items) => (similar = items), () => {});
+    // By the title's whole ID (an episode's address may name it alone).
+    titleOf(pageId).then((t) => similarOf(t.id)).then((items) => (similar = items), () => {});
   });
 
   // The season a series shows: the one chosen here, else the one in the

@@ -9,9 +9,13 @@ import { onTV } from './tv';
 
 const who = () => session.me?.activeProfile?.id ?? '';
 
+// An episode is kept by TMDB's ID of it alone, whichever ID asks: its
+// address names it so, and lists by its whole ID (series and episode).
+const keyOf = (id: string) => id.replace(/^title_series_tmdb_\d+_e(\d+)$/, 'title_episode_tmdb_$1');
+
 /** titleOf is a title's page (a season's too). */
 export function titleOf(id: string): Promise<Title> {
-  return cached(`${who()}:title:${id}`, () => overfin.title(id));
+  return cached(`${who()}:title:${keyOf(id)}`, () => overfin.title(id));
 }
 
 /** similarOf is the titles like this one. */
@@ -28,7 +32,7 @@ export function prefetchTitle(id: string) {
   if (onTV) return; // a cursor passing over cards would keep a TV busy
   prefetch(`${who()}:similar:${id}`, () => overfin.similar(id));
   if (pictured.has(id)) {
-    prefetch(`${who()}:title:${id}`, () => overfin.title(id));
+    prefetch(`${who()}:title:${keyOf(id)}`, () => overfin.title(id));
     return;
   }
   pictured.add(id);

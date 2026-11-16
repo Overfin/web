@@ -22,7 +22,9 @@ describe('titles', () => {
       const parts = titlePath('title_series_tmdb_38527', name).split('/').slice(2);
       expect(titleIdOf(parts)).toBe('title_series_tmdb_38527');
     }
-    expect(titlePath('title_series_tmdb_38527_e63056', '19-2')).toBe('/title/s38527/19-2/e63056');
+    expect(titlePath('title_series_tmdb_38527_e63056', '19-2')).toBe('/title/e63056/19-2');
+    expect(titlePath('title_series_tmdb_48866_e1158146', 'Les 100', { name: 'Le treizième clan', seasonNumber: 3, episodeNumber: 3 }))
+      .toBe('/title/e1158146/les-100-s3e3-le-treizieme-clan');
     expect(titlePath('title_item_0123abc', 'x')).toBe('/title/title_item_0123abc');
     for (const id of ['title_movie_tmdb_550988', 'title_series_tmdb_38527', 'title_series_tmdb_38527_s1', 'title_series_tmdb_38527_s0_e12']) {
       expect(titleIdOf(titlePath(id, 'Some name').split('/').slice(2))).toBe(id);
@@ -33,6 +35,7 @@ describe('titles', () => {
     expect(titleIdOf(['m550988'])).toBe('title_movie_tmdb_550988');
     expect(titleIdOf(['title_movie_tmdb_550988'])).toBe('title_movie_tmdb_550988');
     expect(titleIdOf(['s38527', '19-2', 'e63056'])).toBe('title_series_tmdb_38527_e63056');
+    expect(titleIdOf(['e1158146', 'les-100-s3e3-le-treizieme-clan'])).toBe('title_episode_tmdb_1158146');
     expect(titleIdOf(['m550988', 'e63056'])).toBe('title_movie_tmdb_550988');
     expect(titleIdOf(['s38527', 'episode-3'])).toBe('title_series_tmdb_38527');
     expect(titleIdOf(['m550988', 'season-1'])).toBe('title_movie_tmdb_550988');
@@ -75,8 +78,8 @@ describe('categories', () => {
     expect(playPath('title_series_tmdb_48866_e1158146')).toBe('/play/e1158146');
     // Read back: the episode alone, which the API takes for its page.
     expect(titleIdOf(['e1158146', 'les-100-s3e3-le-treizieme-clan'], true)).toBe('title_episode_tmdb_1158146');
-    // Older addresses still work; a title's page has no such address.
+    // Older addresses still work.
     expect(titleIdOf(['s48866', 'les-100', 'e1158146'], true)).toBe('title_series_tmdb_48866_e1158146');
-    expect(titleIdOf(['e1158146'])).toBe(null);
+    expect(titleIdOf(['e1158146'])).toBe('title_episode_tmdb_1158146'); // title pages too, since episodes' addresses are the player's
   });
 });

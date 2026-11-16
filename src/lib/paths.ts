@@ -1,10 +1,13 @@
-// Readable addresses: /title/m550988/free-guy, /title/s38527/19-2/season-1/
-// episode-3, /person/1245/scarlett-johansson, /collection/645/james-bond,
-// /category/films. Only the number counts (m: a film, s: a series, as TMDB
-// numbers them apart); the name after it is decoration, as the person sees
-// it, and is put right when it's wrong or missing. The API's IDs stay as
-// they are, and addresses made of them (/title/title_movie_tmdb_550988)
-// still work.
+// Readable addresses: /title/m550988/free-guy, /title/s38527/19-2, an
+// episode by TMDB's ID of it then its series, numbers and name
+// (/title/e1158146/les-100-s3e3-le-treizieme-clan, as the player's),
+// /person/1245/scarlett-johansson, /collection/645/james-bond,
+// /category/films. Only the number counts (m: a film, s: a series, e: an
+// episode, as TMDB numbers them apart); the name after it is decoration, as
+// the person sees it, and is put right when it's wrong or missing. The
+// API's IDs stay as they are, and addresses made of them
+// (/title/title_movie_tmdb_550988) still work, as older ones do
+// (/title/s38527/19-2/e63056, /title/s38527/19-2/season-1/episode-3).
 
 import type { Category } from './sdk/overfin.js';
 
@@ -25,9 +28,23 @@ export function slug(name: string | undefined): string {
 
 const titleId = /^title_(movie|series)_tmdb_(\d+)(?:_s(\d+)(?:_e(\d+))?|_e(\d+))?$/;
 
+/** Episode is what an episode's address names after its series. */
+type Episode = { name?: string; seasonNumber?: number; episodeNumber?: number };
+
+/** episodePart is an episode's address part by TMDB's ID of it: then its
+ * series' name (name), its numbers and its own name, as far as given. */
+function episodePart(tmdbId: string, name?: string, episode?: Episode): string {
+  const at = episode?.seasonNumber !== undefined && episode.episodeNumber !== undefined ? `s${episode.seasonNumber}e${episode.episodeNumber}` : '';
+  const s = slug([name, at, episode?.name].filter(Boolean).join(' '));
+  return `e${tmdbId}${s ? `/${s}` : ''}`;
+}
+
 /** titlePath is a title's address; name is its own, or its series' for a
- * season or an episode. A title TMDB doesn't know keeps its ID. */
-export function titlePath(id: string, name?: string): string {
+ * season or an episode (then episode, its numbers and own name). A title
+ * TMDB doesn't know keeps its ID. */
+export function titlePath(id: string, name?: string, episode?: Episode): string {
+  const byTMDB = episodeId.exec(id);
+  if (byTMDB) return `/title/${episodePart(byTMDB[1], name, episode)}`;
   const m = titleId.exec(id);
   if (!m) return `/title/${encodeURIComponent(id)}`;
   const parts = [`${m[1] === 'movie' ? 'm' : 's'}${m[2]}`];
@@ -44,32 +61,26 @@ export function titlePath(id: string, name?: string): string {
  * own, under /play/ (/play/m550988/free-guy); an episode's, TMDB's ID of
  * it alone, then its series' name (name), its numbers and its own name, as
  * far as they're given (/play/e1158146/les-100-s3e3-le-treizieme-clan). */
-export function playPath(id: string, name?: string, episode?: { name?: string; seasonNumber?: number; episodeNumber?: number }): string {
-  const m = episodeId.exec(id);
-  if (m) {
-    const at = episode?.seasonNumber !== undefined && episode.episodeNumber !== undefined ? `s${episode.seasonNumber}e${episode.episodeNumber}` : '';
-    const s = slug([name, at, episode?.name].filter(Boolean).join(' '));
-    return `/play/e${m[1]}${s ? `/${s}` : ''}`;
-  }
-  return '/play/' + titlePath(id, name).slice('/title/'.length);
+export function playPath(id: string, name?: string, episode?: Episode): string {
+  return '/play/' + titlePath(id, name, episode).slice('/title/'.length);
 }
 
 /** episodeId is an episode's ID by TMDB's ID of it. */
 const episodeId = /^title_series_tmdb_\d+_e(\d+)$/;
 
 /** titlePathOf is a title's address, from what lists and pages carry. */
-export function titlePathOf(t: { id: string; name: string; series?: { name: string } }): string {
-  return titlePath(t.id, t.series?.name ?? t.name);
+export function titlePathOf(t: { id: string; name: string; series?: { name: string }; seasonNumber?: number; episodeNumber?: number }): string {
+  return titlePath(t.id, t.series?.name ?? t.name, t.series ? t : undefined);
 }
 
 /** titleIdOf reads a title's ID from its address's parts after /title/
- * (or /play/, play: then an episode's may be TMDB's ID of it alone, e1158146,
- * which the API takes for its page only); null when they name none. */
-export function titleIdOf(parts: string[], play = false): string | null {
+ * (or /play/): an episode's may be TMDB's ID of it alone, e1158146, which
+ * the API takes for its page; null when they name none. */
+export function titleIdOf(parts: string[], _play = false): string | null {
   const [first, ...rest] = parts;
   if (!first) return null;
   if (first.startsWith('title_')) return first;
-  const alone = play ? /^e([1-9]\d{0,9})$/.exec(first) : null;
+  const alone = /^e([1-9]\d{0,9})$/.exec(first);
   if (alone) return `title_episode_tmdb_${alone[1]}`;
   const m = /^([ms])([1-9]\d{0,9})$/.exec(first);
   if (!m) return null;
