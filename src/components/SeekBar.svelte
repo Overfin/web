@@ -48,8 +48,10 @@
   }
 
   // The preview at a share of the video: its sheet, and where the tile is
-  // on it, shown 192 pixels wide.
-  const width = 192;
+  // on it, a fifth of the bar wide (so it grows with the screen), between
+  // 160 and 480 pixels.
+  let barWidth = $state(0);
+  const width = $derived(Math.round(Math.min(480, Math.max(160, barWidth / 5))));
   const preview = $derived.by(() => {
     if (at === null || !trickplay || !trickplay.sheets.length) return null;
     const tp = trickplay;
@@ -68,7 +70,7 @@
   });
 </script>
 
-<div class="seekbar" bind:this={bar} role="slider" tabindex="-1" aria-label={t('player.position')}
+<div class="seekbar" bind:this={bar} bind:clientWidth={barWidth} role="slider" tabindex="-1" aria-label={t('player.position')}
   aria-valuemin={0} aria-valuemax={Math.round(durationMs / 1000)} aria-valuenow={Math.round(positionMs / 1000)}
   aria-valuetext={clock(positionMs)}
   onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={() => (scrubbing = false)}
