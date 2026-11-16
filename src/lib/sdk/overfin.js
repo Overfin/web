@@ -717,8 +717,9 @@ export class Player {
   async close({ ended = false } = {}) {
     if (this.closed) return;
     const pb = this.playback;
-    const position = this.positionMs;
-    if (ended && pb) await this.client.reportProgress(pb.id, { positionMs: position, paused: this.video.paused, ended: true }).catch(() => {});
+    // Ended: stopped at its end, in the one request (a report first would
+    // hold the stop back a round trip, the next title already starting).
+    const position = ended && pb?.durationMs ? pb.durationMs : this.positionMs;
     this.teardown();
     this.closed = true;
     this.pictures?.hide();

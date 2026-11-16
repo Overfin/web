@@ -7,6 +7,7 @@
   // for its address, and its select gets the focus back (else it falls to
   // the page, and the next arrow scrolls instead of choosing).
   let refocus = '';
+  let refocusAt = 0;
 </script>
 
 <script lang="ts">
@@ -76,6 +77,7 @@
   /** change goes to this library with one choice changed (a new shuffle). */
   function change(name: string, value: string) {
     refocus = name;
+    refocusAt = Date.now();
     const next = new URLSearchParams(params);
     next.delete('seed');
     if (name === 'sort') rememberSort(profile, value);
@@ -86,10 +88,13 @@
   }
 
   $effect(() => {
-    if (!refocus) return;
-    const name = refocus;
+    // The genres' select shows once its genres are read: tried again then.
+    void genres.length;
+    if (!refocus || Date.now() - refocusAt > 5000) return;
+    const select = document.querySelector<HTMLSelectElement>(`select[data-filter="${refocus}"]`);
+    if (!select) return;
     refocus = '';
-    document.querySelector<HTMLSelectElement>(`select[data-filter="${name}"]`)?.focus({ preventScroll: true });
+    select.focus({ preventScroll: true });
   });
 
   // What was read of this list in this tab, as far as it was scrolled,
