@@ -7,7 +7,7 @@
   import { leavingText } from '../lib/leaving';
   import { homeChanged } from '../lib/homecache';
   import { screenWidth, sized, sizes, srcset } from '../lib/images';
-  import { similarOf, titleOf } from '../lib/titlecache';
+  import { prefetchTitle, similarOf, titleOf } from '../lib/titlecache';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
@@ -164,6 +164,11 @@
   function neighbours(list: TitleSummary[] | undefined, current: string) {
     const i = (list ?? []).findIndex((e) => e.id === current);
     return { previous: i > 0 ? list![i - 1] : undefined, next: i >= 0 && i + 1 < list!.length ? list![i + 1] : undefined };
+  }
+  // The episodes before and after, read ahead (their page and pictures):
+  // going to them shows them at once.
+  function readAhead(_node: HTMLElement, ids: (string | undefined)[]) {
+    for (const id of ids) if (id) prefetchTitle(id);
   }
   // The season's row opens on the current episode, without moving the page.
   function onCurrent(row: HTMLElement) {
@@ -437,7 +442,7 @@
     {#await titleOf(title.season.id) then season}
       {@const near = neighbours(season.episodes, title.id)}
       {#if season.episodes?.length}
-        <div class="section-head">
+        <div class="section-head" use:readAhead={[near.previous?.id, near.next?.id]}>
           <h2><a href={seriesPath}>{seasonName(season)}</a></h2>
           <span class="actions-row">
             {#if near.previous}<a class="button" href={titlePathOf(near.previous)}>‹ {t('title.previousEpisode')}</a>{/if}

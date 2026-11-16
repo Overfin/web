@@ -38,6 +38,7 @@ export function prefetchTitle(id: string) {
     // poster and the logo at the sizes the browser takes for them.
     if (backdrop) new Image().src = sized(backdrop, 'backdrop', screenWidth());
     if (title.kind !== 'episode') preload(title.images?.primary, 'poster', sizes.heroPoster);
+    else preload(title.images?.primary, 'still', sizes.heroStill);
     preload(title.images?.logo, 'logo', sizes.logo);
   }, () => pictured.delete(id));
 }

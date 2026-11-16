@@ -1,8 +1,12 @@
 // An image shows once it's there: until then its frame shimmers. On the
 // image, `use:loaded` marks it, and its frame, ready when it has loaded (or
-// failed, so the frame stops shimmering either way).
+// failed, so the frame stops shimmering either way). One the browser had
+// already (there within a tenth of a second) shows at once, without its
+// fade: going from page to page, pictures already seen don't blink.
 export function loaded(img: HTMLImageElement) {
+  const start = performance.now();
   const done = () => {
+    if (performance.now() - start < 100) img.style.transition = 'none';
     img.classList.add('loaded');
     img.parentElement?.classList.add('ready');
   };
