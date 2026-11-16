@@ -139,8 +139,8 @@ const fr: Record<keyof typeof en, string> = {
 
   'item.play': 'Lecture',
   'item.score': 'Utilisateurs de TMDB : {value} sur 10, d’après {votes} votes',
-  'title.rank.movie': 'Rang parmi les films de ce serveur : à quel point les gens d’ici le regardent, l’aiment et le veulent.',
-  'title.rank.series': 'Rang parmi les séries de ce serveur : à quel point les gens d’ici la regardent, l’aiment et la veulent.',
+  'title.rank.movie': 'Rang parmi les films sur ce serveur',
+  'title.rank.series': 'Rang parmi les séries sur ce serveur',
   'item.listAdd': 'Ajouter à ma liste',
   'item.listRemove': 'Retirer de ma liste',
   'item.favoriteRemove': 'Retirer des favoris',
