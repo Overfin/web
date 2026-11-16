@@ -63,6 +63,7 @@ export const sizes = {
   card: `(max-width: 37.5rem) 28vw, ${big(10.5)}, 10.5rem`,
   wideCard: `(max-width: 37.5rem) 45vw, ${big(17)}, 17rem`,
   heroPoster: `(max-width: 37.5rem) 55vw, ${big(20)}, 20rem`,
+  heroStill: `(max-width: 37.5rem) 90vw, ${big(32)}, 32rem`,
   logo: `(max-width: 37.5rem) 80vw, ${big(26)}, 26rem`,
   episode: `(max-width: 37.5rem) 90vw, ${big(22)}, 22rem`,
   smallStill: `${big(12)}, 12rem`,

@@ -78,6 +78,11 @@ export function date(d: Date | string, style: 'medium' | 'long' = 'medium'): str
   return (typeof d === 'string' ? new Date(d) : d).toLocaleDateString(region, { dateStyle: style });
 }
 
+/** timeOfDay writes a time of day (20:57, 8:57 PM) as the site's region does. */
+export function timeOfDay(d: Date): string {
+  return d.toLocaleTimeString(region, { hour: 'numeric', minute: '2-digit' });
+}
+
 /** num writes a number in the site's language. */
 export function num(n: number, options?: Intl.NumberFormatOptions): string {
   return n.toLocaleString(region, options);

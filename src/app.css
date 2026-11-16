@@ -638,12 +638,7 @@ ol.list.wishes > li { align-items: flex-start; }
 .bio { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; max-width: 46rem; }
 .bio.whole { display: block; }
 /* Breadcrumbs: series › season › episode. */
-.breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .5rem; list-style: none; margin: 0 0 .4rem; padding: 0; color: rgba(var(--text-rgb), .8); }
-.breadcrumbs li + li::before { content: "›"; margin-right: .5rem; color: var(--muted); }
-.breadcrumbs a { color: var(--text); font-weight: 600; }
-.breadcrumbs a:hover { text-decoration: underline; }
 /* Over the picture, like the title under them. */
-.breadcrumbs { text-shadow: var(--title-shadow); }
 /* Search: the header's button, and the page. */
 header { grid-template-columns: auto 1fr auto auto; grid-template-areas: "brand nav search menu"; }
 .search-link { grid-area: search; display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: var(--radius-s); color: var(--muted); }
@@ -754,6 +749,23 @@ html.has-backdrop .slide::before { content: none; }
 .title-hero .info { align-items: flex-start; gap: 2.5rem; padding-top: 2.5rem; max-width: 76rem; }
 .title-hero .poster { width: clamp(13rem, 22vw, 20rem); }
 .title-hero h1.logo img { max-height: 7rem; }
+/* An episode: its own picture, wide; its series' logo above its name, back
+   to the series; who made it and what its files are, as short facts. */
+.title-hero .poster.still-hero { width: clamp(16rem, 32vw, 32rem); aspect-ratio: 16 / 9; overflow: hidden; }
+.title-hero .poster.still-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.series-link { display: inline-block; margin: 0 0 .5rem; color: var(--text); font-weight: 600; text-shadow: var(--title-shadow); }
+.series-link:hover { text-decoration: underline; }
+.series-link img { display: block; max-width: min(16rem, 60vw); max-height: 4.5rem; width: auto; height: auto; filter: var(--logo-shadow); }
+.facts { display: grid; grid-template-columns: 6.5rem 1fr; gap: .2rem 1rem; margin: .9rem 0 0; font-size: .92rem; }
+.facts > div { display: contents; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.facts dd a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(var(--text-rgb), .35); }
+.facts.copy + .facts.copy { padding-top: .6rem; border-top: 1px solid var(--hairline); }
+.ep-cell { flex: none; border-radius: var(--radius); }
+.ep-cell.current { outline: 3px solid var(--accent); outline-offset: 3px; }
+.section-head .actions-row { display: flex; gap: .5rem; flex-wrap: wrap; }
+.section-head h2 a { color: inherit; }
 /* Beside a large poster there's room for the whole overview. */
 @media (min-width: 601px) { .hero.title-hero .overview.folded { display: block; -webkit-line-clamp: none; overflow: visible; } }
 /* On desktop the seasons start under the poster; on a phone they stay centred. */

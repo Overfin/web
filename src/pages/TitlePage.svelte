@@ -14,7 +14,7 @@
   import { backdropOf } from '../lib/backdrop.svelte';
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
   import { ageText, clock, duration } from '../lib/format';
-  import { date, num, t, tn, type Key } from '../lib/i18n.svelte';
+  import { date, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
   import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
@@ -23,6 +23,7 @@
   import ButtonIcon from '../components/ButtonIcon.svelte';
   import Marks from '../components/Marks.svelte';
   import Row from '../components/Row.svelte';
+  import Card from '../components/Card.svelte';
   import ScrollRow from '../components/ScrollRow.svelte';
   import { HelpTip } from '@overfin/ui';
   import PageError from '../components/PageError.svelte';
@@ -30,12 +31,17 @@
 
   let { id, params }: { id: string; params: URLSearchParams } = $props();
 
+  // A season's address opens its series' page, that season chosen and
+  // brought into view: seasons have no page of their own.
+  const seasonRoute = $derived(/^(title_series_.+)_s(\d{1,4})$/.exec(id));
+  const pageId = $derived(seasonRoute ? seasonRoute[1] : id);
+
   // Titles like this one, below its page; none is no row (and a server
   // before 0.6 has none).
   let similar = $state<TitleSummary[]>([]);
   $effect(() => {
     similar = [];
-    similarOf(id).then((items) => (similar = items), () => {});
+    similarOf(pageId).then((items) => (similar = items), () => {});
   });
 
   // The season a series shows: the one chosen here, else the one in the
@@ -44,11 +50,14 @@
   let chosen = $state<string | null>(null);
   function seasonOf(title: Title): string | null {
     if (title.kind !== 'series' || !title.seasons?.length) return null;
-    return chosen ?? (title.seasons.find((s) => String(s.seasonNumber) === params.get('season')) ?? title.seasons[0]).id;
+    const asked = params.get('season') ?? seasonRoute?.[2];
+    return chosen ?? (title.seasons.find((s) => String(s.seasonNumber) === asked) ?? title.seasons[0]).id;
   }
-  // A season chosen from the row: its episodes are brought into view once
-  // they're there (its heading just under the header).
-  let reveal = false;
+  // A season chosen from the row, or asked by its address: its episodes
+  // are brought into view once they're there (its heading just under the
+  // header).
+  // svelte-ignore state_referenced_locally
+  let reveal = !!seasonRoute;
   function choose(title: Title, s: TitleSummary) {
     chosen = s.id;
     reveal = true;
@@ -140,17 +149,38 @@
 
   // Its address put right: the name, as the person sees it (lib/paths).
   // svelte-ignore state_referenced_locally
-  titleOf(id).then((t) => correct(titlePathOf(t), (parts) => titleIdOf(parts) === id), () => {});
+  titleOf(pageId).then((t) => {
+    if (seasonRoute) history.replaceState(history.state, '', `${titlePathOf(t)}?season=${seasonRoute[2]}`);
+    else correct(titlePathOf(t), (parts) => titleIdOf(parts) === id);
+  }, () => {});
+
+  // When an episode would end, started (or resumed) now: kept current.
+  let now = $state(Date.now());
+  $effect(() => {
+    const tick = setInterval(() => (now = Date.now()), 30_000);
+    return () => clearInterval(tick);
+  });
+  // The episode's season, for its other episodes, the one before and after.
+  function neighbours(list: TitleSummary[] | undefined, current: string) {
+    const i = (list ?? []).findIndex((e) => e.id === current);
+    return { previous: i > 0 ? list![i - 1] : undefined, next: i >= 0 && i + 1 < list!.length ? list![i + 1] : undefined };
+  }
+  // The season's row opens on the current episode, without moving the page.
+  function onCurrent(row: HTMLElement) {
+    const current = row.querySelector<HTMLElement>('.current');
+    if (current) row.scrollLeft = current.offsetLeft - (row.clientWidth - current.offsetWidth) / 2;
+  }
 </script>
 
-{#await titleOf(id)}
+{#await titleOf(pageId)}
   <Skeleton kind="title" />
 {:then title}
   {@const seasonID = seasonOf(title)}
   {@const position = title.userState?.positionMs ?? 0}
   {@const backdrop = title.images?.backdrops?.[0] ?? (title.kind === 'episode' ? title.images?.primary : undefined)}
   {@const poster = title.kind === 'episode' ? undefined : title.images?.primary}
-  {@const seasonPoster = title.kind === 'episode' && title.season ? titleOf(title.season.id) : undefined}
+  {@const still = title.kind === 'episode' ? title.images?.primary : undefined}
+  {@const seriesPath = title.series ? titlePath(title.series.id, title.series.name) + (title.seasonNumber !== undefined ? `?season=${title.seasonNumber}` : '') : ''}
   <!-- Its backdrop is the page's, fixed behind it (lib/backdrop). -->
   <div class="hero title-hero" class:art={!!backdrop} data-theme={backdrop ? 'dark' : undefined} use:backdropOf={backdrop ? { wide: sized(backdrop, 'backdrop', screenWidth()), tall: title.images?.textless ? sized(title.images.textless, 'poster', screenWidth()) : undefined, even: true } : undefined}>
     <div class="info">
@@ -158,30 +188,20 @@
         <div class="poster">
           <img src={overfin.imageUrl(poster, 'medium')} srcset={srcset(poster, 'poster')} sizes={sizes.heroPoster} alt="" use:loaded />
         </div>
-      {:else if seasonPoster && title.season}
-        <!-- An episode: its season's poster, leading back to it. -->
-        {#await seasonPoster then s}
-          {#if s.images?.primary}
-            <a class="poster" href={titlePath(title.season.id, title.series?.name ?? s.name)} aria-label={s.name || seasonName(s)}>
-              <img src={overfin.imageUrl(s.images.primary, 'medium')} srcset={srcset(s.images.primary, 'poster')} sizes={sizes.card} alt="" use:loaded />
-            </a>
-          {/if}
-        {:catch}{/await}
+      {:else if still}
+        <!-- An episode: its own picture, wide. -->
+        <div class="poster still-hero">
+          <img src={overfin.imageUrl(still, 'medium')} srcset={srcset(still, 'still')} sizes={sizes.heroStill} alt="" use:loaded />
+        </div>
       {/if}
       <div>
         {#if title.series}
-          <!-- Where it is: its series, and an episode's season. -->
-          <nav class="breadcrumbs" aria-label={t('title.breadcrumbs')}>
-            <ol>
-              <li><a href={titlePath(title.series.id, title.series.name)}>{title.series.name}</a></li>
-              {#if title.kind === 'episode' && title.season}
-                <li><a href={titlePath(title.season.id, title.series.name)}>{title.season.name || seasonName(title)}</a></li>
-                <li aria-current="page">{t('title.episodeNumber', { number: title.episodeNumber ?? '?' })}</li>
-              {:else}
-                <li aria-current="page">{seasonName(title)}</li>
-              {/if}
-            </ol>
-          </nav>
+          <!-- An episode's series, back to its page, this season chosen. -->
+          <a class="series-link" href={seriesPath}>
+            {#if title.images?.logo}
+              <img src={overfin.imageUrl(title.images.logo, 'medium')} srcset={srcset(title.images.logo, 'logo')} sizes={sizes.logo} alt={title.series.name} />
+            {:else}{title.series.name}{/if}
+          </a>
         {/if}
         {#if title.images?.logo && title.kind !== 'episode' && title.kind !== 'season'}
           <h1 class="logo"><img src={overfin.imageUrl(title.images.logo, 'medium')} srcset={srcset(title.images.logo, 'logo')} sizes={sizes.logo} alt={title.name} /></h1>
@@ -189,6 +209,9 @@
           <h1>{title.name}</h1>
         {/if}
         <div class="meta">
+          {#if title.kind === 'episode' && title.seasonNumber !== undefined && title.episodeNumber !== undefined}
+            <span>{t('item.seasonEpisodeShort', { season: title.seasonNumber, episode: title.episodeNumber })}</span>
+          {/if}
           {#if title.airDate}<span>{date(title.airDate)}</span>
           {:else if title.year}<span>{title.year}</span>{/if}
           {#if ageText(title.age)}<span class="age">{ageText(title.age)}</span>{/if}
@@ -202,6 +225,9 @@
             <span class="rank">#{num(title.rank)}<HelpTip text={t(title.kind === 'series' ? 'title.rank.series' : 'title.rank.movie')} /></span>
           {/if}
           {#if title.durationMs && title.kind !== 'series'}<span>{duration(title.durationMs)}</span>{/if}
+          {#if title.kind === 'episode' && title.playable && title.durationMs}
+            <span>{t('title.endsAt', { time: timeOfDay(new Date(now + title.durationMs - position)) })}</span>
+          {/if}
           {#if title.genres?.length}<span>{title.genres.join(', ')}</span>{/if}
           {#if availabilityText(title)}<span class="availability">{availabilityText(title)}</span>{/if}
           {#if leavingText(title.leavesAt, title.kind)}<span class="leaving">{leavingText(title.leavesAt, title.kind)}</span>{/if}
@@ -262,6 +288,27 @@
               {unfolded.title ? t('common.readLess') : t('common.readMore')}
             </button>
           {/if}
+        {/if}
+        {#if title.crew?.length}
+          <!-- Who directed and wrote the episode. -->
+          <dl class="facts">
+            {#each [['Director', 'title.director'], ['Writer', 'title.writer']] as const as [job, key] (job)}
+              {@const people = title.crew.filter((c) => c.character === job)}
+              {#if people.length}
+                <div><dt>{t(key)}</dt><dd>{#each people as c, i (i)}{#if i}, {/if}{#if c.id}<a href={personPath(c.id, c.name)}>{c.name}</a>{:else}{c.name}{/if}{/each}</dd></div>
+              {/if}
+            {/each}
+          </dl>
+        {/if}
+        {#if title.copies?.length}
+          <!-- What the files are: as the player shows them, nothing to choose. -->
+          {#each title.copies as c, i (i)}
+            <dl class="facts copy">
+              {#if c.video}<div><dt>{t('title.video')}</dt><dd>{c.video}</dd></div>{/if}
+              {#if c.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{c.audio.join(', ')}</dd></div>{/if}
+              {#if c.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{c.subtitles.join(', ')}</dd></div>{/if}
+            </dl>
+          {/each}
         {/if}
       </div>
     </div>
@@ -384,10 +431,34 @@
   {/key}
   </div>
 
+  {#if title.kind === 'episode' && title.season}
+    <!-- The episode's season: the one before and after, and all of them,
+         this one marked. -->
+    {#await titleOf(title.season.id) then season}
+      {@const near = neighbours(season.episodes, title.id)}
+      {#if season.episodes?.length}
+        <div class="section-head">
+          <h2><a href={seriesPath}>{seasonName(season)}</a></h2>
+          <span class="actions-row">
+            {#if near.previous}<a class="button" href={titlePathOf(near.previous)}>‹ {t('title.previousEpisode')}</a>{/if}
+            {#if near.next}<a class="button" href={titlePathOf(near.next)}>{t('title.nextEpisode')} ›</a>{/if}
+          </span>
+        </div>
+        <ScrollRow onrow={onCurrent}>
+          {#each season.episodes as e (e.id)}
+            <div class="ep-cell" class:current={e.id === title.id} aria-current={e.id === title.id ? 'page' : undefined}>
+              <Card item={e} wide />
+            </div>
+          {/each}
+        </ScrollRow>
+      {/if}
+    {:catch}{/await}
+  {/if}
+
   {#if title.cast?.length}
     {@const cast = wholeCast ? title.cast : title.cast.slice(0, castShown)}
     <div class="section-head">
-      <h2>{t('item.cast')}</h2>
+      <h2>{title.kind === 'episode' ? t('title.guests') : t('item.cast')}</h2>
       {#if title.cast.length > castShown}
         <button class="link" type="button" aria-expanded={wholeCast} onclick={() => (wholeCast = !wholeCast)}>
           {wholeCast ? t('item.castLess') : t('item.castAll', { count: title.cast.length })}
