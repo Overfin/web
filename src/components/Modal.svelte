@@ -3,13 +3,22 @@
      so). Nothing on the site is edited in place: lists open their forms in
      one of these. -->
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { onDestroy, type Snippet } from 'svelte';
   import { t } from '../lib/i18n.svelte';
 
   let { title, close, wide = false, children }: { title: string; close: () => void; wide?: boolean; children: Snippet } = $props();
 
   let element = $state<HTMLDialogElement>();
   const id = `modal-${Math.random().toString(36).slice(2)}`;
+  // What had the focus when the window opened (its button) gets it back
+  // when it goes: a window taken off the page, rather than closed, leaves
+  // the focus nowhere (a remote's arrows then start from the top).
+  const opener = document.activeElement as HTMLElement | null;
+  onDestroy(() => {
+    requestAnimationFrame(() => {
+      if (opener?.isConnected && (!document.activeElement || document.activeElement === document.body)) opener.focus({ preventScroll: true });
+    });
+  });
   $effect(() => {
     if (element && !element.open) element.showModal();
   });

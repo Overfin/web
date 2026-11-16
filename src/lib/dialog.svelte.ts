@@ -9,10 +9,16 @@ export interface DialogRequest {
 
 export const dialog = $state<{ current: DialogRequest | null }>({ current: null });
 
+// One at a time: one asked while another is open waits for it (replacing
+// it would leave whoever asked first waiting forever).
+let queue: Promise<unknown> = Promise.resolve();
+
 function open(kind: DialogRequest['kind'], message: string, danger = false) {
-  return new Promise<string | boolean | null>((resolve) => {
+  const shown = queue.then(() => new Promise<string | boolean | null>((resolve) => {
     dialog.current = { kind, message, danger, resolve };
-  });
+  }));
+  queue = shown.catch(() => {});
+  return shown;
 }
 
 /** confirm asks yes or no. */

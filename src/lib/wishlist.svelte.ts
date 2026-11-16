@@ -20,11 +20,17 @@ export function loadWishes(fresh = false): Promise<void> {
   if (loading && loadedFor === profile && !fresh) return loading;
   loadedFor = profile;
   wishes.ids = {};
-  loading = overfin.wishlist().then((w) => {
+  wishes.loaded = false; // the previous profile's no longer
+  wishes.on = true;
+  const reading: Promise<void> = overfin.wishlist().then((w) => {
     wishes.ids = Object.fromEntries(w.items.map((i) => [i.title.id, true as const]));
     wishes.on = w.on;
     wishes.loaded = true;
-  }, () => {});
+  }, () => {
+    // Failed: the next page asks again, rather than keep the failure.
+    if (loading === reading) loading = null;
+  });
+  loading = reading;
   return loading;
 }
 

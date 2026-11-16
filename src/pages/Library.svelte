@@ -6,7 +6,7 @@
   import { tick } from 'svelte';
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
   import { overfin } from '../lib/client';
-  import { keepList, keptList } from '../lib/pagecache';
+  import { forgetList, keepList, keptList } from '../lib/pagecache';
   import { t, tn, type Key } from '../lib/i18n.svelte';
   import { lastSort, rememberLibrary, rememberSort } from '../lib/lastlibrary';
   import { listKey as keyOf, listQuery, listSort, listSorts, type ListKept } from '../lib/lists';
@@ -114,7 +114,10 @@
         keepIt();
         return;
       }
-      items.push(...page.items);
+      // A title already here (one added or removed on the server between
+      // two pages shifts them) isn't shown twice: the grid is keyed by ID.
+      const shown = new Set(items.map((i) => i.id));
+      items.push(...page.items.filter((i) => !shown.has(i.id)));
       if (page.totalCount !== undefined) total = page.totalCount;
       if (page.seed && !seed) {
         const next = new URLSearchParams(params);
@@ -127,6 +130,8 @@
     } catch (err) {
       error = err;
       finished = true;
+      // Its reader is spent: kept, the list would come back as if whole.
+      forgetList(listKey);
     } finally {
       loading = false;
     }

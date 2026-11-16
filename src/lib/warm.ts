@@ -114,7 +114,10 @@ async function warm() {
   for (const step of steps) {
     // Another profile, or a video started: the rest waits.
     if (session.me?.activeProfile?.id !== profile) return;
-    if (router.route.parts[0] === 'play') {
+    // On the profile picker too: a profile chosen there is the server's
+    // before this tab knows it, and what's read then would be kept under
+    // the old profile's keys.
+    if (router.route.parts[0] === 'play' || router.route.parts[0] === 'profiles') {
       warmed = '';
       return;
     }

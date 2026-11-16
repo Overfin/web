@@ -75,6 +75,11 @@ export function keptList<T>(key: string): T | null {
   return entry.state as T;
 }
 
+/** forgetList drops a list's kept state: read again from the start. */
+export function forgetList(key: string) {
+  lists.delete(key);
+}
+
 /** keepList keeps a list's state (what it read, and how to read on). */
 export function keepList(key: string, state: unknown) {
   const at = lists.get(key)?.at ?? Date.now();

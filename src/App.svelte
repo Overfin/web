@@ -8,7 +8,9 @@
   import { explain, isError, overfin } from './lib/client';
   import { i18n, t } from './lib/i18n.svelte';
   import { go, router, takeScroll } from './lib/router.svelte';
-  import { loadCategories, offersDiscovery, offersWishes, picked, session } from './lib/session.svelte';
+  import { loadCategories, offersDiscovery, offersWishes, picked, session, setPicked } from './lib/session.svelte';
+  import { pagesChanged } from './lib/pagecache';
+  import { homeChanged } from './lib/homecache';
   import { applyTheme, rememberTheme } from './lib/theme';
   import Brand from './components/Brand.svelte';
   import Dialog from './components/Dialog.svelte';
@@ -89,6 +91,27 @@
     if (session.me.activeProfile && where !== 'play' && where !== 'profiles') tellArrived(where === 'wishlist');
   }
   start();
+
+  // The profile in use is the browser's on the server, not this tab's: one
+  // chosen in another tab answers for this one too. Back in view, a tab
+  // that finds another profile than the one it shows asks "Who's
+  // watching?" again, its kept pages marked old, rather than show one
+  // profile's titles (a kids profile's) with another's answers.
+  $effect(() => {
+    const check = async () => {
+      if (document.hidden || phase.kind !== 'ready' || !session.me?.activeProfile) return;
+      const now = await overfin.me().catch(() => null);
+      const shown = session.me?.activeProfile?.id;
+      if (!now || !shown || now.activeProfile?.id === shown) return;
+      pagesChanged();
+      homeChanged();
+      session.me = now;
+      setPicked(false);
+      if (router.route.parts[0] !== 'play') go('/profiles');
+    };
+    document.addEventListener('visibilitychange', check);
+    return () => document.removeEventListener('visibilitychange', check);
+  });
 
   const route = $derived(router.route);
   // Each address is a screen of its own: shown anew when it changes.
