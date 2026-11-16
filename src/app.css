@@ -756,12 +756,12 @@ html.has-backdrop .slide::before { content: none; }
 .series-link { display: inline-block; margin: 0 0 .5rem; color: var(--text); font-weight: 600; text-shadow: var(--title-shadow); }
 .series-link:hover { text-decoration: underline; }
 .series-link img { display: block; max-width: min(16rem, 60vw); max-height: 4.5rem; width: auto; height: auto; filter: var(--logo-shadow); }
-.facts { display: grid; grid-template-columns: 6.5rem 1fr; gap: .2rem 1rem; margin: .9rem 0 0; font-size: .92rem; }
-.facts > div { display: contents; }
+dl.facts { display: grid; grid-template-columns: 6.5rem 1fr; gap: .2rem 1rem; margin: .9rem 0 0; font-size: .92rem; }
+dl.facts > div { display: contents; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; }
 .facts dd a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(var(--text-rgb), .35); }
-.facts.copy + .facts.copy { padding-top: .6rem; border-top: 1px solid var(--hairline); }
+dl.facts.copy + dl.facts.copy { padding-top: .6rem; border-top: 1px solid var(--hairline); }
 .ep-cell { flex: none; border-radius: var(--radius); }
 .ep-cell.current { outline: 3px solid var(--accent); outline-offset: 3px; }
 .section-head .actions-row { display: flex; gap: .5rem; flex-wrap: wrap; }
