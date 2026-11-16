@@ -423,7 +423,8 @@ export class Player {
   setSubtitleTrack(id: string | null): Promise<unknown>;
   segmentAt(ms?: number): Segment | null;
   continueHere(): Promise<unknown>;
-  close(): Promise<void>;
+  /** Stops for good; ended: the title counts as watched to its end. */
+  close(options?: { ended?: boolean }): Promise<void>;
   /**
    * Starts at startMs: by default the options' startMs, else where the
    * profile left off. Resolves with the playback, or null when close() or

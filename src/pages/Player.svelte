@@ -210,6 +210,15 @@
   }
   function tvKey(event: KeyboardEvent) {
     if (inControls()) {
+      // Space plays or pauses whatever has the focus (a keyboard on a TV);
+      // OK (Enter) presses the focused button.
+      if (event.key === ' ' || event.key === 'Spacebar') {
+        if (!event.repeat) togglePlay();
+        wake();
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (event.key !== 'Escape') {
         wake();
         return;
@@ -340,7 +349,8 @@
   function wheel(event: WheelEvent) {
     if (menu && (event.target as HTMLElement).closest('.tracks, .episodes')) return; // the menu scrolls
     event.preventDefault();
-    const dy = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+    // In lines (16 px each) or in pages (a scroll a screen at a time): a notch.
+    const dy = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaMode === 2 ? event.deltaY * 100 : event.deltaY;
     if (Math.abs(dy) >= 50) {
       wheelRest = 0;
       nudgeVolume(dy < 0 ? 0.05 : -0.05);
@@ -464,8 +474,10 @@
   function goNext() {
     const n = next;
     if (!n) return;
+    // Left for the next one from its end (the credits on, or the last 30
+    // seconds): watched, as if it had played to the last second.
     handover = true;
-    close();
+    close(positionMs >= upNextAt);
     playInstead(n.id, n.userState?.played ? 0 : (n.userState?.positionMs ?? 0));
   }
 
@@ -617,11 +629,11 @@
   let left = false;
   // handover: another episode takes the player's place; full screen stays.
   let handover = false;
-  function close() {
+  function close(ended = false) {
     homeChanged(); // where it stopped shows in Continue Watching
     const p = player;
     player = null;
-    p?.close();
+    p?.close({ ended });
   }
   onDestroy(() => {
     left = true;
@@ -651,7 +663,7 @@
   }
 </script>
 
-<svelte:window onpagehide={close} />
+<svelte:window onpagehide={() => close()} />
 
 <!-- svelte-ignore a11y_no_static_element_interactions: pointer moves only wake the controls -->
 <div class="player" class:idle={!shown} onpointermove={wake} onpointerdowncapture={(e) => (lastPointer = e.pointerType)} onwheel={wheel}>
