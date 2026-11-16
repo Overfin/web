@@ -197,7 +197,13 @@
       {/each}
     </select>
     {#if filtered}
-      <button class="link" type="button" onclick={() => go(sort === 'name' ? base : `${base}?sort=${sort}`)}>{t('library.clear')}</button>
+      <!-- Back to the whole list, not to a category's genre rows. -->
+      <button class="link" type="button" onclick={() => {
+        const keep = new URLSearchParams();
+        if (sort !== 'name') keep.set('sort', sort);
+        if (params.get('view') === 'all') keep.set('view', 'all');
+        go(keep.size ? `${base}?${keep}` : base);
+      }}>{t('library.clear')}</button>
     {/if}
     {#if total !== undefined}
       <span class="muted count">{tn('library.count', total)}</span>
