@@ -229,4 +229,5 @@
 {#if route.parts[0] !== 'play'}<SiteFooter tmdb={route.parts.length === 0} />{/if}
 <PageScrollbar />
 <Dialog />
-<UndoBar />
+<!-- Not over the player: its controls are along the bottom. -->
+{#if route.parts[0] !== 'play'}<UndoBar />{/if}

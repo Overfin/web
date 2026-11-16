@@ -148,10 +148,10 @@ export function categoryIdOf(part: string | undefined, all: Category[]): string 
 /** correct puts the address right (the name after the number), without a
  * new history entry nor showing the page again: only while the address
  * still names the same thing (still names, for its parts after the first,
- * says what they name). */
-export function correct(path: string, still: (parts: string[]) => boolean) {
-  if (location.pathname === path) return;
+ * says what they name). search: the query it gets, else the address's own. */
+export function correct(path: string, still: (parts: string[]) => boolean, search?: string) {
+  if (location.pathname === path && (search === undefined || location.search === search)) return;
   const parts = location.pathname.split('/').filter(Boolean).map((p) => decodeURIComponent(p));
   if (parts[0] !== path.split('/')[1] || !still(parts.slice(1))) return;
-  history.replaceState(history.state, '', path + location.search + location.hash);
+  history.replaceState(history.state, '', path + (search ?? location.search) + location.hash);
 }

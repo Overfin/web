@@ -47,6 +47,16 @@
   if (!kept || kept.old) read();
   else landed();
 
+  // A title taken out of the rows here stays out of the rows kept for the
+  // tab too: coming back (Back from a title page) shows them without it,
+  // before they're read again.
+  function prune(id: string) {
+    if (!home) return;
+    const out = (list: TitleSummary[]) => list.filter((i) => i.id !== id);
+    home = { ...home, resume: out(home.resume), recommended: out(home.recommended), recent: out(home.recent) };
+    keepHome(profile, home, 0);
+  }
+
   // Titles the profile isn't interested in, said here: out of its
   // recommendations at once, back with Undo.
   let unwanted = $state<string[]>([]);
@@ -56,10 +66,17 @@
     const back = async () => {
       homeChanged();
       unwanted = unwanted.filter((id) => id !== item.id);
-      await overfin.setNotInterested(item.id, false).catch(() => {});
+      try {
+        await overfin.setNotInterested(item.id, false);
+        await read();
+      } catch {
+        // Still not interested, as the server says: out again.
+        unwanted = [...unwanted, item.id];
+      }
     };
     try {
       await overfin.setNotInterested(item.id);
+      prune(item.id);
       offerUndo(t('item.notInterestedDone', { name: item.name }), back);
     } catch {
       unwanted = unwanted.filter((id) => id !== item.id);
@@ -71,7 +88,12 @@
   async function forget(item: { id: string }) {
     homeChanged();
     removed = [...removed, item.id];
-    await overfin.forgetProgress(item.id).catch(() => (removed = removed.filter((id) => id !== item.id)));
+    try {
+      await overfin.forgetProgress(item.id);
+      prune(item.id);
+    } catch {
+      removed = removed.filter((id) => id !== item.id);
+    }
   }
 </script>
 

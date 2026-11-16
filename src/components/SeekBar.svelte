@@ -59,13 +59,16 @@
     const perSheet = tp.columns * tp.rows;
     const sheet = tp.sheets[Math.floor(n / perSheet)];
     if (!sheet) return null;
-    const scale = width / tp.tileWidth;
+    // The tile's height as it is, a fraction of a pixel included: rounded
+    // once per row, the rounding adds up down the sheet and a sliver of
+    // the next row's tile shows.
+    const tile = tp.tileHeight * (width / tp.tileWidth);
     const i = n % perSheet;
     return {
       url: sheet,
-      height: Math.round(tp.tileHeight * scale),
-      size: `${tp.columns * width}px ${Math.round(tp.rows * tp.tileHeight * scale)}px`,
-      position: `${-(i % tp.columns) * width}px ${-Math.floor(i / tp.columns) * Math.round(tp.tileHeight * scale)}px`,
+      height: tile,
+      size: `${tp.columns * width}px ${tp.rows * tile}px`,
+      position: `${-(i % tp.columns) * width}px ${-Math.floor(i / tp.columns) * tile}px`,
     };
   });
 </script>

@@ -76,6 +76,16 @@
   }
   // Nothing read ahead once the card is gone.
   $effect(() => cancel);
+
+  // Taken out with the keyboard or a remote: the card goes, and the focus
+  // to the card next to it (else the one before), not to the top of the page.
+  function takeOut(e: MouseEvent) {
+    const box = (e.currentTarget as HTMLElement).closest('.cardbox');
+    const focused = document.activeElement === e.currentTarget;
+    const near = (box?.nextElementSibling ?? box?.previousElementSibling)?.querySelector<HTMLElement>('.card');
+    remove?.();
+    if (focused && near) requestAnimationFrame(() => { if (!document.activeElement || document.activeElement === document.body) near.focus(); });
+  }
 </script>
 
 <div class="cardbox" class:wide>
@@ -122,7 +132,7 @@
   {/if}
   {#if remove}
     <button class="remove" type="button" title={removeLabel ?? t('home.removeFromContinue')}
-      aria-label={removeLabel ?? t('home.removeFromContinue')}
-      onclick={remove}>✕</button>
+      aria-label={(removeLabel ?? t('home.removeFromContinue')) + ' : ' + item.name}
+      onclick={takeOut}>✕</button>
   {/if}
 </div>

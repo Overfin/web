@@ -6,7 +6,12 @@
 export function loaded(img: HTMLImageElement) {
   const start = performance.now();
   const done = () => {
-    if (performance.now() - start < 100) img.style.transition = 'none';
+    // Without the fade only for this once: its other transitions (a zoom
+    // on hover) come back once it's shown.
+    if (performance.now() - start < 100) {
+      img.style.transition = 'none';
+      requestAnimationFrame(() => requestAnimationFrame(() => (img.style.transition = '')));
+    }
     img.classList.add('loaded');
     img.parentElement?.classList.add('ready');
   };

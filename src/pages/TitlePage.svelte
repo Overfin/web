@@ -151,7 +151,9 @@
   // Its address put right: the name, as the person sees it (lib/paths).
   // svelte-ignore state_referenced_locally
   titleOf(pageId).then((t) => {
-    if (seasonRoute) history.replaceState(history.state, '', `${titlePathOf(t)}?season=${seasonRoute[2]}`);
+    // A season's address becomes its series' with the season: only while
+    // the address still shows this page (it may have been left meanwhile).
+    if (seasonRoute) correct(titlePathOf(t), (parts) => titleIdOf(parts) === id, `?season=${seasonRoute[2]}`);
     else correct(titlePathOf(t), (parts) => titleIdOf(parts) === id);
   }, () => {});
 
