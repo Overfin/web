@@ -2,6 +2,13 @@
      and filtered (genre, decade, what the profile watched) as the person
      chooses, loaded page by page as they scroll. Choices live in the
      address, a shuffle's seed too, so a reload shows the same page. -->
+<script module lang="ts">
+  // The filter just changed with the keyboard: the page is shown anew
+  // for its address, and its select gets the focus back (else it falls to
+  // the page, and the next arrow scrolls instead of choosing).
+  let refocus = '';
+</script>
+
 <script lang="ts">
   import { tick } from 'svelte';
   import type { Genre, TitleQuery, TitlePage, TitleSummary } from '../lib/sdk/overfin.js';
@@ -68,6 +75,7 @@
 
   /** change goes to this library with one choice changed (a new shuffle). */
   function change(name: string, value: string) {
+    refocus = name;
     const next = new URLSearchParams(params);
     next.delete('seed');
     if (name === 'sort') rememberSort(profile, value);
@@ -76,6 +84,13 @@
     const q = next.toString();
     go(`${base}${q ? '?' + q : ''}`);
   }
+
+  $effect(() => {
+    if (!refocus) return;
+    const name = refocus;
+    refocus = '';
+    document.querySelector<HTMLSelectElement>(`select[data-filter="${name}"]`)?.focus({ preventScroll: true });
+  });
 
   // What was read of this list in this tab, as far as it was scrolled,
   // shows at once when it's opened again (pagecache).
@@ -171,27 +186,27 @@
     <p class="everything"><a href="{base}?view=all">{t('genres.everything', { count: total ?? '' })}</a></p>
   {:else}
   <div class="toolbar">
-    <select aria-label={t('library.sort')} value={sort} onchange={(event) => change('sort', event.currentTarget.value)}>
+    <select aria-label={t('library.sort')} value={sort} data-filter="sort" onchange={(event) => change('sort', event.currentTarget.value)}>
       {#each listSorts as value (value)}
         <option {value}>{t(`library.sort.${value}` as Key)}</option>
       {/each}
     </select>
     {#if genres.length && !category}
-      <select aria-label={t('library.genre')} value={genre} onchange={(event) => change('genre', event.currentTarget.value)}>
+      <select aria-label={t('library.genre')} value={genre} data-filter="genre" onchange={(event) => change('genre', event.currentTarget.value)}>
         <option value="">{t('library.genre.all')}</option>
         {#each genres as g (g.name)}
           <option value={g.name}>{g.name}</option>
         {/each}
       </select>
     {/if}
-    <select aria-label={t('library.decade')} value={decade} onchange={(event) => change('decade', event.currentTarget.value)}>
+    <select aria-label={t('library.decade')} value={decade} data-filter="decade" onchange={(event) => change('decade', event.currentTarget.value)}>
       <option value="">{t('library.decade.all')}</option>
       {#each decades as d (d)}
         <option value={String(d)}>{t('library.decade.one', { decade: d })}</option>
       {/each}
       <option value="older">{t('library.decade.older', { year: decades[decades.length - 1] })}</option>
     </select>
-    <select aria-label={t('library.show')} value={show} onchange={(event) => change('show', event.currentTarget.value)}>
+    <select aria-label={t('library.show')} value={show} data-filter="show" onchange={(event) => change('show', event.currentTarget.value)}>
       {#each shows as value (value)}
         <option {value}>{t(`library.show.${value}` as Key)}</option>
       {/each}
