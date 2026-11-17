@@ -499,6 +499,13 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides .dots { display: flex; gap: .45rem; }
 .slides .dots button { width: .6rem; height: .6rem; min-height: 0; padding: 0; border: none; box-shadow: none; border-radius: 999px; background: rgba(var(--text-rgb), .35); transition: width .3s, background-color .3s; }
 .slides .dots button.current { width: 1.6rem; background: var(--text); }
+/* On a touch screen (no arrows on phones), each dot is a 24 px target: the
+   dots further apart, each with a larger invisible hit area. */
+@media (pointer: coarse) {
+  .slides .dots { gap: .9rem; }
+  .slides .dots button { position: relative; }
+  .slides .dots button::after { content: ""; position: absolute; inset: -.45rem; }
+}
 @media (max-width: 600px) {
   .slides { --under: 5rem; height: calc(94vh + var(--under)); height: calc(94svh + var(--under)); min-height: calc(30rem + var(--under)); }
   /* The veil only behind the text, at the bottom: the picture (and the
