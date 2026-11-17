@@ -351,6 +351,7 @@ const fr: Record<keyof typeof en, string> = {
   'player.infoVideo': 'Vidéo',
   'player.infoFile': 'Fichier',
   'player.stereo': 'stéréo',
+  'player.unknownLanguage': 'Langue inconnue',
   'player.mono': 'mono',
   'player.commentary': 'Commentaire',
   'player.audioDescription': 'Audiodescription',

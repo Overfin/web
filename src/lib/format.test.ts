@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { ageText, clock, duration } from './format';
+import { ageText, clock, duration, trackLabel } from './format';
 import { date, i18n, num, t, tn, type Key } from './i18n.svelte';
 
 describe('format', () => {
+  it('names a track whose language the server doesn\'t know, rather than show "?"', () => {
+    i18n.set('en');
+    expect(trackLabel('?')).toBe('Unknown language');
+    expect(trackLabel('')).toBe('Unknown language');
+    expect(trackLabel(undefined)).toBe('Unknown language');
+    expect(trackLabel('? · forced')).toBe('Unknown language · forced');
+    expect(trackLabel('Français')).toBe('Français');
+    expect(trackLabel('English · SDH')).toBe('English · SDH');
+    i18n.set('fr');
+    expect(trackLabel('?')).toBe('Langue inconnue');
+    i18n.set('en');
+  });
   it('shows positions as a clock', () => {
     expect(clock(0)).toBe('0:00');
     expect(clock(125_000)).toBe('2:05');

@@ -15,7 +15,7 @@
   import { onDestroy, onMount, untrack } from 'svelte';
   import type { Player, Playback, Segment, Title, TitleSummary, Track } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
-  import { ageText, clock, duration } from '../lib/format';
+  import { ageText, clock, duration, trackLabel } from '../lib/format';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
   import { correct, playPath, titleIdOf, titlePath } from '../lib/paths';
@@ -504,7 +504,7 @@
   // Overfin), its channels, what it's for when it's not the film's sound.
   const roles: Record<string, Key> = { commentary: 'player.commentary', description: 'player.audioDescription' };
   const audioLabel = (track: Track) =>
-    [track.label, channelsName(track.channels), track.role ? (roles[track.role] ? t(roles[track.role]) : track.role) : ''].filter(Boolean).join(' · ');
+    [trackLabel(track.label), channelsName(track.channels), track.role ? (roles[track.role] ? t(roles[track.role]) : track.role) : ''].filter(Boolean).join(' · ');
   const reasonText = (r: string) => has(`player.reason.${r}`) ? t(`player.reason.${r}` as Key) : r;
   const videoLine = $derived.by(() => {
     const v = playback?.info?.video;
@@ -515,7 +515,8 @@
   const audioLine = $derived.by(() => {
     const a = playback?.info?.audio;
     if (!a) return '';
-    const name = playback?.audioTracks?.find((tr) => tr.id === audio)?.label;
+    const found = playback?.audioTracks?.find((tr) => tr.id === audio);
+    const name = found ? trackLabel(found.label) : '';
     return [a.codec?.toUpperCase(), channelsName(a.channels), name, a.bitrateKbps ? mbps(a.bitrateKbps) : ''].filter(Boolean).join(' · ');
   });
 
@@ -863,7 +864,7 @@
               <h3>{t('player.subtitles')}</h3>
               <button class="choice" class:chosen={!subtitles} onclick={() => chooseSubtitles('')}>{t('player.noSubtitles')}</button>
               {#each playback.subtitleTracks as track (track.id)}
-                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{track.label}</button>
+                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{trackLabel(track.label)}</button>
               {/each}
             </div>
           {/if}

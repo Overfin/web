@@ -13,7 +13,7 @@
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
-  import { ageText, clock, duration } from '../lib/format';
+  import { ageText, clock, duration, trackLabel } from '../lib/format';
   import { date, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
   import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
@@ -313,8 +313,8 @@
           {#each title.copies as c, i (i)}
             <dl class="facts copy">
               {#if c.video}<div><dt>{t('title.video')}</dt><dd>{c.video}</dd></div>{/if}
-              {#if c.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{c.audio.join(', ')}</dd></div>{/if}
-              {#if c.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{c.subtitles.join(', ')}</dd></div>{/if}
+              {#if c.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{c.audio.map(trackLabel).join(', ')}</dd></div>{/if}
+              {#if c.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{c.subtitles.map(trackLabel).join(', ')}</dd></div>{/if}
             </dl>
           {/each}
         {/if}

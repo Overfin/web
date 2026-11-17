@@ -24,3 +24,11 @@ export function clock(ms: number): string {
   const two = (n: number) => String(n).padStart(2, '0');
   return hh ? `${hh}:${two(mm)}:${two(ss)}` : `${mm}:${two(ss)}`;
 }
+
+/** trackLabel is an audio or subtitle track's name as the server gives it,
+ * its language said in words where the server knows none ("?"). */
+export function trackLabel(label?: string): string {
+  const parts = (label ?? '').split(' · ').map((part) => part.trim());
+  if (!parts.some((part) => part && part !== '?')) return t('player.unknownLanguage');
+  return parts.map((part) => (part === '?' ? t('player.unknownLanguage') : part)).filter(Boolean).join(' · ');
+}

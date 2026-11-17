@@ -350,6 +350,7 @@ export default {
   'player.infoVideo': 'Video',
   'player.infoFile': 'File',
   'player.stereo': 'stereo',
+  'player.unknownLanguage': 'Unknown language',
   'player.mono': 'mono',
   'player.commentary': 'Commentary',
   'player.audioDescription': 'Audio description',
