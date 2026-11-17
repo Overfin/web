@@ -358,7 +358,8 @@ ul.plain { list-style: none; padding: 0; margin: 0 0 1rem; }
 ul.plain li { padding: .25rem 0; }
 
 .cardbox { position: relative; flex: none; }
-.cardbox .remove { position: absolute; top: .3rem; right: .3rem; min-height: 0; padding: .1em .45em; font-size: .8rem; background: rgba(var(--panel-rgb), .85); border: none; opacity: 0; }
+/* At least 24 px either way, a finger's minimum (WCAG 2.5.8). */
+.cardbox .remove { position: absolute; top: .3rem; right: .3rem; min-height: 1.5rem; min-width: 1.5rem; display: inline-grid; place-items: center; padding: .1em .45em; font-size: .8rem; background: rgba(var(--panel-rgb), .85); border: none; opacity: 0; }
 .cardbox:hover .remove, .cardbox .remove:focus-visible { opacity: 1; }
 @media (hover: none) { .cardbox .remove { opacity: 1; } }
 

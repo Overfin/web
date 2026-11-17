@@ -103,7 +103,7 @@
       <ol class="list wishes">
         {#each groups as g, i (g.key)}
           <li>
-            <a class="thumb" href={titlePathOf(g.first.title)}>
+            <a class="thumb" href={titlePathOf(g.first.title)} aria-label={g.name}>
               {#if g.first.title.images?.primary}
                 <img src={overfin.imageUrl(g.first.title.images.primary, 'small')} srcset={srcset(g.first.title.images.primary, 'poster')} sizes={sizes.card} alt="" loading="lazy" use:loaded />
               {/if}
