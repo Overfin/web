@@ -16,6 +16,7 @@
   import type { Player, Playback, Segment, Title, TitleSummary, Track } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { ageText, clock, duration, trackLabel } from '../lib/format';
+  import { gapEnd, rangesOf } from '../lib/gap';
   import { has, i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
   import { correct, playPath, titleIdOf, titlePath } from '../lib/paths';
@@ -151,6 +152,20 @@
       if (err?.name === 'NotAllowedError') blocked = true;
     });
   }
+
+  // A stream that begins just after the place asked for (a resume point a
+  // little before its first piece) leaves the video waiting there, paused,
+  // for ever: while it hasn't started, or waits, the place moves to the
+  // piece's start (lib/gap).
+  $effect(() => {
+    if (!video || (started && !waiting)) return;
+    const timer = setInterval(() => {
+      if (!video || video.seeking || video.readyState >= 3) return;
+      const to = gapEnd(rangesOf(video.buffered), video.currentTime);
+      if (to !== null) video.currentTime = to + 0.01;
+    }, 500);
+    return () => clearInterval(timer);
+  });
 
   function togglePlay() {
     if (!video) return;
