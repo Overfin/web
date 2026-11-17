@@ -57,6 +57,9 @@ body {
    of the window even hidden: PageScrollbar draws one over the page. What
    scrolls inside the page keeps its own. */
 html { scrollbar-width: none; }
+/* What the focus or a link brings into view stops below the sticky header,
+   not under it (Shift+Tab up a page). */
+html { scroll-padding-top: calc(var(--header-h) + .5rem); }
 html::-webkit-scrollbar { display: none; }
 body { scrollbar-color: rgba(var(--text-rgb), .16) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -557,7 +560,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .season-year { font-size: .8rem; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .seasons button:hover .season-poster { transform: none; } }
 /* Brought into view when a season is chosen: just under the header. */
-.season-head { scroll-margin-top: calc(var(--header-h) + .8rem); }
+.season-head { scroll-margin-top: .3rem; }
 /* A row of names, one chosen (the libraries): centered while they fit,
    scrolling sideways when they don't. */
 .pills { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; margin: .2rem calc(-1 * var(--gutter)) 1.4rem; padding: .2rem var(--gutter) .3rem; }
