@@ -59,6 +59,13 @@
       edges();
     });
   });
+  // Scrolled from the top: the veil behind the header then reaches further
+  // down, over what passes under it (app.css).
+  let scrolled = $state(typeof window !== 'undefined' && window.scrollY > 0);
+  function scrolling() {
+    const now = window.scrollY > 0;
+    if (now !== scrolled) scrolled = now;
+  }
   let menu: HTMLDivElement;
   let toggle: HTMLButtonElement;
   // The sections' list, on phones.
@@ -113,9 +120,9 @@
   }
 </script>
 
-<svelte:window onclick={outside} onkeydown={keydown} onresize={edges} />
+<svelte:window onclick={outside} onkeydown={keydown} onresize={edges} onscroll={scrolling} />
 
-<header data-theme="dark">
+<header data-theme="dark" class:scrolled>
   <!-- Phones: the sections behind a button. -->
   <button class="sections-toggle" type="button" bind:this={sectionsToggle} aria-expanded={sectionsOpen} aria-controls="sections"
     aria-label={t('nav.sections')} title={t('nav.sections')} onclick={() => (sectionsOpen = !sectionsOpen)}>

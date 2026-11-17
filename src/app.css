@@ -127,7 +127,14 @@ header::before {
   content: ""; position: absolute; inset: 0 0 auto 0; height: calc(var(--header-h) * 2.6); z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(var(--bg-rgb), .88) 0%, rgba(var(--bg-rgb), .8) 18%, rgba(var(--bg-rgb), .65) 36%,
     rgba(var(--bg-rgb), .45) 55%, rgba(var(--bg-rgb), .24) 74%, rgba(var(--bg-rgb), .08) 90%, rgba(var(--bg-rgb), 0) 100%);
+  transition: height .25s;
 }
+/* At a page's top, the veil stops at the header's foot: past it, it would
+   dim the page's own first lines (its title, a title's poster), which sit
+   there unscrolled. A title's backdrop is veiled already. Only the home
+   page's slideshow, its picture bright under the header, keeps it long. */
+html:not(:has(.slides)) header:not(.scrolled)::before { height: var(--header-h); }
+@media (prefers-reduced-motion: reduce) { header::before { transition: none; } }
 /* Over pictures, its words keep a soft shadow. */
 header .brand, header nav a, header .who { text-shadow: 0 1px 2px rgba(0, 0, 0, .8), 0 0 14px rgba(0, 0, 0, .6); }
 .brand { grid-area: brand; display: inline-flex; align-items: center; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
@@ -860,9 +867,11 @@ dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1p
 .page-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: space-between; margin-bottom: 1rem; }
 .page-head h1 { margin: 0; }
 /* A list's rows with their Edit and Delete buttons. */
-.profiles-list li { display: flex; align-items: center; gap: .9rem; }
-.profiles-list .grow { flex: 1; min-width: 0; }
-.row-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; }
+.profiles-list li { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem .9rem; }
+/* The name keeps room for itself: on a phone, the buttons go under it
+   (on the right) rather than squeeze it to a few letters. */
+.profiles-list .grow { flex: 1 1 8rem; min-width: 0; overflow-wrap: anywhere; }
+.row-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .profiles-list .avatar.small { width: 2.75rem; height: 2.75rem; font-size: 1.2rem; flex: none; }
 .page-backdrop.tall img { object-position: center top; }
 
