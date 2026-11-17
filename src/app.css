@@ -334,6 +334,12 @@ form.stack { display: grid; gap: .6rem; text-align: left; }
 ol.episodes li:has(.still .act:focus-visible) .still { outline: 3px solid var(--accent); outline-offset: 2px; }
 .profile:focus-visible { outline: none; }
 .profile:focus-visible .avatar { outline: 3px solid var(--accent); }
+/* The sections' line scrolls sideways, so it clips what passes its edges:
+   room for a focused section's ring, the line where it was. */
+@media (min-width: 721px) {
+  header nav { padding: 4px; margin: -4px; }
+  header nav a:focus-visible { outline-offset: 0; }
+}
 
 dialog {
   background: linear-gradient(180deg, rgba(var(--text-rgb), .04), rgba(var(--text-rgb), 0) 50%) var(--panel); color: var(--text);
