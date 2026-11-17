@@ -131,6 +131,8 @@ export function arrows(event: KeyboardEvent): boolean {
   if (to < 0) return false;
   event.preventDefault();
   const target = reachable[to].e;
+  // Where it was before anything scrolled: whether it was in full view.
+  const before = target.getBoundingClientRect();
   target.focus({ preventScroll: true });
   const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const behavior = smooth ? 'smooth' : 'auto';
@@ -144,6 +146,9 @@ export function arrows(event: KeyboardEvent): boolean {
   const box = target.getBoundingClientRect();
   const under = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
   if (box.bottom + scrollY <= innerHeight) window.scrollTo({ top: 0, behavior });
-  else if (box.top < under || box.bottom > innerHeight) target.scrollIntoView({ block: 'center', inline: 'nearest', behavior });
+  // (Above the header's foot judged from before the scroll above: the page
+  // keeps room for the header when it brings something into view, so after
+  // it, an item from above would seem in full view, just under the header.)
+  else if (before.top < under || box.bottom > innerHeight) target.scrollIntoView({ block: 'center', inline: 'nearest', behavior });
   return true;
 }
