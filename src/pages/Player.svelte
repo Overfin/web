@@ -1009,7 +1009,7 @@
   .loading .start svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   .loading .start:hover, .loading .start:focus-visible { background: #fff; transform: scale(1.06); }
   .loading { position: absolute; z-index: 1; top: 0; right: 0; bottom: 0; left: 0; background: #000; display: flex; align-items: center; justify-content: center; }
-  .loading .backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; filter: blur(2px); }
+  .loading .backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; }
   .loading-title { position: relative; text-align: center; padding: 0 1.5rem; }
   .loading-title .logo, .paused-about .logo { max-width: min(26rem, 70vw); max-height: 9rem; object-fit: contain; display: block; }
   .loading-title .logo { margin: 0 auto; }

@@ -17,7 +17,7 @@
     width: max-content; max-width: calc(100vw - 2rem); box-sizing: border-box; }
   @media (max-width: 600px) { .undo { width: calc(100vw - 2rem); justify-content: space-between; } }
   .undo:not(:empty) { padding: .6rem .6rem .6rem 1rem; border-radius: 14px; background: rgba(var(--panel-rgb), .95);
-    border: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0, 0, 0, .35); backdrop-filter: blur(8px); }
+    border: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0, 0, 0, .35); }
   .undo span { font-size: .9rem; }
   .undo button { min-height: 0; padding: .35em .9em; border-radius: 999px; font-weight: 600; white-space: nowrap; }
 </style>

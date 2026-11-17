@@ -119,9 +119,17 @@ header {
   position: sticky; top: 0; z-index: 5;
   display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand nav menu";
   align-items: center; gap: 1.5rem; min-height: var(--header-h); padding: 0 var(--gutter); color: var(--text);
-  background: linear-gradient(180deg, rgba(var(--bg-rgb), .94), rgba(var(--bg-rgb), .82)); backdrop-filter: blur(14px) saturate(140%);
-  border-bottom: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+  background: transparent;
 }
+/* Behind it, no line: a veil of the page's colour, fading down past the
+   header's bottom, so its text stays readable over what scrolls under. */
+header::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: calc(var(--header-h) * 2.6); z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(var(--bg-rgb), .88) 0%, rgba(var(--bg-rgb), .8) 18%, rgba(var(--bg-rgb), .65) 36%,
+    rgba(var(--bg-rgb), .45) 55%, rgba(var(--bg-rgb), .24) 74%, rgba(var(--bg-rgb), .08) 90%, rgba(var(--bg-rgb), 0) 100%);
+}
+/* Over pictures, its words keep a soft shadow. */
+header .brand, header nav a, header .who { text-shadow: 0 1px 2px rgba(0, 0, 0, .8), 0 0 14px rgba(0, 0, 0, .6); }
 .brand { grid-area: brand; display: inline-flex; align-items: center; font-weight: 800; font-size: 1.15rem; letter-spacing: .01em; color: var(--text); }
 /* Overfin's banner, or the operator's: as tall as the logo, never too
    wide. The header is dark, so the banner for dark pages shows; the one
@@ -168,7 +176,7 @@ header nav a.active {
   position: absolute; right: 0; top: calc(100% + .4rem); min-width: 14rem; padding: .4rem;
   display: grid; background: linear-gradient(180deg, rgba(var(--text-rgb), .04), rgba(var(--text-rgb), 0) 40%) rgba(var(--panel-rgb), .97);
   border: 1px solid var(--hairline); border-radius: var(--radius); box-shadow: var(--shadow-l);
-  backdrop-filter: blur(14px); animation: drop .14s ease-out;
+  animation: drop .14s ease-out;
 }
 @keyframes drop { from { opacity: 0; transform: translateY(-4px); } }
 .dropdown a, .dropdown button { display: flex; justify-content: flex-start; width: 100%; min-height: 2.5rem; padding: .5rem .75rem; border: none; border-radius: var(--radius-s); background: none; box-shadow: none; font-weight: 400; }
@@ -229,10 +237,12 @@ h2 { font-size: clamp(1.05rem, 1rem + .4vw, 1.3rem); margin: 2rem 0 .7rem; }
 
 /* A title's top: its backdrop, darkened toward the text, never washed out. */
 .hero {
-  position: relative; margin: -1.5rem calc(-1 * var(--gutter)) 1rem;
+  position: relative; margin: calc(-1.5rem - var(--header-h)) calc(-1 * var(--gutter)) 1rem; padding-top: var(--header-h);
   display: flex; align-items: flex-end; background: var(--bg); overflow: hidden;
 }
-.hero.art { min-height: min(70vh, 30rem); }
+/* It starts under the header, which is see-through: as tall as before,
+   plus the header's height. */
+.hero.art { min-height: calc(min(70vh, 30rem) + var(--header-h)); }
 .hero img.backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
 .hero.art::before {
   content: ""; position: absolute; z-index: 1; inset: 0;
@@ -307,14 +317,14 @@ dialog {
   border: 1px solid var(--hairline); border-radius: var(--radius); padding: 1.4rem; max-width: min(26rem, calc(100vw - 2rem));
   box-shadow: var(--shadow-l);
 }
-dialog::backdrop { background: rgba(5, 6, 9, .72); backdrop-filter: blur(3px); }
+dialog::backdrop { background: rgba(5, 6, 9, .72); }
 dialog input { width: 100%; }
 dialog .actions { justify-content: flex-end; margin-bottom: 0; }
 /* Discovery */
 /* A film's or a series' score, bottom left, above the progress bar. */
-.poster .rating { position: absolute; z-index: 1; left: .4rem; bottom: .55rem; display: inline-flex; align-items: center; gap: .25em; font-size: .7rem; font-weight: 600; padding: .15em .5em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); backdrop-filter: blur(6px); border: 1px solid var(--hairline); color: var(--text); }
+.poster .rating { position: absolute; z-index: 1; left: .4rem; bottom: .55rem; display: inline-flex; align-items: center; gap: .25em; font-size: .7rem; font-weight: 600; padding: .15em .5em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); border: 1px solid var(--hairline); color: var(--text); }
 .poster .rating svg { width: 1em; height: 1em; fill: var(--warn); }
-.poster .flag { position: absolute; z-index: 1; top: .4rem; left: .4rem; font-size: .7rem; padding: .15em .5em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); backdrop-filter: blur(6px); border: 1px solid var(--hairline); color: var(--text); }
+.poster .flag { position: absolute; z-index: 1; top: .4rem; left: .4rem; font-size: .7rem; padding: .15em .5em; border-radius: 999px; background: rgba(var(--panel-rgb), .85); border: 1px solid var(--hairline); color: var(--text); }
 ul.plain { list-style: none; padding: 0; margin: 0 0 1rem; }
 ul.plain li { padding: .25rem 0; }
 
@@ -410,9 +420,11 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
    would have it. Its own stacking context keeps all of it under the rows. */
 .slides {
   --under: 8rem;
-  position: relative; z-index: 0; margin: -1.5rem calc(-1 * var(--gutter)) calc(-1 * var(--under) - 1rem);
-  height: calc(min(75vh, 44rem) + var(--under)); min-height: calc(26rem + var(--under));
-  overflow: hidden; background: var(--bg); touch-action: pan-y;
+  position: relative; z-index: 0; margin: calc(-1.5rem - var(--header-h)) calc(-1 * var(--gutter)) calc(-1 * var(--under) - 1rem);
+  height: calc(min(75vh, 44rem) + var(--under) + var(--header-h)); min-height: calc(26rem + var(--under) + var(--header-h));
+  /* Clipped, never scrollable: with hidden, focusing a dot scrolled its
+     inside up (the text's veil reaches past its foot). */
+  overflow: hidden; overflow: clip; background: var(--bg); touch-action: pan-y;
 }
 .slides ~ * { position: relative; z-index: 1; }
 .slide { position: absolute; inset: 0; display: flex; align-items: flex-end; opacity: 0; transition: opacity .7s; }
@@ -446,7 +458,7 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides .controls { position: absolute; z-index: 3; right: var(--gutter); bottom: calc(1.6rem + var(--under) - .8rem); display: flex; align-items: center; gap: .8rem; }
 .slides .nav {
   display: grid; place-items: center; width: 2.4rem; height: 2.4rem; min-height: 0; padding: 0;
-  border-radius: 50%; border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .45); backdrop-filter: blur(8px); box-shadow: var(--shadow-s);
+  border-radius: 50%; border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .55); box-shadow: var(--shadow-s);
   transition: background-color .2s;
 }
 .slides .nav:hover { background: rgba(var(--bg-rgb), .75); }
@@ -455,19 +467,28 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides .dots button { width: .6rem; height: .6rem; min-height: 0; padding: 0; border: none; box-shadow: none; border-radius: 999px; background: rgba(var(--text-rgb), .35); transition: width .3s, background-color .3s; }
 .slides .dots button.current { width: 1.6rem; background: var(--text); }
 @media (max-width: 600px) {
-  .slides { --under: 5rem; height: calc(86vh + var(--under)); height: calc(86svh + var(--under)); min-height: calc(30rem + var(--under)); }
-  .slide::before { background: linear-gradient(to top, var(--bg) 25%, rgba(var(--bg-rgb), .6) 60%, rgba(var(--bg-rgb), .15) 100%); }
-  .slide .content { padding-bottom: calc(3.2rem + var(--under)); }
+  .slides { --under: 5rem; height: calc(94vh + var(--under)); height: calc(94svh + var(--under)); min-height: calc(30rem + var(--under)); }
+  /* The veil only behind the text, at the bottom: the picture (and the
+     logo above the text) stays clear. */
+  .slide::before { background: linear-gradient(to top, var(--bg) 0, var(--bg) calc(var(--under) + 2rem),
+    rgba(var(--bg-rgb), .82) calc(var(--under) + 7rem), rgba(var(--bg-rgb), .45) calc(var(--under) + 12rem),
+    rgba(var(--bg-rgb), .12) calc(var(--under) + 16rem), rgba(var(--bg-rgb), 0) calc(var(--under) + 19rem)); }
+  .slide .content { padding-bottom: calc(1.6rem + var(--under)); }
+  .slide .content p, .slide .content .meta { text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
   /* Small buttons side by side, from the text's edge: not a full-width
      Play. */
   .slide .actions { justify-content: flex-start; }
   .slide .actions button, .slide .actions button.primary, .slide .actions .button { flex: 0 0 auto; }
   .slide .logo { max-height: 6rem; }
+  /* Lower text: the genres stay on the title's page; the logo keeps its
+     distance, so its veil and the text's don't overlap. */
+  .slide .meta .genres { display: none; }
+  .slide .content > .logo { margin-bottom: 2.2rem; }
   /* The logo centred, at the top of the veil. */
   .slide .content > .logo { justify-self: center; object-position: center bottom; }
   .slide .overview { -webkit-line-clamp: 2; }
   .slides .nav { display: none; }
-  .slides .controls { left: 0; right: 0; justify-content: center; bottom: calc(1.2rem + var(--under)); }
+  .slides .controls { left: 0; right: 0; justify-content: center; bottom: calc(.3rem + var(--under)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .slide, .slide img.backdrop, .slides .dots button { transition: none; }
@@ -670,7 +691,7 @@ button.link.about-toggle { align-self: flex-start; min-height: 0; padding: .1rem
   .shift {
     display: grid; place-items: center; position: absolute; z-index: 2; top: 0; bottom: 2.8rem; margin: auto 0;
     width: 3rem; height: 3rem; min-height: 0; padding: 0; border-radius: 50%;
-    border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .6); backdrop-filter: blur(8px); box-shadow: var(--shadow);
+    border: 1px solid var(--hairline); background: rgba(var(--bg-rgb), .7); box-shadow: var(--shadow);
     opacity: 0; transition: opacity .2s, background-color .2s;
   }
   .scroller:hover .shift { opacity: 1; }
@@ -715,12 +736,8 @@ svg.icon { width: 1.15em; height: 1.15em; flex: none; fill: currentColor; margin
     linear-gradient(to top, rgba(var(--bg-rgb), .95) 0%, rgba(var(--bg-rgb), .35) 45%, rgba(var(--bg-rgb), 0) 70%);
 }
 html.has-backdrop main, html.has-backdrop footer.site-foot { position: relative; z-index: 1; }
-/* See-through, but enough for its text over a dark picture on a light
-   page, or a light one on a dark page. */
-html.has-backdrop header {
-  background: linear-gradient(180deg, rgba(var(--bg-rgb), .78), rgba(var(--bg-rgb), .62));
-  backdrop-filter: blur(16px) saturate(150%); box-shadow: none;
-}
+/* The header stays see-through here too: its veil (header::before) keeps
+   its text readable. */
 html.has-backdrop footer.site-foot { background: rgba(var(--bg-rgb), .9); }
 /* Its own picture and fades: the page's now. */
 html.has-backdrop .hero { background: none; overflow: visible; }
@@ -795,22 +812,30 @@ html.has-backdrop .slide .content::before {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
 }
-/* On a phone, one veil: from above the logo to the slideshow's foot,
+/* On a phone, one veil: from just above the text (the logo stays on the
+   clear picture) to the slideshow's foot,
    dark behind the buttons and dots, then the page's color. */
 @media (max-width: 600px) {
   html.has-backdrop .slides::after { content: none; }
   html.has-backdrop .slides + .sheet { --under: 5rem; }
   html.has-backdrop .slide .content::before {
-    grid-row: 1 / 4;
-    margin: -2.6rem calc(-1 * var(--gutter)) calc(-1 * (4rem + var(--under))) calc(-1 * var(--gutter));
+    grid-row: 2 / 4;
+    margin: -4.5rem calc(-1 * var(--gutter)) calc(-1 * (4rem + var(--under))) calc(-1 * var(--gutter));
     background: linear-gradient(to bottom, rgba(var(--bg-rgb), .8) calc(100% - var(--under) - 1rem), rgba(var(--page-rgb), .8) calc(100% - var(--under) + 1rem));
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem);
-    mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .1) 1rem, rgba(0, 0, 0, .3) 2rem, rgba(0, 0, 0, .6) 3rem, rgba(0, 0, 0, .85) 4rem, #000 5rem);
+    mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .1) 1rem, rgba(0, 0, 0, .3) 2rem, rgba(0, 0, 0, .6) 3rem, rgba(0, 0, 0, .85) 4rem, #000 5rem);
+  }
+  /* Behind the logo, a veil of its own: light, fading out on every side,
+     apart from the text's. */
+  html.has-backdrop .slide .content::after {
+    content: ""; position: relative; z-index: -1; pointer-events: none; grid-column: 1; grid-row: 1;
+    justify-self: stretch; align-self: stretch; margin: -1.8rem calc(-1 * var(--gutter)) -1rem;
+    background: radial-gradient(ellipse 62% 58% at 50% 55%, rgba(var(--bg-rgb), .55) 0%, rgba(var(--bg-rgb), .32) 50%, rgba(var(--bg-rgb), 0) 100%);
   }
 }
 @media (max-width: 600px) {
   .title-hero .info { align-items: center; gap: 1.25rem; padding-top: 1.5rem; }
-  .title-hero.art { padding-top: 0; }
+  .title-hero.art { padding-top: var(--header-h); }
   .title-hero.art .poster { display: block; width: 55%; }
   .title-hero .info > div:last-child { align-self: stretch; }
   /* The poster above already shows the logo: kept for screen readers only. */
@@ -846,7 +871,7 @@ dialog.modal .pin-part { margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1p
    or the focus is outlined, not lit by a shadow. The player's spinner keeps
    turning (only the page's animations stop). */
 html.tv *, html.tv *::before, html.tv *::after {
-  transition: none !important; backdrop-filter: none !important;
+  transition: none !important;
   box-shadow: none !important; text-shadow: none !important; filter: none !important;
 }
 html.tv .dropdown, html.tv .poster, html.tv .skeleton .line, html.tv .slides.loading .line { animation: none; }

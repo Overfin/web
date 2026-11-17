@@ -189,7 +189,7 @@
               </span>
             {/if}
             {#if item.durationMs && item.kind === 'movie'}<span>{duration(item.durationMs)}</span>{/if}
-            {#if item.genres?.length}<span>{item.genres.slice(0, 3).join(', ')}</span>{/if}
+            {#if item.genres?.length}<span class="genres">{item.genres.slice(0, 3).join(', ')}</span>{/if}
           </div>
           {#if item.overview}<p class="overview">{item.overview}</p>{/if}
           </div>
