@@ -483,6 +483,9 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
 .slides + h2 { margin-top: .5rem; }
 .slide .logo { display: block; max-width: min(24rem, 70vw); max-height: 9rem; width: auto; height: auto; margin-bottom: 1rem; object-fit: contain; object-position: left bottom; filter: var(--logo-shadow); }
 .slide h2 { font-size: clamp(1.8rem, 1.2rem + 2.5vw, 3rem); line-height: 1.1; margin: 0 0 .75rem; text-shadow: var(--title-shadow); }
+/* Its words keep a shadow over a bright picture (a tall poster on a tablet
+   held upright), as on phones. */
+.slide .content p, .slide .content .meta { text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
 .slide .overview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: rgba(var(--text-rgb), .88); }
 .slides .controls { position: absolute; z-index: 3; right: var(--gutter); bottom: calc(1.6rem + var(--under) - .8rem); display: flex; align-items: center; gap: .8rem; }
 .slides .nav {
@@ -503,7 +506,6 @@ a.button.primary:hover { background: var(--accent-hover); border-color: var(--ac
     rgba(var(--bg-rgb), .82) calc(var(--under) + 7rem), rgba(var(--bg-rgb), .45) calc(var(--under) + 12rem),
     rgba(var(--bg-rgb), .12) calc(var(--under) + 16rem), rgba(var(--bg-rgb), 0) calc(var(--under) + 19rem)); }
   .slide .content { padding-bottom: calc(1.6rem + var(--under)); }
-  .slide .content p, .slide .content .meta { text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
   /* Small buttons side by side, from the text's edge: not a full-width
      Play. */
   .slide .actions { justify-content: flex-start; }
