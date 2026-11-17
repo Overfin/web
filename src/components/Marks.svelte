@@ -15,12 +15,17 @@
   } = $props();
 
   let onList = $state<boolean | null>(null);
+  // Until the server answers, the list's icon keeps its place (the
+  // buttons after it moved, or went to the next line, when it came).
+  let asking = $state(true);
   let marks = $state<{ played?: boolean; favorite?: boolean }>({});
   // Another title: what was marked here was the last one's.
   $effect(() => {
     marks = {};
     onList = null;
-    overfin.onWatchlist(id).then((on) => (onList = on)).catch(() => {}); // not offered here
+    asking = true;
+    overfin.onWatchlist(id).then((on) => (onList = on)).catch(() => {}) // not offered here
+      .finally(() => (asking = false));
   });
   async function toggleList() {
     homeChanged();
@@ -61,6 +66,8 @@
   <button class="toggle" class:on={onList} aria-pressed={onList} aria-label={label} title={label} onclick={toggleList}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2-6.5 4.2v-16a1 1 0 0 1 1-1z" /></svg>
   </button>
+{:else if asking}
+  <span class="toggle pending" aria-hidden="true"></span>
 {/if}
 <button class="toggle" class:on={played} aria-pressed={played} aria-label={played ? t('item.markUnwatched') : t('item.markWatched')}
   title={played ? t('item.markUnwatched') : t('item.markWatched')} onclick={togglePlayed}>
@@ -73,3 +80,8 @@
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C5.9 14.8 3 12.2 3 8.9 3 6.3 5 4.3 7.6 4.3c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.6 0 4.6 2 4.6 4.6 0 3.3-2.9 5.9-7.7 10.2z" /></svg>
 </button>
 {/if}
+
+<style>
+  /* The list's place while its answer comes: as large as its button, empty. */
+  .pending { display: inline-block; flex: none; height: 2.5rem; visibility: hidden; }
+</style>
