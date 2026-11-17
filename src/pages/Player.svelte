@@ -169,9 +169,34 @@
 
   function togglePlay() {
     if (!video) return;
+    // While the stream changes, the video says paused: what's wanted is
+    // kept apart (switched below).
+    if (playOn !== null) playOn = !playOn;
     if (video.paused) video.play().catch(() => {});
     else video.pause();
   }
+
+  // An audio track or a quality picked restarts the stream, which plays on
+  // if it played. A second pick before the first new stream could play saw
+  // the video "paused" (it was loading) and left the film paused: whether
+  // it played is taken at the first pick, and holds until the last pick's
+  // stream can play. Play or pause meanwhile changes it.
+  let playOn: boolean | null = null;
+  let changes = 0;
+  function switched(change: () => Promise<unknown> | undefined) {
+    // Read before the change: it empties the video at once.
+    if (playOn === null) playOn = !!video && !video.paused;
+    const run = ++changes;
+    const v = video;
+    Promise.resolve(change()).catch(() => {}); // the player shows its own failure
+    v?.addEventListener('canplay', function ready() {
+      if (run !== changes) return; // a newer pick's stream: that one decides
+      v.removeEventListener('canplay', ready);
+      if (playOn && v.paused) v.play().catch(() => {});
+      playOn = null;
+    });
+  }
+
   function seekTo(ms: number) {
     if (!video) return;
     video.currentTime = Math.min(Math.max(0, ms), durationMs || ms) / 1000;
@@ -508,7 +533,7 @@
     menu = '';
     if (kbps === maxBitrate) return;
     maxBitrate = kbps;
-    player?.setMaxBitrate(kbps);
+    switched(() => player?.setMaxBitrate(kbps));
   }
   const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(i18n.formats, { maximumFractionDigits: 1 })} Mb/s`;
   const rangeName = (r?: string) => !r ? '' : r === 'SDR' ? 'SDR' : r === 'HDR10Plus' ? 'HDR10+'
@@ -666,7 +691,7 @@
 
   function chooseAudio(trackId: string) {
     audio = trackId;
-    player?.setAudioTrack(trackId);
+    switched(() => player?.setAudioTrack(trackId));
     menu = '';
   }
   // The audio and subtitles chosen are the title's from now on (the SDK
