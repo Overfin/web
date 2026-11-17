@@ -79,6 +79,15 @@
     sectionsOpen = false;
   });
 
+  // Opened, the list takes the focus on its first section, so Tab and
+  // Shift+Tab go through it at once (Escape gives it back to the button).
+  async function toggleSections() {
+    sectionsOpen = !sectionsOpen;
+    if (!sectionsOpen) return;
+    await tick();
+    sections?.querySelector<HTMLElement>('a')?.focus();
+  }
+
   function outside(event: MouseEvent) {
     const target = event.target as Node;
     if (open && !menu.contains(target)) open = false;
@@ -125,7 +134,7 @@
 <header data-theme="dark" class:scrolled>
   <!-- Phones: the sections behind a button. -->
   <button class="sections-toggle" type="button" bind:this={sectionsToggle} aria-expanded={sectionsOpen} aria-controls="sections"
-    aria-label={t('nav.sections')} title={t('nav.sections')} onclick={() => (sectionsOpen = !sectionsOpen)}>
+    aria-label={t('nav.sections')} title={t('nav.sections')} onclick={toggleSections}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d={sectionsOpen ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16'} /></svg>
   </button>
   <Brand />
