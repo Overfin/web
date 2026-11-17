@@ -659,7 +659,9 @@ ol.episodes .marks .toggle svg { width: 1.1rem; height: 1.1rem; }
 ol.list.wishes > li { align-items: flex-start; }
 /* A series' seasons: name, state, and its own remove button at the end of
    the line; the state wraps under the name rather than push it out. */
-.list.wishes ul.seasons { list-style: none; margin: .35rem 0 0; padding: 0; display: grid; gap: .3rem; }
+.list.wishes ul.seasons { list-style: none; margin: .35rem 0 0; padding: 0; display: grid; gap: .3rem; overflow: visible; }
+/* (Not the title page's row of seasons, which scrolls sideways: that
+   clipped the focus ring of a season's link and button here.) */
 .list.wishes ul.seasons li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: .6rem; padding: 0; border: 0; }
 @media (max-width: 600px) {
   .list.wishes ul.seasons li { grid-template-columns: 1fr auto; }
