@@ -17,7 +17,7 @@
   "devDependencies": {
     "@overfin/ui": "github:overfin/ui#v0.5.1",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
-    "playwright-core": "1.65.0",
+    "playwright-core": "1.65.1",
     "svelte": "5.57.3",
     "svelte-check": "4.7.8",
     "typescript": "6.0.3",
