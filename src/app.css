@@ -845,13 +845,15 @@ html.has-backdrop .slides + .sheet { --under: 8rem; background: linear-gradient(
 .slide .content > .logo, .slide .content > h2 { grid-column: 1; grid-row: 1; }
 .slide .text { grid-column: 1; grid-row: 2; justify-self: stretch; }
 .slide .actions { grid-column: 1; grid-row: 3; justify-self: stretch; }
+/* An oval, darkest at the text's left and fading out on every side long
+   before its box ends: a box's edges showed on bright and dark pictures. */
 html.has-backdrop .slide .content::before {
   content: ""; position: relative; z-index: -1; pointer-events: none; justify-self: stretch;
   grid-column: 1; grid-row: 1 / 4;
-  margin: -2.6rem -14rem -2.6rem calc(-1 * var(--gutter));
-  background: linear-gradient(to right, rgba(var(--bg-rgb), .55) 0, rgba(var(--bg-rgb), .55) 45%, rgba(var(--bg-rgb), .385) 65%, rgba(var(--bg-rgb), .14) 85%, rgba(var(--bg-rgb), 0) 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, .2) .7rem, rgba(0, 0, 0, .65) 1.6rem, #000 2.6rem, #000 calc(100% - 2.6rem), rgba(0, 0, 0, .65) calc(100% - 1.6rem), rgba(0, 0, 0, .2) calc(100% - .7rem), transparent 100%);
+  margin: -6rem -22rem -6rem calc(-1 * var(--gutter));
+  background: rgba(var(--bg-rgb), .64);
+  -webkit-mask-image: radial-gradient(ellipse 100% 50% at 0% 50%, #000 0%, rgba(0, 0, 0, .9) 38%, rgba(0, 0, 0, .55) 64%, rgba(0, 0, 0, .2) 85%, transparent 100%);
+  mask-image: radial-gradient(ellipse 100% 50% at 0% 50%, #000 0%, rgba(0, 0, 0, .9) 38%, rgba(0, 0, 0, .55) 64%, rgba(0, 0, 0, .2) 85%, transparent 100%);
 }
 /* On a phone, one veil: from just above the text (the logo stays on the
    clear picture) to the slideshow's foot,
