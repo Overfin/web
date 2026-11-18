@@ -1,5 +1,7 @@
 <!-- Discover: what's trending, popular and upcoming, films and series, that
-     the libraries don't have (what they have is on the home page). -->
+     isn't available yet: neither this server's libraries nor a paired
+     server has it (what's available is in Films, Series and the
+     categories); no filter, only what is missing is asked for. -->
 <script lang="ts">
   import { t } from '../lib/i18n.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
