@@ -83,12 +83,22 @@ export function timeOfDay(d: Date): string {
   return d.toLocaleTimeString(region, { hour: 'numeric', minute: '2-digit' });
 }
 
+/** listParts joins items as the site's language does ("A, B and C"),
+ * in parts: each item (by its index) and the words between, so that an
+ * item may be drawn as something else (a button). Items must not be
+ * empty: Intl leaves an empty one out. */
+export function listParts(items: string[]): ({ item: number } | { text: string })[] {
+  let at = 0;
+  return new Intl.ListFormat(region, { type: 'conjunction' }).formatToParts(items).map((p) =>
+    p.type === 'element' ? { item: at++ } : { text: p.value });
+}
+
 /** num writes a number in the site's language. */
 export function num(n: number, options?: Intl.NumberFormatOptions): string {
   return n.toLocaleString(region, options);
 }
 
-export function tn(base: 'library.count' | 'manage.limitReserved' | 'manage.moreDevices', count: number): string {
+export function tn(base: 'library.count' | 'manage.limitReserved' | 'manage.moreDevices' | 'title.moreSources' | 'title.moreSourcesLabel', count: number): string {
   const form = new Intl.PluralRules(current).select(count) === 'one' ? 'one' : 'other';
   return t(`${base}.${form}`, { count: count.toLocaleString(region) });
 }

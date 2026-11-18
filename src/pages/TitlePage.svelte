@@ -4,6 +4,7 @@
      posters, with the chosen season's episodes, those no library has too;
      an episode shows its season's poster. -->
 <script lang="ts">
+  import { tick } from 'svelte';
   import { leavingText } from '../lib/leaving';
   import { homeChanged } from '../lib/homecache';
   import { screenWidth, sized, sizes, srcset } from '../lib/images';
@@ -13,8 +14,8 @@
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
-  import { ageText, clock, duration, trackLabel } from '../lib/format';
-  import { date, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
+  import { ageText, clock, duration, pictureText, shortList, trackLabel } from '../lib/format';
+  import { date, listParts, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
   import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
@@ -88,6 +89,19 @@
   function onChosen(row: HTMLElement) {
     const active = row.querySelector<HTMLElement>('[aria-selected="true"]');
     if (active) row.scrollLeft = active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2;
+  }
+
+  // Every place the title is available, listed whole on demand.
+  let allSources = $state(false);
+  $effect(() => {
+    void pageId;
+    allSources = false;
+  });
+  // The button pressed goes; focus stays on the one taking its place.
+  async function showSources(all: boolean) {
+    allSources = all;
+    await tick();
+    document.querySelector<HTMLElement>('#title-sources .sources-more')?.focus();
   }
 
   // An episode marked from the list.
@@ -308,15 +322,45 @@
             {/each}
           </dl>
         {/if}
-        {#if title.copies?.length}
+        {#snippet where()}
+          <!-- Where it plays from, Play's first: this server, then the
+               servers it's shared from, by name. -->
+          {#if title.showAvailability && title.sources?.length}
+            {@const all = title.sources.map((s) => s.name ?? '')}
+            {@const short = shortList(all)}
+            {@const shown = allSources ? all : short.names}
+            <div><dt>{t('title.availability')}</dt><dd id="title-sources">
+              {#each listParts(short.more && !allSources ? [...shown, '…'] : shown) as part, i (i)}
+                {#if 'text' in part}{part.text}{:else if part.item < shown.length}{shown[part.item]}{:else}<button class="link sources-more"
+                  type="button" aria-expanded="false" aria-controls="title-sources" aria-label={tn('title.moreSourcesLabel', short.more)}
+                  onclick={() => showSources(true)}>{tn('title.moreSources', short.more)}</button>{/if}
+              {/each}
+              {#if allSources && short.more}<button class="link sources-more fewer" type="button" aria-expanded="true" aria-controls="title-sources"
+                onclick={() => showSources(false)}>{t('title.fewerSources')}</button>{/if}
+            </dd></div>
+          {/if}
+        {/snippet}
+        {#if title.sources?.[0] && !title.sources[0].local}
+          {@const first = title.sources[0]}
+          <!-- Played from another server: what it said of its copies. -->
+          <dl class="facts copy">
+            {@render where()}
+            {#if first.video}<div><dt>{t('title.video')}</dt><dd>{pictureText(first.video)}</dd></div>{/if}
+            {#if first.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{first.audio.map(trackLabel).join(', ')}</dd></div>{/if}
+            {#if first.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{first.subtitles.map(trackLabel).join(', ')}</dd></div>{/if}
+          </dl>
+        {:else if title.copies?.length}
           <!-- What the files are: as the player shows them, nothing to choose. -->
           {#each title.copies as c, i (i)}
             <dl class="facts copy">
+              {#if i === 0}{@render where()}{/if}
               {#if c.video}<div><dt>{t('title.video')}</dt><dd>{c.video}</dd></div>{/if}
               {#if c.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{c.audio.map(trackLabel).join(', ')}</dd></div>{/if}
               {#if c.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{c.subtitles.map(trackLabel).join(', ')}</dd></div>{/if}
             </dl>
           {/each}
+        {:else if title.showAvailability && title.sources?.length}
+          <dl class="facts copy">{@render where()}</dl>
         {/if}
       </div>
     </div>

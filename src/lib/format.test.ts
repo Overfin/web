@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ageText, clock, duration, trackLabel } from './format';
-import { date, i18n, num, t, tn, type Key } from './i18n.svelte';
+import { ageText, clock, duration, pictureText, shortList, trackLabel } from './format';
+import { date, i18n, listParts, num, t, tn, type Key } from './i18n.svelte';
 
 describe('format', () => {
   it('names a track whose language the server doesn\'t know, rather than show "?"', () => {
@@ -67,6 +67,35 @@ describe('t', () => {
     i18n.follow('de-DE');
     expect(i18n.locale).toBe('en');
     expect(i18n.formats).toBe('en');
+    i18n.set('en');
+  });
+});
+
+describe('pictureText', () => {
+  it('names a picture as versions are named', () => {
+    expect(pictureText({ height: 2160, hdr: ['hdr10', 'dv'] })).toBe('2160p · HDR10 · Dolby Vision');
+    expect(pictureText({ height: 1080 })).toBe('1080p');
+    expect(pictureText({ height: 480, hdr: ['hlg', 'other'] })).toBe('SD · HLG');
+    expect(pictureText(undefined)).toBe('');
+    expect(pictureText({ height: 0 })).toBe('');
+  });
+});
+
+describe('shortList', () => {
+  it('keeps the first three, and counts the rest', () => {
+    expect(shortList(['a', 'b', 'c'])).toEqual({ names: ['a', 'b', 'c'], more: 0 });
+    expect(shortList(['a', 'b', 'c', 'd', 'e'])).toEqual({ names: ['a', 'b', 'c'], more: 2 });
+    expect(shortList([])).toEqual({ names: [], more: 0 });
+  });
+});
+
+describe('listParts', () => {
+  it('joins items as the language does, each by its index', () => {
+    i18n.set('en');
+    expect(listParts(['a', 'b', '…'])).toEqual([{ item: 0 }, { text: ', ' }, { item: 1 }, { text: ', and ' }, { item: 2 }]);
+    i18n.set('fr');
+    expect(listParts(['a', 'b', '…'])).toEqual([{ item: 0 }, { text: ', ' }, { item: 1 }, { text: ' et ' }, { item: 2 }]);
+    expect(listParts(['a'])).toEqual([{ item: 0 }]);
     i18n.set('en');
   });
 });

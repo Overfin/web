@@ -32,3 +32,18 @@ export function trackLabel(label?: string): string {
   if (!parts.some((part) => part && part !== '?')) return t('player.unknownLanguage');
   return parts.map((part) => (part === '?' ? t('player.unknownLanguage') : part)).filter(Boolean).join(' · ');
 }
+
+/** pictureText names a paired server's picture as the player names
+ * versions: "2160p · HDR10 · Dolby Vision", "SD" below 720 lines. */
+export function pictureText(p?: { height: number; hdr?: string[] }): string {
+  if (!p || !(p.height > 0)) return '';
+  const names: Record<string, string> = { hdr10: 'HDR10', hlg: 'HLG', dv: 'Dolby Vision' };
+  const hdr = (p.hdr ?? []).map((f) => names[f]).filter(Boolean);
+  return [p.height < 720 ? 'SD' : `${p.height}p`, ...hdr].join(' · ');
+}
+
+/** shortList cuts names to the first few: those shown, and how many more
+ * there are (0 when all are). */
+export function shortList(names: string[], shown = 3): { names: string[]; more: number } {
+  return names.length <= shown ? { names, more: 0 } : { names: names.slice(0, shown), more: names.length - shown };
+}
