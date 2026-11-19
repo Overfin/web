@@ -7,6 +7,7 @@
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Skeleton from '../components/Skeleton.svelte';
   import { discoverRows, landed } from '../lib/warm';
+  import { discoverListPath } from '../lib/paths';
 
 
   const rows = discoverRows;
@@ -30,5 +31,6 @@
   <p class="muted">{t('common.nothingYet')}</p>
 {/if}
 {#each rows as row (row.key)}
-  <DiscoverRow title={t(row.key)} list={row.list} kind={row.kind} availability="missing" flags={false} {found} />
+  <DiscoverRow title={t(row.key)} list={row.list} kind={row.kind} availability="missing" flags={false} {found}
+    href={discoverListPath(row.list, row.kind, 'missing')} />
 {/each}

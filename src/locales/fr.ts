@@ -134,6 +134,7 @@ const fr: Record<keyof typeof en, string> = {
   'library.clear': 'Effacer les filtres',
   'genres.recent': 'Ajouts récents',
   'genres.seeAll': 'Tout voir',
+  'genres.seeAllCount': 'Tout voir ({count})',
   'genres.everything': 'Voir les {count} titres, de A à Z',
   'library.noMatch': 'Aucun titre ne correspond à ces filtres.',
 
@@ -409,8 +410,6 @@ const fr: Record<keyof typeof en, string> = {
   'person.more': 'Lire la suite',
   'common.readMore': 'Lire la suite',
   'common.readLess': 'Réduire',
-  'person.showElsewhere': 'Afficher ({count})',
-  'person.hideElsewhere': 'Masquer',
   'person.department.Acting': 'Interprétation',
   'person.department.Directing': 'Réalisation',
   'person.department.Writing': 'Scénario',

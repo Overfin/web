@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { categoryIdOf, categoryPath, collectionIdOf, collectionPath, personIdOf, personPath, slug, playPath, titleIdOf, titlePath } from './paths';
+import { categoryIdOf, categoryPath, collectionIdOf, collectionPath, discoverListOf, discoverListPath, personIdOf, personPath, recommendedPath, slug, playPath, titleIdOf, titlePath } from './paths';
 
 describe('slug', () => {
   it('keeps letters and digits, drops accents, dashes the rest', () => {
@@ -81,5 +81,26 @@ describe('categories', () => {
     // Older addresses still work.
     expect(titleIdOf(['s48866', 'les-100', 'e1158146'], true)).toBe('title_series_tmdb_48866_e1158146');
     expect(titleIdOf(['e1158146'])).toBe('title_episode_tmdb_1158146'); // title pages too, since episodes' addresses are the player's
+  });
+});
+
+describe('whole lists', () => {
+  it('give a discovery list an address and read it back', () => {
+    expect(discoverListPath('trending', 'movie', 'missing')).toBe('/discover/trending/films');
+    expect(discoverListPath('trending', 'series', 'library')).toBe('/discover/trending/series?availability=library');
+    for (const [list, kind, availability] of [['popular', 'movie', 'missing'], ['trending', 'series', 'all'], ['upcoming', 'series', 'library']] as const) {
+      const url = new URL(discoverListPath(list, kind, availability), 'https://example.org');
+      expect(discoverListOf(url.pathname.split('/').slice(2), url.searchParams)).toEqual({ list, kind, availability });
+    }
+  });
+  it('refuse what is no list', () => {
+    expect(discoverListOf(['trending'], new URLSearchParams())).toBeNull();
+    expect(discoverListOf(['soon', 'films'], new URLSearchParams())).toBeNull();
+    expect(discoverListOf(['trending', 'movie'], new URLSearchParams())).toBeNull();
+    expect(discoverListOf(['trending', 'films'], new URLSearchParams('availability=any'))).toBeNull();
+  });
+  it('give the recommendations an address', () => {
+    expect(recommendedPath()).toBe('/recommended');
+    expect(recommendedPath(true)).toBe('/recommended/recent');
   });
 });

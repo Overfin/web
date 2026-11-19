@@ -155,3 +155,32 @@ export function correct(path: string, still: (parts: string[]) => boolean, searc
   if (parts[0] !== path.split('/')[1] || !still(parts.slice(1))) return;
   history.replaceState(history.state, '', path + (search ?? location.search) + location.hash);
 }
+
+/** Discovery's lists, kinds and availabilities, as the server names them. */
+export type DiscoverList = 'trending' | 'popular' | 'upcoming';
+export type DiscoverKind = 'movie' | 'series';
+export type DiscoverAvailability = 'all' | 'library' | 'missing';
+
+/** discoverListPath is the address of one of discovery's lists, whole:
+ * /discover/trending/films, with ?availability=library (or all) for the
+ * available ones, as Home shows them. */
+export function discoverListPath(list: DiscoverList, kind: DiscoverKind, availability: DiscoverAvailability): string {
+  const path = `/discover/${list}/${kind === 'movie' ? 'films' : 'series'}`;
+  return availability === 'missing' ? path : `${path}?availability=${availability}`;
+}
+
+/** discoverListOf reads such an address's parts (after /discover/) and
+ * query; null for one that isn't. */
+export function discoverListOf(parts: string[], params: URLSearchParams): { list: DiscoverList; kind: DiscoverKind; availability: DiscoverAvailability } | null {
+  const [list, kind] = parts;
+  const availability = params.get('availability') ?? 'missing';
+  if (parts.length !== 2 || !['trending', 'popular', 'upcoming'].includes(list) || !['films', 'series'].includes(kind)
+    || !['all', 'library', 'missing'].includes(availability)) return null;
+  return { list: list as DiscoverList, kind: kind === 'films' ? 'movie' : 'series', availability: availability as DiscoverAvailability };
+}
+
+/** recommendedPath is the address of the profile's recommendations, whole:
+ * among everything, or among the newest (recent). */
+export function recommendedPath(recent = false): string {
+  return recent ? '/recommended/recent' : '/recommended';
+}

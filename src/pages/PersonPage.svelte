@@ -54,7 +54,7 @@
     </div>
   </div>
   {#if here.length}
-    <h2>{t('titles.inLibrary')}</h2>
+    <h2>{t('titles.inLibrary')} ({here.length})</h2>
     <div class="grid">
       {#each here as c (c.title.id)}
         <Card item={c.title} note={c.roles?.join(', ')} />
@@ -62,21 +62,28 @@
     </div>
   {/if}
   {#if elsewhere.length}
-    <div class="section-head">
-      <h2>{t('titles.notInLibrary')}</h2>
-      <button class="link" type="button" aria-expanded={showElsewhere} onclick={() => (showElsewhere = !showElsewhere)}>
-        {showElsewhere ? t('person.hideElsewhere') : t('person.showElsewhere', { count: elsewhere.length })}
+    <!-- The heading itself opens and folds them; its triangle says which. -->
+    <h2>
+      <button class="fold" type="button" aria-expanded={showElsewhere} aria-controls="elsewhere" onclick={() => (showElsewhere = !showElsewhere)}>
+        {t('titles.notInLibrary')} ({elsewhere.length}) <span aria-hidden="true">{showElsewhere ? '▴' : '▾'}</span>
       </button>
-    </div>
-    {#if showElsewhere}
-      <div class="grid">
+    </h2>
+    <div class="grid" id="elsewhere" hidden={!showElsewhere}>
+      {#if showElsewhere}
         {#each elsewhere as c (c.title.id)}
           <Card item={c.title} note={c.roles?.join(', ')} flags={false} />
         {/each}
-      </div>
-    {/if}
+      {/if}
+    </div>
   {/if}
   {#if !person.credits.length}<p class="muted">{t('person.nothing')}</p>{/if}
 {:catch error}
   <PageError {error} />
 {/await}
+
+<style>
+  /* A heading's look, as a button. */
+  .fold { font: inherit; color: inherit; background: none; border: none; box-shadow: none; padding: 0; min-height: 0; text-align: start; cursor: pointer; }
+  .fold:hover, .fold:active { background: none; transform: none; }
+  .fold:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>

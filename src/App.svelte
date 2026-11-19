@@ -17,7 +17,7 @@
   import UndoBar from './components/UndoBar.svelte';
   import SiteFooter from './components/SiteFooter.svelte';
   import PageScrollbar from './components/PageScrollbar.svelte';
-  import { categoryIdOf, collectionIdOf, personIdOf, titleIdOf } from './lib/paths';
+  import { categoryIdOf, collectionIdOf, discoverListOf, personIdOf, titleIdOf } from './lib/paths';
   import PageBackdrop from './components/PageBackdrop.svelte';
   import Header from './components/Header.svelte';
   import ConfirmAddress from './components/ConfirmAddress.svelte';
@@ -40,6 +40,7 @@
   import Search from './pages/Search.svelte';
   import Setup from './pages/Setup.svelte';
   import TitlePage from './pages/TitlePage.svelte';
+  import TitleList from './pages/TitleList.svelte';
   import TastesForm from './components/TastesForm.svelte';
 
   type Phase =
@@ -122,7 +123,7 @@
   function loadingShape(where: string | undefined): { kind: 'home' | 'title' | 'grid' | 'rows'; heading?: boolean } {
     if (!where) return { kind: 'home' };
     if (where === 'title' || where === 'person' || where === 'collection') return { kind: 'title' };
-    if (where === 'library' || where === 'list' || where === 'favorites' || where === 'collections') return { kind: 'grid', heading: true };
+    if (where === 'library' || where === 'list' || where === 'favorites' || where === 'collections' || where === 'recommended') return { kind: 'grid', heading: true };
     return { kind: 'rows', heading: true };
   }
 
@@ -219,8 +220,13 @@
         <MyList />
       {:else if route.parts[0] === 'favorites'}
         <Favorites />
-      {:else if route.parts[0] === 'discover'}
+      {:else if route.parts[0] === 'discover' && route.parts.length === 1}
         <Discover />
+      {:else if route.parts[0] === 'discover' && discoverListOf(route.parts.slice(1), route.params)}
+        <!-- One of discovery's lists, whole (lib/paths). -->
+        <TitleList source={{ discover: discoverListOf(route.parts.slice(1), route.params)! }} />
+      {:else if route.parts[0] === 'recommended' && (route.parts.length === 1 || (route.parts.length === 2 && route.parts[1] === 'recent'))}
+        <TitleList source={{ recommended: route.parts[1] === 'recent' ? 'recent' : 'all' }} />
       {:else if route.parts[0] === 'collections'}
         <Collections />
       {:else if route.parts[0] === 'collection' && route.parts[1]}

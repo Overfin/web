@@ -3,6 +3,7 @@
 
 import type { TitleSummary } from './sdk/overfin.js';
 import { overfin } from './client';
+import { categoryPath } from './paths';
 import { session } from './session.svelte';
 
 // The slideshow's random picks: new each time the site opens, the same
@@ -19,12 +20,15 @@ export function homeAvailability(): 'all' | 'library' {
 }
 
 // What's new: in each home category, then in each library (while the
-// menu shows them).
+// menu shows them); each with its list's address, sorted by date added
+// (path).
 function sections() {
   return [
     ...session.categories.filter((c) => c.home).map((c) => ({ id: c.id, name: c.name,
+      path: `${categoryPath(c, session.categories)}?sort=addedAt`,
       call: ['/titles', { kind: ['movie', 'series'], category: c.id, sort: 'addedAt', order: 'desc', limit: 16 }] as Call })),
     ...(session.librariesShown ? session.libraries : []).map((l) => ({ id: l.id, name: l.name,
+      path: `/library/${l.id}?sort=addedAt`,
       call: ['/titles/latest', { library: l.id, limit: 16 }] as Call })),
   ];
 }
@@ -56,7 +60,10 @@ export async function loadHome() {
     random, recommended, recent, leaving,
     resume: items(answers[0]),
     trending: trending.length ? { movie: items(answers[1]), series: items(answers[2]) } : { movie: [], series: [] },
-    latest: latest.map((section, i) => ({ section, items: items(rest[i]) })),
+    // With how many titles in all, when the answer says (a category's
+    // does; what's new in a library doesn't).
+    latest: latest.map((section, i) => ({ section, items: items(rest[i]),
+      total: rest[i] instanceof Error ? undefined : (rest[i] as { totalCount?: number }).totalCount })),
   };
 }
 

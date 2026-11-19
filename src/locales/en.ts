@@ -133,6 +133,7 @@ export default {
   'library.clear': 'Clear filters',
   'genres.recent': 'Recently added',
   'genres.seeAll': 'See all',
+  'genres.seeAllCount': 'See all ({count})',
   'genres.everything': 'See all {count} titles, A to Z',
   'library.noMatch': 'No titles match these filters.',
 
@@ -408,8 +409,6 @@ export default {
   'person.more': 'Read more',
   'common.readMore': 'Read more',
   'common.readLess': 'Read less',
-  'person.showElsewhere': 'Show ({count})',
-  'person.hideElsewhere': 'Hide',
   'person.department.Acting': 'Acting',
   'person.department.Directing': 'Directing',
   'person.department.Writing': 'Writing',

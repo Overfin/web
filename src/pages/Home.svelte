@@ -13,6 +13,7 @@
   import { offerUndo } from '../lib/undo.svelte';
   import type { TitleSummary } from '../lib/sdk/overfin.js';
   import { landed } from '../lib/warm';
+  import { discoverListPath, recommendedPath } from '../lib/paths';
   import PageError from '../components/PageError.svelte';
   import DiscoverRow from '../components/DiscoverRow.svelte';
   import Row from '../components/Row.svelte';
@@ -114,17 +115,17 @@
   <Row title={t('home.lastChance')} items={home.leaving} help={t('home.lastChanceHelp')} />
   <Row title={t('home.continue')} items={home.resume.filter((i) => !removed.includes(i.id))} wide remove={forget} />
   <Row title={t('home.recommended')} items={home.recommended.filter((i) => !unwanted.includes(i.id))}
-    remove={notInterested} removeLabel={t('item.notInterested')} />
+    remove={notInterested} removeLabel={t('item.notInterested')} href={recommendedPath()} />
   <Row title={t('home.recentForYou')} items={home.recent.filter((i) => !unwanted.includes(i.id))}
-    remove={notInterested} removeLabel={t('item.notInterested')} />
+    remove={notInterested} removeLabel={t('item.notInterested')} href={recommendedPath(true)} />
   {#if session.discovery}
     <DiscoverRow title={t('home.trendingMovies')} list="trending" kind="movie" {availability} flags={availability === 'all'}
-      items={home.trending.movie} />
+      items={home.trending.movie} href={discoverListPath('trending', 'movie', availability)} />
     <DiscoverRow title={t('home.trendingSeries')} list="trending" kind="series" {availability} flags={availability === 'all'}
-      items={home.trending.series} />
+      items={home.trending.series} href={discoverListPath('trending', 'series', availability)} />
   {/if}
-  {#each home.latest as { section, items } (section.id)}
-    <Row title={t('home.latest', { library: section.name })} {items} />
+  {#each home.latest as { section, items, total } (section.id)}
+    <Row title={t('home.latest', { library: section.name })} {items} href={section.path} count={total} />
   {/each}
   </div>
 {:else if error}
