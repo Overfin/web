@@ -330,7 +330,8 @@ test('light theme: the header and a picture with its text stay as on dark pages'
   const at = await series(p);
   await p.goto(base + (at ?? '/'));
   await p.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
-  const top = at ? '.hero.art[data-theme]' : '.slides';
+  // The slideshow's skeleton (.slides.loading) comes first, without a theme.
+  const top = at ? '.hero.art[data-theme]' : '.slides[data-theme]';
   await p.locator(top).waitFor();
   const colors = await p.evaluate((top) => ({
     page: getComputedStyle(document.body).backgroundColor,
