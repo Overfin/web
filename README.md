@@ -31,7 +31,8 @@ TypeScript, on Overfin's
 - **Libraries**: sorting (the profile's last choice kept in the browser),
   filters (genre, decade, watched), a repeatable shuffle, infinite scroll.
 - **Title pages**: films, series, seasons, episodes, cast, ratings, similar
-  titles; my list, watched and favorite; wishes, for a film, a season or a
+  titles, a film's or an episode's versions named from what they hold (with
+  their audio and subtitles); my list, watched and favorite; wishes, for a film, a season or a
   series' seasons not here yet, and "Unavailable" on missing episodes.
 - **Collections**: TMDB's series of films the profile has films of, each
   with its page: every film in release order, those not here yet included
@@ -40,8 +41,12 @@ TypeScript, on Overfin's
 - **My wishlist**: the profile's films and seasons to get, in its order (a
   series moves as a whole, its seasons each removable), with what became
   of each, and what arrived since; Overfin takes turns between accounts.
-- **Player**: Overfin picks direct play, repackaging or transcoding from what
-  the browser declares; audio and subtitle choice, quality, playback info,
+- **Player**: the SDK chooses the version, its audio and how it plays (the
+  file as it is, repackaged, the sound or the picture converted) from what
+  the browser plays and the screen shows, and steps down by itself when a
+  play fails or plays silent (remembered on the device, forgotten from the
+  player's settings); versions, audio and subtitle choice, quality, playback
+  info (what the version holds, how it plays and why),
   previews while seeking, "Skip intro", the next episode, progress, resume,
   taking playback back from another device, and the same keys whatever has
   the focus (arrows seek and change the volume, Space plays and pauses).

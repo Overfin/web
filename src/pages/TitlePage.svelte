@@ -10,12 +10,13 @@
   import { screenWidth, sized, sizes, srcset } from '../lib/images';
   import { prefetchTitle, similarOf, titleOf } from '../lib/titlecache';
   import type { Title, TitleSummary } from '../lib/sdk/overfin.js';
+  import { audioLabel, audioMenu, copyLabel, subtitleLabel, subtitleMenu } from '../lib/sdk/overfin.js';
   import { explain, overfin } from '../lib/client';
   import { loaded } from '../lib/loaded';
   import { backdropOf } from '../lib/backdrop.svelte';
   import { collectionPath, correct, personPath, titleIdOf, titlePath, titlePathOf } from '../lib/paths';
   import { ageText, clock, duration, pictureText, shortList, trackLabel } from '../lib/format';
-  import { date, listParts, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
+  import { date, i18n, listParts, num, t, timeOfDay, tn, type Key } from '../lib/i18n.svelte';
   import { notice } from '../lib/dialog.svelte';
   import { play } from '../lib/play';
   import { score } from '../lib/score';
@@ -350,13 +351,17 @@
             {#if first.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{first.subtitles.map(trackLabel).join(', ')}</dd></div>{/if}
           </dl>
         {:else if title.copies?.length}
-          <!-- What the files are: as the player shows them, nothing to choose. -->
-          {#each title.copies as c, i (i)}
+          <!-- Its versions, named from their facts as the player names them
+               (their lengths when there are several), nothing to choose. -->
+          {@const copies = title.copies}
+          {#each copies as c, i (c.id)}
+            {@const audio = audioMenu(c).map((a) => audioLabel(a, i18n.locale))}
+            {@const subs = subtitleMenu(c).tracks.map((s) => subtitleLabel(s, i18n.locale))}
             <dl class="facts copy">
               {#if i === 0}{@render where()}{/if}
-              {#if c.video}<div><dt>{t('title.video')}</dt><dd>{c.video}</dd></div>{/if}
-              {#if c.audio?.length}<div><dt>{t('title.audio')}</dt><dd>{c.audio.map(trackLabel).join(', ')}</dd></div>{/if}
-              {#if c.subtitles?.length}<div><dt>{t('title.subtitles')}</dt><dd>{c.subtitles.map(trackLabel).join(', ')}</dd></div>{/if}
+              <div><dt>{t('title.video')}</dt><dd>{[copyLabel(c, i18n.locale, copies), copies.length > 1 && c.durationMs ? duration(c.durationMs) : ''].filter(Boolean).join(' · ')}</dd></div>
+              {#if audio.length}<div><dt>{t('title.audio')}</dt><dd>{audio.join(', ')}</dd></div>{/if}
+              {#if subs.length}<div><dt>{t('title.subtitles')}</dt><dd>{subs.join(', ')}</dd></div>{/if}
             </dl>
           {/each}
         {:else if title.showAvailability && title.sources?.length}

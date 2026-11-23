@@ -14,6 +14,7 @@
   import { sizes, srcset } from '../lib/images';
   import { onDestroy, onMount, untrack } from 'svelte';
   import type { Player, Playback, Segment, Title, TitleSummary, Track } from '../lib/sdk/overfin.js';
+  import { channelsName as copyChannels, codecName, fallbacks, rangeName as copyRange } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
   import { ageText, clock, duration, trackLabel } from '../lib/format';
   import { gapEnd, rangesOf } from '../lib/gap';
@@ -60,8 +61,9 @@
   // Already full screen when the next episode replaced the player.
   let fullscreen = $state(typeof document !== 'undefined' && !!document.fullscreenElement);
   let scrubbing = $state(false);
-  // The menu open: audio, subtitles, the episodes, the settings, or none.
-  let menu = $state<'' | 'audio' | 'subtitles' | 'episodes' | 'settings'>('');
+  // The menu open: the versions, audio, subtitles, the episodes, the
+  // settings, or none.
+  let menu = $state<'' | 'versions' | 'audio' | 'subtitles' | 'episodes' | 'settings'>('');
   // The seek-bar previews, all fetched as playback starts, so they show
   // at once; kept here so the browser keeps them.
   let sheets: HTMLImageElement[] = [];
@@ -526,7 +528,10 @@
   // Limits offered: those below the file's own bitrate (above, nothing
   // would change).
   const qualities = [40_000, 20_000, 10_000, 6_000, 4_000, 2_000, 1_000];
-  const offered = $derived(qualities.filter((k) => !playback?.info?.bitrateKbps || k < playback.info.bitrateKbps));
+  // A copy's overall rate: its size over its length.
+  const copyKbps = $derived(playback?.copy?.durationMs ? (playback.copy.size * 8) / playback.copy.durationMs : 0);
+  const fileKbps = $derived(copyKbps || playback?.info?.bitrateKbps || 0);
+  const offered = $derived(qualities.filter((k) => !fileKbps || k < fileKbps));
   let maxBitrate = $state(0);
   let showInfo = $state(false);
   function chooseQuality(kbps: number) {
@@ -543,8 +548,10 @@
   // An audio track in the menu: its language (named in itself, by
   // Overfin), its channels, what it's for when it's not the film's sound.
   const roles: Record<string, Key> = { commentary: 'player.commentary', description: 'player.audioDescription' };
-  const audioLabel = (track: Track) =>
+  // A copy's tracks come labelled by the SDK, from their facts.
+  const audioLabel = (track: Track) => playback?.copy ? track.label :
     [trackLabel(track.label), channelsName(track.channels), track.role ? (roles[track.role] ? t(roles[track.role]) : track.role) : ''].filter(Boolean).join(' · ');
+  const subtitleLabel = (track: Track) => playback?.copy ? track.label : trackLabel(track.label);
   const reasonText = (r: string) => has(`player.reason.${r}`) ? t(`player.reason.${r}` as Key) : r;
   const videoLine = $derived.by(() => {
     const v = playback?.info?.video;
@@ -552,6 +559,55 @@
     return [[v.codec?.toUpperCase(), v.profile].filter(Boolean).join(' '), v.width && v.height ? `${v.width}×${v.height}` : '',
       v.bitDepth ? `${v.bitDepth} bits` : '', rangeName(v.range), v.bitrateKbps ? mbps(v.bitrateKbps) : ''].filter(Boolean).join(' · ');
   });
+  // A copy's facts, for the information panel: its picture, the audio
+  // playing, its file; how it plays, and why.
+  const copyVideoLine = $derived.by(() => {
+    const v = playback?.copy?.video;
+    if (!v) return '';
+    const [num, den] = (v.fps ?? '').split('/').map(Number);
+    const fps = num > 0 ? `${(num / (den > 0 ? den : 1)).toLocaleString(i18n.formats, { maximumFractionDigits: 3 })} i/s` : '';
+    return [codecName(v.codec), `${v.width}×${v.height}`, v.bitDepth ? `${v.bitDepth} bits` : '', copyRange(v) || 'SDR', fps].filter(Boolean).join(' · ');
+  });
+  const copyAudioLine = $derived.by(() => {
+    const a = playback?.copy?.audioTracks.find((tr) => tr.id === audio);
+    if (!a) return '';
+    // Its label (language, channels…), then its codec.
+    const label = playback?.audioTracks?.find((tr) => tr.id === audio)?.label ?? copyChannels(a.channels, i18n.locale);
+    return [label, codecName(a.codec)].filter(Boolean).join(' · ');
+  });
+  const copyFileLine = $derived.by(() => {
+    const c = playback?.copy;
+    if (!c) return '';
+    const kind = c.mediaType.split('/')[1]?.replace(/^x-/, '') ?? '';
+    return [kind.toUpperCase(), copyKbps ? mbps(Math.round(copyKbps)) : ''].filter(Boolean).join(' · ');
+  });
+  const deliveryLine = $derived.by(() => {
+    const d = playback?.delivery;
+    if (!d) return '';
+    const what = d.converts.video && d.converts.audio ? 'player.converts.both' : d.converts.video ? 'player.converts.video'
+      : d.converts.audio ? 'player.converts.audio' : '';
+    return [t(`player.delivery.${d.kind}` as Key), what ? t(what as Key) : ''].filter(Boolean).join(' · ');
+  });
+  // Why it plays so, and what failed before when it stepped down.
+  const whyLine = $derived.by(() => {
+    const d = playback?.delivery;
+    if (!d) return '';
+    const why = t(`player.why.${d.reason}` as Key);
+    return d.fallback ? `${why} (${t(`player.failed.${d.fallback}` as Key)})` : why;
+  });
+  // Plays the copy's fixes this device remembers, for the settings' reset.
+  let remembered = $state(0);
+  function forgetFixes() {
+    fallbacks.reset();
+    remembered = 0;
+    menu = '';
+    sign(t('player.fixesForgotten'));
+  }
+  function chooseVersion(versionId: string) {
+    menu = '';
+    if (versionId === playback?.versionId) return;
+    switched(() => player?.setVersion(versionId));
+  }
   const audioLine = $derived.by(() => {
     const a = playback?.info?.audio;
     if (!a) return '';
@@ -622,6 +678,7 @@
         // The site's language, when the video has it (and the profile
         // prefers it).
         audioLanguage: i18n.locale,
+        language: i18n.locale,
         pictureCanvas,
         // Every (re)start: the title and the track menus.
         onStart(pb) {
@@ -634,6 +691,7 @@
           });
           audio = pb.audioTrack ?? '';
           subtitles = player?.subtitleTrack ?? pb.subtitleTrack ?? '';
+          remembered = fallbacks.count();
         },
         onTakenOver(device) {
           notice = { text: t('player.takenOver', { device: device || t('player.anotherDevice') }), takenOver: true };
@@ -797,9 +855,23 @@
     <div class="info-panel">
       <button class="close" type="button" aria-label={t('common.close')} onclick={() => (showInfo = false)}>✕</button>
       <dl>
+        {#if playback.copy && playback.delivery}
+          <!-- A copy: its facts, how it plays and why, the device's quirks. -->
+          <dt>{t('player.infoVersion')}</dt>
+          <dd>{playback.versions?.find((v) => v.id === playback?.versionId)?.name ?? ''}</dd>
+          {#if copyVideoLine}<dt>{t('player.infoVideo')}</dt><dd>{copyVideoLine}</dd>{/if}
+          {#if copyAudioLine}<dt>{t('player.audio')}</dt><dd>{copyAudioLine}</dd>{/if}
+          {#if copyFileLine}<dt>{t('player.infoFile')}</dt><dd>{copyFileLine}</dd>{/if}
+          <dt>{t('player.infoMethod')}</dt>
+          <dd>{deliveryLine}</dd>
+          <dt>{t('player.infoWhy')}</dt>
+          <dd>{whyLine}</dd>
+          {#if playback.delivery.quirks.length}<dt>{t('player.infoQuirks')}</dt><dd>{playback.delivery.quirks.join(', ')}</dd>{/if}
+        {:else}
         <dt>{t('player.infoMethod')}</dt>
         <dd>{t(`player.infoMethod.${playback.method}` as Key)}</dd>
-        {#if playback.info?.reasons?.length}
+        {/if}
+        {#if !playback.copy && playback.info?.reasons?.length}
           <dt>{t('player.infoWhy')}</dt>
           <dd>{#each playback.info.reasons as r}<div>{reasonText(r)}</div>{/each}</dd>
         {/if}
@@ -877,6 +949,22 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h4v4H3zm6 1h12v2H9zM3 10h4v4H3zm6 1h12v2H9zm-6 4h4v4H3zm6 1h12v2H9z" /></svg>
         </button>
       {/if}
+      {#if playback?.versions && playback.versions.length > 1}
+        <div class="menuwrap">
+          <button class="icon" class:on={menu === 'versions'} onclick={() => (menu = menu === 'versions' ? '' : 'versions')}
+            aria-expanded={menu === 'versions'} aria-label={t('player.versions')} title={t('player.versions')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6H2v14a2 2 0 0 0 2 2h14v-2H4zm16-4H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H8V4h12zM12 5.5v9l6-4.5z" /></svg>
+          </button>
+          {#if menu === 'versions'}
+            <div class="tracks" role="dialog" aria-label={t('player.versions')}>
+              <h3>{t('player.versions')}</h3>
+              {#each playback.versions as v (v.id)}
+                <button class="choice" class:chosen={playback.versionId === v.id} onclick={() => chooseVersion(v.id)}>{v.name}</button>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
       {#if playback?.audioTracks?.length}
         <div class="menuwrap">
           <button class="icon" class:on={menu === 'audio'} onclick={() => (menu = menu === 'audio' ? '' : 'audio')}
@@ -904,7 +992,7 @@
               <h3>{t('player.subtitles')}</h3>
               <button class="choice" class:chosen={!subtitles} onclick={() => chooseSubtitles('')}>{t('player.noSubtitles')}</button>
               {#each playback.subtitleTracks as track (track.id)}
-                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{trackLabel(track.label)}</button>
+                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{subtitleLabel(track)}</button>
               {/each}
             </div>
           {/if}
@@ -924,6 +1012,10 @@
             {/each}
             <h3>{t('player.info')}</h3>
             <button class="choice" class:chosen={showInfo} onclick={() => { showInfo = !showInfo; menu = ''; }}>{t('player.showInfo')}</button>
+            {#if remembered}
+              <!-- Fixes the device remembers (a play that failed stepped down): forgotten here. -->
+              <button class="choice" onclick={forgetFixes}>{t('player.forgetFixes', { n: remembered })}</button>
+            {/if}
           </div>
         {/if}
       </div>
