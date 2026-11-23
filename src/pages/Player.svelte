@@ -13,12 +13,12 @@
   import { homeChanged } from '../lib/homecache';
   import { sizes, srcset } from '../lib/images';
   import { onDestroy, onMount, untrack } from 'svelte';
-  import type { Player, Playback, Segment, Title, TitleSummary, Track } from '../lib/sdk/overfin.js';
+  import type { Player, Playback, Segment, Title, TitleSummary } from '../lib/sdk/overfin.js';
   import { channelsName as copyChannels, codecName, fallbacks, rangeName as copyRange } from '../lib/sdk/overfin.js';
   import { explain, hls, overfin } from '../lib/client';
-  import { ageText, clock, duration, trackLabel } from '../lib/format';
+  import { ageText, clock, duration } from '../lib/format';
   import { gapEnd, rangesOf } from '../lib/gap';
-  import { has, i18n, t, type Key } from '../lib/i18n.svelte';
+  import { i18n, t, type Key } from '../lib/i18n.svelte';
   import { playInstead, takeStart } from '../lib/play';
   import { correct, playPath, titleIdOf, titlePath } from '../lib/paths';
   import { canGoBack, replace } from '../lib/router.svelte';
@@ -530,7 +530,7 @@
   const qualities = [40_000, 20_000, 10_000, 6_000, 4_000, 2_000, 1_000];
   // A copy's overall rate: its size over its length.
   const copyKbps = $derived(playback?.copy?.durationMs ? (playback.copy.size * 8) / playback.copy.durationMs : 0);
-  const fileKbps = $derived(copyKbps || playback?.info?.bitrateKbps || 0);
+  const fileKbps = $derived(copyKbps);
   const offered = $derived(qualities.filter((k) => !fileKbps || k < fileKbps));
   let maxBitrate = $state(0);
   let showInfo = $state(false);
@@ -541,24 +541,6 @@
     switched(() => player?.setMaxBitrate(kbps));
   }
   const mbps = (kbps: number) => `${(kbps / 1000).toLocaleString(i18n.formats, { maximumFractionDigits: 1 })} Mb/s`;
-  const rangeName = (r?: string) => !r ? '' : r === 'SDR' ? 'SDR' : r === 'HDR10Plus' ? 'HDR10+'
-    : r.startsWith('DOVI') ? `Dolby Vision${r.includes('HDR10Plus') ? ' (HDR10+)' : r.includes('HDR10') ? ' (HDR10)' : r.includes('HLG') ? ' (HLG)' : ''}` : r;
-  // Channels as people say them: stereo, 5.1, 7.1.
-  const channelsName = (n?: number) => n === 6 ? '5.1' : n === 8 ? '7.1' : n === 2 ? t('player.stereo') : n === 1 ? t('player.mono') : n ? `${n} ch` : '';
-  // An audio track in the menu: its language (named in itself, by
-  // Overfin), its channels, what it's for when it's not the film's sound.
-  const roles: Record<string, Key> = { commentary: 'player.commentary', description: 'player.audioDescription' };
-  // A copy's tracks come labelled by the SDK, from their facts.
-  const audioLabel = (track: Track) => playback?.copy ? track.label :
-    [trackLabel(track.label), channelsName(track.channels), track.role ? (roles[track.role] ? t(roles[track.role]) : track.role) : ''].filter(Boolean).join(' · ');
-  const subtitleLabel = (track: Track) => playback?.copy ? track.label : trackLabel(track.label);
-  const reasonText = (r: string) => has(`player.reason.${r}`) ? t(`player.reason.${r}` as Key) : r;
-  const videoLine = $derived.by(() => {
-    const v = playback?.info?.video;
-    if (!v) return '';
-    return [[v.codec?.toUpperCase(), v.profile].filter(Boolean).join(' '), v.width && v.height ? `${v.width}×${v.height}` : '',
-      v.bitDepth ? `${v.bitDepth} bits` : '', rangeName(v.range), v.bitrateKbps ? mbps(v.bitrateKbps) : ''].filter(Boolean).join(' · ');
-  });
   // A copy's facts, for the information panel: its picture, the audio
   // playing, its file; how it plays, and why.
   const copyVideoLine = $derived.by(() => {
@@ -608,14 +590,6 @@
     if (versionId === playback?.versionId) return;
     switched(() => player?.setVersion(versionId));
   }
-  const audioLine = $derived.by(() => {
-    const a = playback?.info?.audio;
-    if (!a) return '';
-    const found = playback?.audioTracks?.find((tr) => tr.id === audio);
-    const name = found ? trackLabel(found.label) : '';
-    return [a.codec?.toUpperCase(), channelsName(a.channels), name, a.bitrateKbps ? mbps(a.bitrateKbps) : ''].filter(Boolean).join(' · ');
-  });
-
   // ---- The episodes, without leaving -------------------------------------------
 
   let seasons = $state<TitleSummary[]>([]);
@@ -867,19 +841,6 @@
           <dt>{t('player.infoWhy')}</dt>
           <dd>{whyLine}</dd>
           {#if playback.delivery.quirks.length}<dt>{t('player.infoQuirks')}</dt><dd>{playback.delivery.quirks.join(', ')}</dd>{/if}
-        {:else}
-        <dt>{t('player.infoMethod')}</dt>
-        <dd>{t(`player.infoMethod.${playback.method}` as Key)}</dd>
-        {/if}
-        {#if !playback.copy && playback.info?.reasons?.length}
-          <dt>{t('player.infoWhy')}</dt>
-          <dd>{#each playback.info.reasons as r}<div>{reasonText(r)}</div>{/each}</dd>
-        {/if}
-        {#if videoLine}<dt>{t('player.infoVideo')}</dt><dd>{videoLine}</dd>{/if}
-        {#if audioLine}<dt>{t('player.audio')}</dt><dd>{audioLine}</dd>{/if}
-        {#if playback.info?.container}
-          <dt>{t('player.infoFile')}</dt>
-          <dd>{[playback.info.container.toUpperCase(), playback.info.bitrateKbps ? mbps(playback.info.bitrateKbps) : ''].filter(Boolean).join(' · ')}</dd>
         {/if}
         <dt>{t('player.quality')}</dt>
         <dd>{maxBitrate ? mbps(maxBitrate) : t('player.qualityAuto')}</dd>
@@ -975,7 +936,7 @@
             <div class="tracks" role="dialog" aria-label={t('player.audio')}>
               <h3>{t('player.audio')}</h3>
               {#each playback.audioTracks as track (track.id)}
-                <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{audioLabel(track)}</button>
+                <button class="choice" class:chosen={audio === track.id} onclick={() => chooseAudio(track.id)}>{track.label}</button>
               {/each}
             </div>
           {/if}
@@ -992,7 +953,7 @@
               <h3>{t('player.subtitles')}</h3>
               <button class="choice" class:chosen={!subtitles} onclick={() => chooseSubtitles('')}>{t('player.noSubtitles')}</button>
               {#each playback.subtitleTracks as track (track.id)}
-                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{subtitleLabel(track)}</button>
+                <button class="choice" class:chosen={subtitles === track.id} onclick={() => chooseSubtitles(track.id)}>{track.label}</button>
               {/each}
             </div>
           {/if}
