@@ -440,6 +440,7 @@ export default {
   'error.server-busy': 'The server is busy; try again shortly.',
   'error.playback-ended-by-admin': 'The server’s administrator stopped this playback.',
   'error.not-playable': "This item can't be played.",
+  'error.delivery-refused': "This title can't be played right now. Try again later.",
   'error.name-taken': 'That name is already used.',
   'error.profile-limit-reached': 'This account has as many profiles as allowed.',
   'error.owner-only': 'Only the account owner can do this.',

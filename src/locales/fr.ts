@@ -441,6 +441,7 @@ const fr: Record<keyof typeof en, string> = {
   'error.server-busy': 'Le serveur est occupé ; réessayez dans un instant.',
   'error.playback-ended-by-admin': 'L’administrateur du serveur a arrêté cette lecture.',
   'error.not-playable': 'Ce titre ne peut pas être lu.',
+  'error.delivery-refused': 'Ce titre ne peut pas être lu pour l’instant. Réessayez plus tard.',
   'error.name-taken': 'Ce nom est déjà utilisé.',
   'error.profile-limit-reached': 'Ce compte a atteint son nombre maximal de profils.',
   'error.owner-only': 'Seul le titulaire du compte peut faire cela.',
