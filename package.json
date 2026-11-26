@@ -15,7 +15,7 @@
     "e2e": "node --test --test-concurrency=1 tests/e2e/*.e2e.mjs"
   },
   "devDependencies": {
-    "@overfin/ui": "github:overfin/ui#v0.5.4",
+    "@overfin/ui": "github:overfin/ui#v0.5.7",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "playwright-core": "1.65.1",
     "svelte": "5.59.1",
